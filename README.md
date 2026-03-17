@@ -70,7 +70,7 @@
 ### Option A: The One-Click Portable App (Recommended)
 **No coding required. No installation required.**
 
-1. Download **`Reflow_Portable_v0.6.zip`** from [**Releases**](https://github.com/user/Reflow-Studio/releases).
+1. Download **`Reflow_Portable_v0.6.zip`** from [**Releases**](https://github.com/ananta-sj/Reflow-Studio/releases).
 2. Extract the folder to a short path (e.g., `D:\Reflow` or your USB Drive). 
    * *Note: Avoid "C:\Program Files" to prevent permission issues.*
 3. Double-click **`Launch_Reflow.bat`**.
