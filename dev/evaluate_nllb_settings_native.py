@@ -1,0 +1,39 @@
+"""Native NLLB selector acceptance with disposable application settings."""
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT/'dev'))
+from evaluate_desktop_candidate import CODE
+
+
+def main():
+    code = CODE.replace('XTTS speech runtime', 'NLLB translation runtime').replace('xtts_runtime', 'nllb_runtime')
+    code = code.replace('xtts_selector', 'nllb_selector')
+    rendered = "                    check('nllb_selector_rendered',window.evaluate_js('document.querySelector(\"#root\").textContent.includes(\"NLLB translation runtime\")'))"
+    assert rendered in code
+    code = code.replace(rendered, """                    deadline=time.monotonic()+30
+                    while time.monotonic()<deadline and not window.evaluate_js('document.querySelector("#root").textContent.includes("NLLB translation runtime")'):time.sleep(.2)
+"""+rendered)
+    marker = "                    check('selector_saved_through_real_bridge',window.evaluate_js('window.__candidateSelected')=='isolated')"
+    before = "                    time.sleep(.4)\n"+marker
+    after = """                    deadline=time.monotonic()+30
+                    while time.monotonic()<deadline and window.evaluate_js('window.__candidateSelected')!='isolated':
+                        window.evaluate_js('(async()=>{if(window.__nllbReadBusy)return;window.__nllbReadBusy=true;try{window.__candidateSelected=(await window.pywebview.api.get_settings()).values.nllb_runtime;}finally{window.__nllbReadBusy=false;}})()')
+                        time.sleep(.2)
+"""+marker
+    assert before in code
+    code = code.replace(before, after).replace('2026-10-14-desktop-candidate-{phase}.json', '2026-10-16-nllb-routing-native.json')
+    with tempfile.TemporaryDirectory(prefix='nllb-native-', dir=ROOT/'temp') as scratch:
+        with (ROOT/'docs/validation/2026-10-16-nllb-routing-native.log').open('wb') as log:
+            result = subprocess.run([str(ROOT/'runtime_profiles/desktop-candidate/python.exe'), '-B', '-X', 'utf8', '-c',
+                                     code, str(ROOT), scratch, 'native-controls-ready'], stdout=log, stderr=subprocess.STDOUT,
+                                    timeout=180, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    print('Native NLLB settings exit:', result.returncode)
+    return result.returncode
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

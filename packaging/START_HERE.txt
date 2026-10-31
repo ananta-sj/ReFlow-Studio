@@ -1,0 +1,48 @@
+REFLOW STUDIO - WINDOWS PORTABLE TEST CANDIDATE
+Candidate: RC1, 31 October 2026
+
+START
+1. Extract the entire ZIP to a writable local folder. Do not launch inside ZIP.
+2. Double-click Launch_Reflow.bat. Keep the folder structure intact.
+3. Windows needs a working WebView2 runtime. A Microsoft Visual C++ prerequisite
+   installer is included at build/windows-portable/VC_redist.x64.exe; use it
+   only if the launcher reports the corresponding missing runtime libraries.
+4. Select the engine and check its readiness in Marketplace before rendering.
+
+WHAT IS INCLUDED
+The application, built interface, FFmpeg, the current portable Python runtime,
+and prepared F5, vision, MuseTalk, XTTS CPU, recognition CPU, translation CPU,
+separation CPU and face enhancement CPU runtime profiles are included.
+Including a runtime does not certify every engine, model or GPU configuration.
+Current default engine selections have not been changed.
+
+MODEL SETUP
+Downloaded model weights, reference voices, model connections, API credentials,
+personal settings and media are NOT included. Model downloads need internet,
+disk space and, where applicable, publisher access approval/authentication.
+Your development computer's installed voices will not appear in a fresh copy.
+Use Marketplace readiness/setup guidance. Do not assume every optional engine
+is a one-click download. Cloud engines require your own supported endpoint and
+credentials. Gated models and voice references require deliberate setup.
+
+EXPERIMENTAL ROUTES
+IndicF5 and IndicTrans2 evaluation environments, the IndicF5 GPU environment,
+the experimental desktop replacement and superseded XTTS candidate are not
+included. Those routes need a separately reviewed setup. RVC voices are not
+included. Linux/macOS and untested GPU routes are outside this candidate's
+validated scope. The accepted development dubs are not bundled as examples.
+
+TEST STATUS AND LICENSE
+This is a local test candidate, not an approved public release. Relocated
+startup checks on the development PC do not replace a clean Windows PC test.
+Full long-video, recovery and optional-engine acceptance remains to be done.
+The application's license choice and final distribution review remain pending.
+The root LICENSE.txt currently contains Python's license/history. Bundled
+components retain their included notices; this does not assign an application
+license or clear redistribution of all third-party components/models.
+
+INTEGRITY
+portable-manifest.json lists packaged files and their SHA-256 checksums.
+The ZIP's separate SHA256SUMS.txt verifies the complete archive.
+No software was installed and no models were downloaded to assemble this ZIP.
+See README.txt for usage and recovery limitations.

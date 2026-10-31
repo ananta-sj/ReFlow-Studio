@@ -1,0 +1,10 @@
+[
+  {"id":"morning-is-not-afternoon","source":"Good morning.","reference":"सुप्रभात।","review":"The greeting must mean morning, not afternoon or evening."},
+  {"id":"greeting-with-context","source":"Good morning. This is a short test.","reference":"सुप्रभात। यह एक छोटा परीक्षण है।","review":"Preserve both the greeting and the statement about a short test."},
+  {"id":"negation","source":"I do not want to cancel the order.","reference":"मैं ऑर्डर रद्द नहीं करना चाहता।","review":"The speaker wants to KEEP the order; do not reverse the negation."},
+  {"id":"time-and-date","source":"The meeting is at 9:30 tomorrow morning.","reference":"बैठक कल सुबह 9:30 बजे है।","review":"Preserve tomorrow, morning and 9:30; equivalent numeral scripts are acceptable."},
+  {"id":"numbers-and-negation","source":"The price is 1,250 rupees, not 250 rupees.","reference":"कीमत 1,250 रुपये है, 250 रुपये नहीं।","review":"Preserve both amounts, currency and which amount is rejected."},
+  {"id":"question","source":"Could you speak more slowly, please?","reference":"क्या आप कृपया थोड़ा धीरे बोल सकते हैं?","review":"Keep the polite request/question, rather than inventing a statement."},
+  {"id":"brand-and-action","source":"ReFlow Studio keeps the original background music.","reference":"ReFlow Studio मूल पृष्ठभूमि संगीत को बनाए रखता है।","review":"Keep the product identity and that background music is preserved, not removed."},
+  {"id":"multi-sentence-reference","source":"Some call me nature. Others call me Mother Nature.","reference":"कुछ लोग मुझे प्रकृति कहते हैं। दूसरे मुझे धरती माँ कहते हैं।","review":"Preserve the two groups and personification; do not treat either sentence as unrelated dialogue."}
+]

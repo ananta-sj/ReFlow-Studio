@@ -1,0 +1,105 @@
+<!--
+InstallBuilder Enterprise project for Reflow Studio's Windows setup.exe.
+Wraps the PyInstaller onedir build in dist/ReflowStudio/ (see
+packaging/reflow.spec / packaging/build_dist.py) with a normal Windows
+installer: Program Files copy, Start Menu + Desktop shortcuts, and an
+auto-generated uninstaller - built via the CLI (builder-cli.exe build
+packaging/installbuilder/reflow-installer.xml windows) rather than the
+GUI, which doesn't need a display session to run.
+
+dist/ReflowStudio/ must already exist (run packaging/build_dist.py
+first) - this project only packages it, it doesn't invoke PyInstaller.
+-->
+<project>
+    <shortName>reflowstudio</shortName>
+    <fullName>Reflow Studio</fullName>
+    <version>1.0.0</version>
+    <vendor>Reflow Studio</vendor>
+    <installerFilename>ReflowStudio-1.0.0-Setup.exe</installerFilename>
+    <outputDirectory>C:/Projects/Reflow Studio/installer</outputDirectory>
+    <windowsExecutableIcon>C:/Projects/Reflow Studio/assets/icon.ico</windowsExecutableIcon>
+    <enableRollback>0</enableRollback>
+    <enableTimestamp>1</enableTimestamp>
+    <compressionAlgorithm>lzma</compressionAlgorithm>
+    <requestedExecutionLevel>requireAdministrator</requestedExecutionLevel>
+
+    <componentList>
+        <component>
+            <name>default</name>
+            <description>Reflow Studio</description>
+            <canBeEdited>0</canBeEdited>
+            <selected>1</selected>
+            <show>0</show>
+            <folderList>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfiles</name>
+                    <platforms>windows</platforms>
+                    <distributionFileList>
+                        <distributionDirectory allowWildcards="1">
+                            <origin>C:/Projects/Reflow Studio/dist/ReflowStudio/*</origin>
+                        </distributionDirectory>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Start Menu Folder</description>
+                    <destination>${windows_folder_programs}/${fullName}</destination>
+                    <name>startmenushortcuts</name>
+                    <platforms>windows</platforms>
+                    <shortcutList>
+                        <shortcut>
+                            <comment>Launch Reflow Studio</comment>
+                            <name>Reflow Studio</name>
+                            <path>${installdir}/ReflowStudio.exe</path>
+                            <windowsPath>${installdir}/ReflowStudio.exe</windowsPath>
+                            <windowsIcon>${installdir}/ReflowStudio.exe</windowsIcon>
+                            <platforms>windows</platforms>
+                            <runAsAdmin>0</runAsAdmin>
+                        </shortcut>
+                        <shortcut>
+                            <comment>Uninstall Reflow Studio</comment>
+                            <name>Uninstall Reflow Studio</name>
+                            <path>${installdir}/${uninstallerName}</path>
+                            <windowsPath>${installdir}/${uninstallerName}</windowsPath>
+                            <platforms>windows</platforms>
+                            <runAsAdmin>1</runAsAdmin>
+                        </shortcut>
+                    </shortcutList>
+                </folder>
+                <folder>
+                    <description>Desktop</description>
+                    <destination>${platform_desktop_directory}</destination>
+                    <name>desktopshortcut</name>
+                    <platforms>windows</platforms>
+                    <shortcutList>
+                        <shortcut>
+                            <comment>Launch Reflow Studio</comment>
+                            <name>Reflow Studio</name>
+                            <path>${installdir}/ReflowStudio.exe</path>
+                            <windowsPath>${installdir}/ReflowStudio.exe</windowsPath>
+                            <windowsIcon>${installdir}/ReflowStudio.exe</windowsIcon>
+                            <platforms>windows</platforms>
+                            <runAsAdmin>0</runAsAdmin>
+                        </shortcut>
+                    </shortcutList>
+                </folder>
+            </folderList>
+        </component>
+    </componentList>
+
+    <parameterList>
+        <directoryParameter>
+            <name>installdir</name>
+            <description>Installer.Parameter.installdir.description</description>
+            <explanation>Installer.Parameter.installdir.explanation</explanation>
+            <value>C:/Program Files/Reflow Studio</value>
+            <default>C:/Program Files/Reflow Studio</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>1</mustBeWritable>
+            <mustExist>0</mustExist>
+            <width>30</width>
+        </directoryParameter>
+    </parameterList>
+</project>

@@ -1,0 +1,120 @@
+name: Build native desktop candidates
+
+# Candidate artifacts only: this workflow never publishes a GitHub Release.
+# Local AI engine environments require separate per-platform acceptance.
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-candidates-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    name: Source archive
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Check packaging and export clean source
+        run: |
+          python -m unittest discover -s packaging/tests -v
+          python packaging/create_source_archive.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReflowStudio-source
+          path: release-assets/ReflowStudio-source.zip*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+  build:
+    name: ${{ matrix.target }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            target: windows-x64
+          - os: ubuntu-22.04
+            target: linux-x64
+          - os: macos-14
+            target: macos-arm64
+          - os: macos-15-intel
+            target: macos-x64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PIP_NO_CACHE_DIR: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build interface from locked dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Check packaging contracts
+        run: python -m unittest discover -s packaging/tests -v
+      - name: Install build tool on ephemeral runner
+        run: python -m pip install -r packaging/requirements-build.txt
+      - name: Download and verify native relocatable Python
+        run: python packaging/prepare_ci_runtime.py '${{ matrix.target }}'
+      - name: Install desktop dependencies into bundled Python
+        run: |
+          if [[ '${{ runner.os }}' == 'Windows' ]]; then
+            RUNTIME='build/ci-runtime/python/python.exe'
+          else
+            RUNTIME='build/ci-runtime/python/bin/python3'
+          fi
+          "$RUNTIME" -m pip install -r packaging/requirements-desktop.txt
+          "$RUNTIME" -m pip check
+          "$RUNTIME" -m pip freeze --all > build/desktop-installed.txt
+      - name: Build native launcher
+        run: python packaging/build_native_launcher.py --output build/ci-launcher --work build/ci-launcher-work
+      - name: Assemble, run native smoke check, and archive
+        run: python packaging/build_ci_candidate.py '${{ matrix.target }}'
+      - name: Upload candidate downloads
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReflowStudio-${{ matrix.target }}-desktop-preview
+          path: release-assets/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Retain checks and exact dependency inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checks-${{ matrix.target }}
+          path: |
+            build/ci-*-smoke.json
+            build/desktop-installed.txt
+          if-no-files-found: ignore
+          retention-days: 14

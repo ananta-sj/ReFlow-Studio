@@ -1,0 +1,200 @@
+{
+  "m2m100": {
+    "repo": "facebook/m2m100_418M",
+    "revision": "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636",
+    "folder": "models/translation/m2m100_418M",
+    "files": [
+      {
+        "name": "README.md",
+        "size": 4603,
+        "sha256": null
+      },
+      {
+        "name": "config.json",
+        "size": 908,
+        "sha256": null
+      },
+      {
+        "name": "generation_config.json",
+        "size": 233,
+        "sha256": null
+      },
+      {
+        "name": "pytorch_model.bin",
+        "size": 1935796948,
+        "sha256": "d907ea45e4e4b9db163382a6674f6218b3c59566fe06d77f4055c208b4e87ed1"
+      },
+      {
+        "name": "sentencepiece.bpe.model",
+        "size": 2423393,
+        "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+      },
+      {
+        "name": "special_tokens_map.json",
+        "size": 1140,
+        "sha256": null
+      },
+      {
+        "name": "tokenizer_config.json",
+        "size": 298,
+        "sha256": null
+      },
+      {
+        "name": "vocab.json",
+        "size": 3708092,
+        "sha256": null
+      }
+    ]
+  },
+  "nllb": {
+    "repo": "facebook/nllb-200-distilled-600M",
+    "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d",
+    "folder": "models/translation/nllb_600M",
+    "files": [
+      {
+        "name": "README.md",
+        "size": 7667,
+        "sha256": null
+      },
+      {
+        "name": "config.json",
+        "size": 846,
+        "sha256": null
+      },
+      {
+        "name": "generation_config.json",
+        "size": 189,
+        "sha256": null
+      },
+      {
+        "name": "pytorch_model.bin",
+        "size": 2460457927,
+        "sha256": "c266c2cfd19758b6d09c1fc31ecdf1e485509035f6b51dfe84f1ada83eefcc42"
+      },
+      {
+        "name": "sentencepiece.bpe.model",
+        "size": 4852054,
+        "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a"
+      },
+      {
+        "name": "special_tokens_map.json",
+        "size": 3548,
+        "sha256": null
+      },
+      {
+        "name": "tokenizer.json",
+        "size": 17331176,
+        "sha256": "e316b82de11d0f951f370943b3c438311629547285129b0b81dadabd01bca665"
+      },
+      {
+        "name": "tokenizer_config.json",
+        "size": 564,
+        "sha256": null
+      }
+    ]
+  },
+  "xtts": {
+    "repo": "coqui/XTTS-v2",
+    "revision": "6c2b0d75eae4b7047358e3b6bd9325f857d43f77",
+    "folder": "models/xtts/default",
+    "files": [
+      {
+        "name": "LICENSE.txt",
+        "size": 4014,
+        "sha256": null
+      },
+      {
+        "name": "README.md",
+        "size": 4263,
+        "sha256": null
+      },
+      {
+        "name": "config.json",
+        "size": 4368,
+        "sha256": null
+      },
+      {
+        "name": "model.pth",
+        "size": 1867929118,
+        "sha256": "c7ea20001c6a0a841c77e252d8409f6a74fb423e79b3206a0771ba5989776187"
+      },
+      {
+        "name": "speakers_xtts.pth",
+        "size": 7754818,
+        "sha256": "f0f6137c19a4eab0cbbe4c99b5babacf68b1746e50da90807708c10e645b943b"
+      },
+      {
+        "name": "vocab.json",
+        "size": 361219,
+        "sha256": null
+      }
+    ]
+  },
+  "f5_asr": {
+    "repo": "openai/whisper-large-v3-turbo",
+    "revision": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9",
+    "folder": "models/f5/reference-asr",
+    "files": [
+      {
+        "name": "README.md",
+        "size": 21196,
+        "sha256": null
+      },
+      {
+        "name": "added_tokens.json",
+        "size": 34648,
+        "sha256": null
+      },
+      {
+        "name": "config.json",
+        "size": 1256,
+        "sha256": null
+      },
+      {
+        "name": "generation_config.json",
+        "size": 3772,
+        "sha256": null
+      },
+      {
+        "name": "merges.txt",
+        "size": 493869,
+        "sha256": null
+      },
+      {
+        "name": "model.safetensors",
+        "size": 1617824864,
+        "sha256": "542566a422ae4f3fd23f1ba11add198fca01bbf82e66e6a2857b3f608b1eb9d1"
+      },
+      {
+        "name": "normalizer.json",
+        "size": 52666,
+        "sha256": null
+      },
+      {
+        "name": "preprocessor_config.json",
+        "size": 340,
+        "sha256": null
+      },
+      {
+        "name": "special_tokens_map.json",
+        "size": 2186,
+        "sha256": null
+      },
+      {
+        "name": "tokenizer.json",
+        "size": 2710337,
+        "sha256": null
+      },
+      {
+        "name": "tokenizer_config.json",
+        "size": 282843,
+        "sha256": null
+      },
+      {
+        "name": "vocab.json",
+        "size": 1036558,
+        "sha256": null
+      }
+    ]
+  }
+}

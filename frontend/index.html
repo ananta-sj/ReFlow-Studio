@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reflow Studio</title>
+    <style>
+      /* Instant, dependency-free splash - paints before the app bundle and
+         its stylesheet finish loading. React's own BootScreen (same look)
+         replaces this the moment it mounts, since createRoot().render()
+         overwrites #root's contents.
+
+         IMPORTANT: none of this styling targets #root itself. #root is the
+         same element React mounts the real app into, and CSS rules aren't
+         removed just because the DOM content they applied to changed - a
+         `#root { display:flex; justify-content:center }` rule here would
+         keep squeezing/centering the real app (shrink-wrapped, with black
+         bars on both sides) forever after mount, not just during the
+         splash. Scoped to .boot-splash instead, which only exists in this
+         static markup and is gone the instant React replaces #root's
+         children. */
+      html, body { margin: 0; background: #0d0e10; }
+      #root { min-height: 100vh; }
+      .boot-splash {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI Semibold', 'Inter', system-ui, sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: #eef0ec;
+      }
+      .boot-splash .splash-accent {
+        color: #c8ff4d;
+        margin-left: 0.4rem;
+        text-shadow: 0 0 16px #c8ff4d;
+        animation: splash-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes splash-pulse {
+        0%, 100% { text-shadow: 0 0 10px #c8ff4d; }
+        50% { text-shadow: 0 0 24px #c8ff4d; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div class="boot-splash">ReFlow<span class="splash-accent">Studio</span></div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

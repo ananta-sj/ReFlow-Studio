@@ -1,0 +1,78 @@
+{
+  "revision": "89cd0007fd7b9e0693a2fd4404d187e07dac79fd",
+  "files": [
+    {
+      "name": "LICENSE",
+      "bytes": 1128,
+      "sha256": "383258420065a19d9fef0daf00d10792d3f8a5ccf783d94a91f5d6755386615b"
+    },
+    {
+      "name": "README.md",
+      "bytes": 4757,
+      "sha256": "c5f91855219624bf018f8299b01c2ef2e7b8ea9cc0bb4ec28f29416b1ed7eb4f"
+    },
+    {
+      "name": "config.json",
+      "bytes": 1371,
+      "sha256": "50e8ccb60e8ee574edb6f57bc0559aa41eee4943d6cf2a1707b7fb77f0fab0bf"
+    },
+    {
+      "name": "configuration_indictrans.py",
+      "bytes": 14155,
+      "sha256": "d7e4ce84efacc18981228f5071b00dba6e3bf165f8ea7bcc8ecdada8942e1a52"
+    },
+    {
+      "name": "modeling_indictrans.py",
+      "bytes": 79785,
+      "sha256": "ed965054c67e6829809c6936f697b6b7cc6f50ee6136200bca060e1884a1610a"
+    },
+    {
+      "name": "tokenization_indictrans.py",
+      "bytes": 8044,
+      "sha256": "35396cf65b9fdc21379f8bc12cd658eec32fbe5de87a25fa5f4df190c5ffc4e3"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "bytes": 1099,
+      "sha256": "e6c237ab5521d3b25b1ba6a9529f13065a2f3aacb14f955b98e2074481a07168"
+    },
+    {
+      "name": "special_tokens_map.json",
+      "bytes": 96,
+      "sha256": "9046da57c270c8e74d0f38832b4adce269c9d914ef21d2a0925e7772152dd793"
+    },
+    {
+      "name": "generation_config.json",
+      "bytes": 163,
+      "sha256": "6c8b29ae72e680d5a2d9e849567f6f556d3f4e9bbd42434964a646f49b556972"
+    },
+    {
+      "name": "dict.SRC.json",
+      "bytes": 645314,
+      "sha256": "c6f65113581422c8777991d3770123c63447fe63dc5f3e8f4187eeff7553a689"
+    },
+    {
+      "name": "dict.TGT.json",
+      "bytes": 3390440,
+      "sha256": "f7817850c9e4b99c59fad57d0611c7720f1921f215e6f247cf25d52eff7f1146"
+    },
+    {
+      "name": "model.SRC",
+      "bytes": 759425,
+      "sha256": "3cedc5cbcc740369b76201942a0f096fec7287fee039b55bdb956f301235b914"
+    },
+    {
+      "name": "model.TGT",
+      "bytes": 3256903,
+      "sha256": "ac9257c8e76b8b607705b959cc3d075656ea33032f7a974e467b8941df6e98d4",
+      "remote_sha256_matches": true
+    },
+    {
+      "name": "model.safetensors",
+      "bytes": 4462265272,
+      "sha256": "35d28fe035cd6ac026536b555558b07762425c8b930670219063e4fc3666c96d",
+      "remote_sha256_matches": true
+    }
+  ],
+  "processor_sha256": "354c3299229f8b05602d82d0a84a8c2e98082dce38879a3459ca2fc33ec8f7b8"
+}

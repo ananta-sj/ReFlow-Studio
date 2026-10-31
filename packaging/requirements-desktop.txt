@@ -1,0 +1,15 @@
+# Native desktop previews. Optional AI engine environments are separate.
+audioop-lts==0.2.2; python_version >= '3.13'
+filelock==3.20.3
+keyring==25.7.0
+numpy==2.5.4
+packaging==26.0
+pillow==12.3.0
+psutil==7.2.2
+pydub==0.25.1
+pystray==0.19.5
+pywebview==6.2.1; sys_platform != 'linux'
+pywebview[qt]==6.2.1; sys_platform == 'linux'
+requests==2.34.2
+soundfile==0.13.1
+tqdm==4.67.3

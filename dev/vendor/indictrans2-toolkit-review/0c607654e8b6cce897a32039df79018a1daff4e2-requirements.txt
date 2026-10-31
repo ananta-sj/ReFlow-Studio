@@ -1,0 +1,7 @@
+setuptools>=68.2.2
+torch
+sacremoses
+sentencepiece
+transformers
+sacrebleu
+indic-nlp-library-IT2 @ git+https://github.com/VarunGumma/indic_nlp_library

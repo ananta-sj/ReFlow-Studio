@@ -1,0 +1,11 @@
+{
+  "release": "20261026",
+  "python": "3.13.18",
+  "upstream": "https://github.com/astral-sh/python-build-standalone/releases/tag/20261026",
+  "targets": {
+    "windows-x64": {"triple": "x86_64-pc-windows-msvc", "sha256": "ebe90cc1dce2dd2d7afa1f0aa9b6c269c7c0174aeabdc6a801381602b7283424"},
+    "linux-x64": {"triple": "x86_64-unknown-linux-gnu", "sha256": "126343c54daff4068efc1ac269518d0cc202d57857794948103dd1454e8881be"},
+    "macos-arm64": {"triple": "aarch64-apple-darwin", "sha256": "e5af2fde6a937a0e0c795a0c595c4efb70578d57463a2657c819992b9b9acbac"},
+    "macos-x64": {"triple": "x86_64-apple-darwin", "sha256": "708be9e7df297f68bdae589ea9e62a621db5abe7708f79e851c41410347452d1"}
+  }
+}

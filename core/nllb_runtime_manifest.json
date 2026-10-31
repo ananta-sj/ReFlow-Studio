@@ -1,0 +1,13 @@
+{
+  "schema": "reflow.nllb-runtime.v1",
+  "package_runtime_identity": "85a69c83e2310e8e53303987947f2313cb4c6aa70627eeccae3b85b564fd8163",
+  "source_sha256": {
+    "core/nllb_worker.py": "6ac986111710f18b5ff1579cebd130141a5b4655cee5dacce52559043236da76",
+    "core/providers/translation/nllb_local.py": "c0f772abf304a2281d67cedc352355f26f5530ae6baa3791d8ed9559f2957e5b",
+    "core/translation_completion.py": "70efb1ed08ed41a6deb548e5c620d7795f435b01a27c3b0837838a802deb634b",
+    "core/generation_control.py": "5ab42be82d4cdc253715508af80e32658c582d29bee8ec68106d2e2a85ffef84",
+    "core/languages.py": "b2f35f34b10906685120609a6c938e34364b0a7fdb42eea698c76cb759f1c471",
+    "core/source_language.py": "a44cce83c7157ea18a1141a68bbfeff7881b367dbb40f35b2f5ddbd52f2e7ebd",
+    "core/nllb_runtime.py": "74d10703716da039d89b7034f4ba8a5a29252e9a826891f6bbaf8acb54c237c9"
+  }
+}

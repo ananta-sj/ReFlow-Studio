@@ -1,20 +1,96 @@
-torch --index-url https://download.pytorch.org/whl/cu118
-torchvision --index-url https://download.pytorch.org/whl/cu118
-torchaudio --index-url https://download.pytorch.org/whl/cu118
-gradio
-transformers
-scipy
-librosa
-soundfile
-matplotlib
+# Core
 psutil
-gfpgan
-basicsr
-facexlib
-realesrgan
-moviepy
-opencv-python
 pydub
-ffmpeg-python
-imageio[ffmpeg]
+cffi
 numpy
+scipy>=1.11.2
+torch
+torchaudio
+tqdm
+pywebview
+keyring
+airllm
+pystray
+pillow
+huggingface_hub
+
+# OpenCV 5.0 (the current PyPI default as of this writing) removed
+# CascadeClassifier from its Python bindings entirely - a real breaking
+# API change, not a packaging mistake - which silently broke Wav2Lip's
+# face detection (core/Wav2Lip/inference.py's face_detect()) with an
+# AttributeError, on every single render, only surfacing deep into a
+# render's lip-sync stage rather than at install time. Pinned below 5 to
+# stay on the last API-compatible major version. opencv-python-headless
+# (not opencv-python) specifically - this is a backend image-processing
+# pipeline with no GUI window (cv2.imshow etc.) calls anywhere in it, and
+# installing both packages side by side corrupts the shared `cv2` install
+# (they ship overlapping files under the same import name) - found by
+# hitting exactly that corruption for real, not assumed.
+opencv-python-headless<5
+
+# transformers>=5 removed transformers.pytorch_utils.isin_mps_friendly,
+# which coqui-tts 0.27.5's XTTS loader still imports at module load time
+# (an upstream coqui-tts/transformers version mismatch, not this app's
+# code) - found by actually importing TTS.api and reading the real
+# ImportError, not assumed. Pin below the break until coqui-tts ships a
+# fix.
+transformers<5
+
+# AI & TTS Dependencies. The original `TTS` PyPI package (Coqui's,
+# archived upstream) needs a C++ compiler to build its
+# monotonic_align Cython extension - `Microsoft C++ Build Tools`
+# aren't a given on a fresh Windows machine, and this whole tree
+# doesn't need a from-source build at all. `coqui-tts` is the actively
+# maintained community fork, ships a prebuilt Windows wheel (its
+# monotonic-alignment-search extension is a separate prebuilt wheel
+# too), and still imports as `TTS` (this codebase's import lines are
+# unaffected).
+coqui-tts
+# Required by coqui-tts under torch>=2.9 for audio IO (a runtime
+# ImportError otherwise, not a build-time one - also found by actually
+# importing TTS.api, not assumed). NOTE: torchcodec needs real FFmpeg
+# *shared* libraries (avcodec-*.dll etc.) - this project's own bundled
+# ffmpeg/bin/ffmpeg.exe is a --enable-static build with no such DLLs,
+# so TTS synthesis previously failed at runtime ("Could not load
+# libtorchcodec") on every segment even though everything imported
+# fine and the model loaded - each failure was logged but swallowed
+# per-segment (core/tts/tts_handler.py's generate_audio()), so a whole
+# render could report 100% complete with zero real dubbed audio. Fixed
+# by vendoring a full-shared FFmpeg build's DLLs into ffmpeg/shared_libs/
+# (gitignored alongside the rest of ffmpeg/, copied into packaged builds
+# by packaging/build_dist.py's existing whole-folder ASSET_FOLDERS copy)
+# and registering that folder via os.add_dll_directory() in config.py -
+# plain PATH is not enough for a dependent DLL loaded via
+# ctypes.CDLL(full_path) under Windows' post-3.8 safe DLL search mode.
+torchcodec
+
+# STT (core/stt/stt_handler.py) and content filtering
+# (core/vision/vision_handler.py) - both previously undeclared here
+# despite being hard imports, so a plain `pip install -r
+# requirements.txt` never actually produced a working STT/filter stage.
+faster-whisper
+nudenet
+
+# Background/vocal separation (core/audio_separator.py shells out to
+# `python -m demucs`) - same gap as above.
+demucs
+
+# F5-TTS voice provider (core/providers/voice/f5tts_local.py) - real
+# zero-shot voice cloning via the f5-tts PyPI package's own F5TTS API.
+f5-tts
+
+# MuseTalk lipsync provider (core/providers/lipsync/musetalk_local.py,
+# vendored inference code in core/MuseTalk/) - diffusers for its VAE/
+# UNet (AutoencoderKL/UNet2DConditionModel base classes), einops/
+# omegaconf for its data pipeline and YAML config, face-alignment as
+# the real face-landmark detector (swapped in for mmpose/DWPose - mmcv
+# doesn't ship a build compatible with this project's torch version;
+# see core/MuseTalk/musetalk/utils/preprocessing.py's patch note for
+# the full explanation).
+diffusers
+einops
+omegaconf
+face-alignment
+# Streaming, locked, on-demand model recovery (core/model_assets.py).
+requests
+filelock
