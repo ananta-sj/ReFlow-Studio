@@ -32,7 +32,7 @@ def include(name):
         return False
     if path.suffix.lower() in DENY_SUFFIXES or path.name in DENY_NAMES or path.name.startswith('.env'):
         return False
-    if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md'}:
+    if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md','docs/RC2_PLATFORM_RELEASES.md'}:
         return True
     if name in {'assets/icon.ico','assets/icon.png'}:
         return True

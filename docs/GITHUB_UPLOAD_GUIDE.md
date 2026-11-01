@@ -2,9 +2,9 @@
 
 Use the prepared **source-only folder**, not the working project root:
 
-`release-assets/github-source-upload/ReflowStudio-source/`
+`release-assets/github-source-upload-v0.7.0-rc.2/ReflowStudio-source/`
 
-Its contents are also in `release-assets/ReflowStudio-source-RC2.zip`. Extract
+Its contents are also in `release-assets/ReflowStudio-source-v0.7.0-rc.2.zip`. Extract
 that ZIP to obtain the same source-only tree. Do not upload the ZIP as the
 repository's application code: GitHub needs the extracted files to find the
 README and Actions workflow.
@@ -44,7 +44,7 @@ your terminal, use the browser method below or arrange your Git setup separately
    git clone https://github.com/ananta-sj/ReFlow-Studio.git GitHub-upload
    ```
 
-2. In File Explorer, open `github-source-upload/ReflowStudio-source`. Copy all
+2. In File Explorer, open `github-source-upload-v0.7.0-rc.2/ReflowStudio-source`. Copy all
    its contents into the new `GitHub-upload` folder. Replace matching source
    files when prompted. Keep the new clone's `.git` directory; the clean export
    contains no `.git` directory to replace it.
@@ -76,19 +76,15 @@ than 100 files, preserving the same folder structure. Do not omit `.github`.
 
 ## Application downloads go in Releases
 
-The corrected application download is:
+There are four separate release sets under `release-assets/Releases/RC2/`:
+`Windows-x64`, `Linux-x64`, `macOS-Apple-Silicon` and `macOS-Intel`. Each has its
+own release fields, notes and `Upload-to-GitHub` folder. Attach only that
+platform's upload files to its own GitHub pre-release. Use the distinct tags in
+[the platform release guide](RC2_PLATFORM_RELEASES.md).
 
-`dist/ReflowStudio-Windows-Executable-RC2-2026-10-31.zip`
-
-The prepared split-download set is:
-
-`dist/github-windows-download-RC2/`
-
-For a future GitHub Release, attach both `.part` files, the
-`Assemble-ReflowStudio.cmd` script, its instructions, manifest and checksums as
-release assets. These generated downloads do **not** belong in the source
-repository's ordinary file tree. Keep all application companion files in the
-download; publishing `ReflowStudio.exe` alone is insufficient.
+These generated downloads do **not** belong in the source repository's ordinary
+file tree. Keep all application companion files in the Windows download;
+publishing `ReflowStudio.exe` alone is insufficient.
 
 The updated downloads remain test candidates. Finish the fresh-PC checks and
 application/component licensing decisions before treating them as a public

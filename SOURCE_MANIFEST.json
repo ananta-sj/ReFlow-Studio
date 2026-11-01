@@ -8,7 +8,7 @@
     {
       "path": ".github/workflows/build.yml",
       "bytes": 3873,
-      "sha256": "42580476d7ac132ef4ce135f3ee3a541768fbaf38de1a213bd7a4ed21d714a25"
+      "sha256": "829af3d41e6beb181e29bf3c5d64a3f0debb9878a41fdac089f8b9ccfa7d58e6"
     },
     {
       "path": ".gitignore",
@@ -32,8 +32,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 10169,
-      "sha256": "650f27b32e552dd0c42abb5a8e92047132e67ae613961b52bdd81e676e8d0460"
+      "bytes": 14042,
+      "sha256": "717acdc6dd6847d87f7d13393dbd9be9932d62b2a0fd30f810d2dae0be78fe2d"
     },
     {
       "path": "README.txt",
@@ -3167,8 +3167,13 @@
     },
     {
       "path": "docs/GITHUB_UPLOAD_GUIDE.md",
-      "bytes": 4425,
-      "sha256": "1c12ea846e255bc714aae517e32533c427742a6df34f994d7cd4a6b9935092f3"
+      "bytes": 4504,
+      "sha256": "f15b2cecff2868dc5dbf883d9242ac1a7aa152848a38579f771c6a4ccb99cce9"
+    },
+    {
+      "path": "docs/RC2_PLATFORM_RELEASES.md",
+      "bytes": 2604,
+      "sha256": "b8d01608e4a9b775974c22d2cbbf4eeacef47019f91e6faa1f15f18dbd5d78ce"
     },
     {
       "path": "docs/validation/2026-10-13-xtts-security-cpu-lock-review.json",
@@ -4052,8 +4057,8 @@
     },
     {
       "path": "packaging/README.md",
-      "bytes": 3591,
-      "sha256": "bdcd27fa29afdc0d00d37ad24fa720d5225138a735db6aa41858ca27bef04818"
+      "bytes": 4057,
+      "sha256": "0adf7b0b95ca111ebc4de25602f6426036de2b17b7680df0f3c27e57bf4bcdc7"
     },
     {
       "path": "packaging/START_HERE.txt",
@@ -4097,8 +4102,8 @@
     },
     {
       "path": "packaging/create_source_archive.py",
-      "bytes": 5537,
-      "sha256": "bfdcf07c38e0c07ac50522ebd6067f4dd346cc2cd8117a2e1d9fb9fe7fa403db"
+      "bytes": 5569,
+      "sha256": "9d8a3e397c7665b14bb4a8ed52265dc0a983fe3e29ea9d81897f81f4c6ab5739"
     },
     {
       "path": "packaging/finalize_executable_candidate.py",
@@ -4136,6 +4141,11 @@
       "sha256": "6ab09f84e92963f7f8c8fdc3aeb46e3836a44fccc5c08f7d54989a407c62fec7"
     },
     {
+      "path": "packaging/prepare_tester_releases.py",
+      "bytes": 19707,
+      "sha256": "7a6d76be84133f09b927e140f4609b94b72a29e528e56a5e046836e1eed0a9de"
+    },
+    {
       "path": "packaging/prepare_windows_candidate.py",
       "bytes": 5483,
       "sha256": "be90be8d0ca296594fbe322523328336f382d3f472a2f905caecf58096f14082"
@@ -4159,6 +4169,11 @@
       "path": "packaging/requirements-desktop.txt",
       "bytes": 375,
       "sha256": "400c7abfa2f619a60aacb4344b11fa46b019dbddb53c509ecd21bd79bf992d27"
+    },
+    {
+      "path": "packaging/split_platform_releases.py",
+      "bytes": 9214,
+      "sha256": "f4292fc8162192f8995256eeacb9905972be45a6f2c0329821d20fad61c02f99"
     },
     {
       "path": "packaging/split_release_asset.py",

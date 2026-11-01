@@ -1,5 +1,7 @@
 # ReFlow Studio
 
+**Current version: `v0.7.0-rc.2` · Volunteer-testing pre-release**
+
 **Translate, dub, and review video, audio, and subtitles in one desktop workspace.**
 
 ReFlow Studio brings transcription, translation, voice generation, timing and
@@ -11,10 +13,60 @@ export your results from the same project.
 [Builds](https://github.com/ananta-sj/ReFlow-Studio/actions) ·
 [Report an issue](https://github.com/ananta-sj/ReFlow-Studio/issues)
 
-> **Release status:** the updated Windows executable is a test candidate.
-> Linux and macOS remain experimental. The new build workflow prepares review
-> artifacts; it does not automatically publish a release. Check a download's
-> notes for its included engines and setup requirements.
+> **Volunteer testers wanted:** `v0.7.0-rc.2` is a release candidate, not a stable
+> production release. We welcome testing on real Windows, Linux and Mac hardware.
+> Native CI desktop checks passed for all four targets, but complete engine and
+> fresh-machine testing remains ongoing. Check your platform's release notes
+> before downloading: the Windows engine bundle and Linux/Mac previews include
+> different components.
+
+## Choose your platform
+
+There are four separate platform release sets. On the
+[Releases page](https://github.com/ananta-sj/ReFlow-Studio/releases), choose the
+entry whose title contains **`v0.7.0-rc.2` and your platform**. Each download
+appears when its corresponding pre-release is published.
+
+| Platform release | Choose it for | Included setup |
+| --- | --- | --- |
+| **Windows x64** | 64-bit Intel/AMD Windows PCs | Python, FFmpeg and eight prepared engine environments; models/references still need setup. |
+| **Linux x64 Desktop Preview** | 64-bit Intel/AMD Linux PCs | Python and desktop libraries; local AI runtimes, models and FFmpeg/FFprobe need separate setup. |
+| **macOS Apple Silicon Desktop Preview** | Macs with an Apple M-series chip | Native Apple Silicon desktop preview; AI runtimes, models and FFmpeg/FFprobe need separate setup. |
+| **macOS Intel Desktop Preview** | Macs with an Intel processor | Native Intel desktop preview with the same separate engine/model/media-tool requirements. |
+
+Keep the Linux/Mac `.tar.gz` archives intact until extracting them on the target
+system; their executable permissions and internal links must be preserved. The
+Mac previews are not Developer ID signed or notarized. Minimum OS compatibility,
+signing/data behavior and native engine support still need volunteer validation.
+
+The default Windows release set uses the fuller engine bundle. The smaller
+Windows CI desktop preview is not the same package. Downloading model weights
+alone does not install the local AI engine runtimes missing from a desktop preview.
+
+## Help test v0.7.0-rc.2
+
+The maintainer does not have every target platform, so community testing is
+especially useful. Start with a short, disposable sample rather than important
+project media.
+
+1. Check startup, window/taskbar/tray branding, menus, file selection and exit.
+2. Try settings, Marketplace readiness guidance and queues. Report unclear setup
+   errors as well as crashes.
+3. Where compatible engines/models are installed, try a short dub and check
+   wording, pronunciation, voice quality and audio/video synchronization.
+4. Test subtitle/audio exports, cancellation, restart and recovery.
+
+[Report feedback or a bug](https://github.com/ananta-sj/ReFlow-Studio/issues).
+Use a title such as **`[v0.7.0-rc.2][Linux x64] Short description`** and include:
+
+- The exact download filename, OS version and CPU architecture.
+- CPU/GPU details and the selected engines/models.
+- Source/target language, input type and duration where relevant.
+- Reproduction steps, expected result and the actual error or behavior.
+
+Each platform release includes a testing guide and feedback template. Remove
+credentials and private media from shared logs. Passing a build or startup check
+does not establish that all dubbing features work on every machine.
 
 ## What you can do
 
@@ -38,7 +90,7 @@ operating system; CPU processing can take substantially longer.
 ## Start with the Windows download
 
 Use the **application download** from [Releases](https://github.com/ananta-sj/ReFlow-Studio/releases)
-when the updated release is published. GitHub's automatic **Source code** archive
+for `v0.7.0-rc.2` when published. GitHub's automatic **Source code** archive
 is for development, rather than a ready-to-run application.
 
 1. Download and extract the entire Windows package to a writable folder, such
@@ -91,6 +143,20 @@ work and do not guarantee parallel model inference or faster renders.
 
 ## Engines and optional features
 
+### Dubbing languages
+
+The current menu offers **13 targets through the default XTTS speech route**:
+English, Hindi, Mandarin Chinese, Spanish, French, German, Italian, Portuguese,
+Russian, Arabic, Japanese, Korean and Turkish. Compatible translation and speech
+models must be set up first.
+
+Other menu languages require compatible alternative providers. The menu's 24
+language choices are not a promise of 24 fully supported local dubbing routes.
+Standard F5-TTS defaults to English/Chinese; the current IndicF5 route has been
+validated for Hindi only and requires separate experimental setup.
+
+### Engine choices
+
 Adapters include Whisper-based transcription; NLLB, M2M100 and IndicTrans2
 translation; XTTS, F5-TTS and IndicF5 speech; and configured API providers.
 Optional processing includes RVC voice conversion, Demucs separation,
@@ -106,10 +172,10 @@ route has passed release testing on every platform.
 
 | Platform | Current packaging status |
 | --- | --- |
-| Windows x64 | Portable executable candidate with local startup and interface checks; clean-PC release testing remains. |
-| Linux x64 | Native desktop preview workflow; engine and distribution-specific testing remains. |
-| macOS Apple Silicon | `.app` desktop preview workflow; native engine, writable-data and signing work remains. |
-| macOS Intel | Separate `.app` preview target with the same pending validation. |
+| Windows x64 | Native CI desktop check plus local engine-bundle startup/branding checks passed; clean-PC and complete workflow testing remains. |
+| Linux x64 | Native CI desktop/package checks passed; real-machine GUI, engine and distribution-specific testing remains. |
+| macOS Apple Silicon | Native CI desktop/package checks passed; native GUI/engine, writable-data and signing work remains. |
+| macOS Intel | Native CI desktop/package checks passed; the same Mac-specific validation remains. |
 
 The GitHub Actions workflow builds each target on its own operating system and
 also exports a clean source ZIP. Its **desktop previews include desktop
@@ -117,7 +183,7 @@ dependencies, not the full Windows engine bundle**. They currently need FFmpeg
 and FFprobe separately on PATH, plus any required local AI runtimes and models.
 Mac previews are not Developer ID signed or notarized.
 
-After uploading the updated source, open **Actions → Build native desktop
+To run another native build, open **Actions → Build native desktop
 candidates → Run workflow**. Successful jobs provide candidate archives,
 checksums and check reports as Actions artifacts. A build passing does not
 establish complete media-workflow or clean-machine acceptance.
@@ -129,6 +195,9 @@ local Windows assembly process.
 For uploading the updated project, use the prepared source-only export and the
 [GitHub upload guide](docs/GITHUB_UPLOAD_GUIDE.md). Keep application downloads
 in Releases rather than in the source tree.
+
+Maintainers publishing the four separate pre-releases can use the platform tags
+and upload sets in [the RC2 release guide](docs/RC2_PLATFORM_RELEASES.md).
 
 ## Work on the source
 

@@ -4,6 +4,13 @@ For the native executable, cross-platform Actions workflow and source export,
 see [the native build guide](../docs/GITHUB_NATIVE_BUILDS.md). The steps below
 describe the verified Windows base assembly used by the executable candidate.
 
+The four volunteer-testing releases for `v0.7.0-rc.2` are described in
+[the platform release guide](../docs/RC2_PLATFORM_RELEASES.md). After placing the
+downloaded native artifacts and check ZIPs in `release-assets/Releases`, the
+development helpers `prepare_tester_releases.py` and `split_platform_releases.py`
+validate/copy them and generate the four upload sets. These helpers refuse
+existing output directories; they do not publish releases or install engines.
+
 This workflow uses installed local files. It does not install dependencies,
 download models, change application defaults or publish a release. The current
 Windows source launcher and Python 3.10 desktop runtime are retained. Eight
