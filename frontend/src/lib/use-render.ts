@@ -22,7 +22,13 @@ export function useRenderJob() {
     if (!result.ok) await confirmAction({ title: 'Stop unavailable', description: result.message ?? 'Unable to request cancellation.', alertOnly: true })
     return result
   }
-  return { ...session.render, start, startBatch, stop, isRunning: session.busy,
+  async function retry() {
+    const result = await runJobAction(() => bridge.retryRender())
+    if (!result.ok) await confirmAction({ title: 'Retry unavailable', description: result.message ?? 'Unable to retry this job.', alertOnly: true })
+    return result
+  }
+  return { ...session.render, start, startBatch, stop, retry, isRunning: session.busy,
     isStopping: session.render.status === 'stopping',
-    stillWorking: session.busy && session.render.status === 'running' && now - session.lastEventAt >= STILL_WORKING_THRESHOLD_MS }
+    waitingSeconds: session.busy && session.render.status === 'running' && now - session.lastEventAt >= STILL_WORKING_THRESHOLD_MS
+      ? Math.floor((now - session.lastEventAt) / 1000) : null }
 }

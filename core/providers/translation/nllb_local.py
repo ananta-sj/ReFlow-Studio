@@ -8,6 +8,9 @@ M2M100 fallback already documents on TranslationProvider.translate()'s
 custom_instructions parameter.
 """
 
+import logging
+import unicodedata
+
 from core.providers.base import TranslationProvider, require_translation_text
 from core.languages import NLLB_LANG_MAP, require_fixed_translation
 from core.source_language import NLLB_SOURCE_MAP, require_fixed_source
@@ -90,13 +93,36 @@ class NLLBLocalProvider(TranslationProvider):
         from core.translation_completion import require_input_window, require_finished
         require_input_window(inputs, self._model, 'NLLB-200')
         from core.generation_control import generation_kwargs
-        with torch.no_grad():
-            generated = self._model.generate(
-                **inputs, forced_bos_token_id=forced_bos_token_id, max_new_tokens=512,
-                num_beams=5, do_sample=False,
-                **generation_kwargs(),
-            )
-        require_finished(generated, self._tokenizer, 'NLLB-200')
+        from core.render_context import check_cancelled
+
+        # An exact standalone reaction has a safe equivalent. A retry on
+        # this cue can complete mechanically while inventing a full sentence.
+        reaction = (source_code == 'jpn_Jpan' and target_code == 'hin_Deva'
+                    and unicodedata.normalize('NFKC', text.strip()) in {'え?', 'えっ?'})
+        limit = 32 if reaction else 512
+
+        def generate(beams, **options):
+            with torch.no_grad():
+                return self._model.generate(
+                    **inputs, forced_bos_token_id=forced_bos_token_id, max_new_tokens=limit,
+                    num_beams=beams, do_sample=False, **options, **generation_kwargs(),
+                )
+
+        generated = generate(5)
+        try:
+            require_finished(generated, self._tokenizer, 'NLLB-200', max_new_tokens=limit)
+        except RuntimeError:
+            check_cancelled()
+            if reaction:
+                logging.info('NLLB used a verified Hindi equivalent for an unfinished Japanese reaction.')
+                return 'क्या?'
+            logging.info('NLLB is retrying an unfinished translation with repetition controls.')
+            generated = generate(1, no_repeat_ngram_size=3, repetition_penalty=1.15)
+            try:
+                require_finished(generated, self._tokenizer, 'NLLB-200', max_new_tokens=limit)
+            except RuntimeError as error:
+                raise RuntimeError('NLLB-200 could not finish this translation after an automatic retry. '
+                                   'No partial translation was accepted.') from error
         return require_translation_text(self._tokenizer.batch_decode(generated, skip_special_tokens=True)[0])
 
     def _isolated_call(self, text, target, source):

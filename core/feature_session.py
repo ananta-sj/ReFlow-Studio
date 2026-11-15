@@ -6,6 +6,7 @@ import subprocess
 import threading
 import time
 import uuid
+import psutil
 
 from core.render_context import bind_job, current_job, run_process
 from core.optional_runtime import ROOT, interpreter
@@ -44,6 +45,8 @@ class FeatureSession:
                 run_process([self.executable, '-B', str(self.worker), str(self.request)],
                     check=True, stdout=log, stderr=subprocess.STDOUT, timeout=24 * 3600,
                     env={**os.environ, 'PYTHONIOENCODING': 'utf-8', 'TEMP': str(self.folder), 'TMP': str(self.folder),
+                         'REFLOW_PARENT_PID': str(os.getpid()),
+                         'REFLOW_PARENT_CREATED': str(psutil.Process().create_time()),
                          'HF_HOME': str(ROOT / 'models/f5/cache'), 'TORCH_HOME': str(ROOT / 'models/f5/torch-cache'),
                          'PATH': str(ROOT / 'ffmpeg/bin') + os.pathsep + os.environ.get('PATH', ''),
                          **({'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1'}
@@ -70,7 +73,7 @@ class FeatureSession:
             request = self.folder / f'call-{self.sequence:08d}.json'
             pending = request.with_suffix('.tmp')
             pending.write_text(json.dumps(params, allow_nan=False), encoding='utf-8')
-            os.replace(pending, request)
+            self.job.publish(pending, request)
             response = request.with_suffix('.response.json')
             deadline = time.monotonic() + timeout
             while not response.exists():
@@ -84,9 +87,10 @@ class FeatureSession:
                     self.job.request_stop()
                     raise TimeoutError(self.label+' inference exceeded its time limit: ' + self._diagnostic())
                 self.finished.wait(.05)
-            result = json.loads(response.read_text(encoding='utf-8'))
-            request.unlink()
-            response.unlink()
+            from core.worker_json import read_json,retire
+            result = read_json(response,self.job.check)
+            retire(request)
+            retire(response)
             if not isinstance(result, dict):
                 raise RuntimeError(self.label+' worker returned an invalid response')
             if not result.get('ok'):

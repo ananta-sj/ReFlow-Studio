@@ -202,8 +202,8 @@ class QueueManager:
         return first
 
     @durable
-    def prepare_recovery(self, item_id):
-        self.set_paused(True)
+    def prepare_recovery(self, item_id, resume_batch=False):
+        self.set_paused(not resume_batch)
         return self.update_item(item_id, status='processing', progress=0, status_text='Starting...')
 
     @synchronized

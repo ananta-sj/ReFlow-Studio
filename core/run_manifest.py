@@ -125,7 +125,7 @@ class RunManifest:
             settings_sha256=hashlib.sha256(json.dumps(settings.all(), sort_keys=True,
                 ensure_ascii=False, allow_nan=False).encode('utf-8')).hexdigest(),
             operations=[], cue_artifacts=[], quality_reports=[], output=None, error=None,
-            checkpoint_support=True, checkpoint_stages=['stt', 'translation'], checkpoints=[])
+            checkpoint_support=True, checkpoint_stages=['extract', 'separate', 'stt', 'translation', 'speech'], checkpoints=[])
         self.save()
 
     def save(self):
@@ -173,7 +173,8 @@ class RunManifest:
             item['status'] = 'cancelled' if isinstance(error, (GeneratorExit, RenderCancelled)) else 'failed'
             # Provider errors can contain URLs/tokens. Preserve type and operation
             # identity here; the existing UI owns the diagnostic message.
-            item['error'] = {'type': type(error).__name__}
+            from core.failure_diagnostics import summarize
+            item['error'] = summarize(error)
             raise
         else:
             item['status'] = 'completed'
@@ -192,9 +193,10 @@ class RunManifest:
             artifact = file_identity(output) if output else None
             if artifact is not None and artifact['bytes'] == 0:
                 raise RuntimeError('Process returned an empty output.')
+            from core.failure_diagnostics import summarize
             self.data.update(status=status, finished_at=datetime.now(timezone.utc).isoformat(),
                 output=artifact,
-                error={'type': type(error).__name__} if error else None)
+                error=summarize(error) if error else None)
             self.save()
 
 
@@ -202,7 +204,7 @@ def observe_provider(manifest, stage, provider, method, *args, cue_id=None, **kw
     if manifest is None:
         return getattr(provider, method)(*args, **kwargs)
     evidence = {'method': method, 'cue_id': cue_id}
-    if method in ('translate', 'filter_text', 'synthesize') and args:
+    if method in ('translate', 'filter_text', 'synthesize', 'synthesize_retry') and args:
         evidence['text'] = args[0]
     if method == 'convert' and isinstance(kwargs.get('text'), str):
         evidence['text'] = kwargs['text']
@@ -231,7 +233,7 @@ def observe_provider(manifest, stage, provider, method, *args, cue_id=None, **kw
         elif method == 'separate':
             item['artifacts'] = [{**file_identity(path), 'retention': 'temporary-unless-exported'}
                                  for path in result if path and Path(path).is_file()]
-        elif method in ('synthesize', 'convert', 'execute', 'scan_and_blur', 'enhance'):
+        elif method in ('synthesize', 'synthesize_retry', 'convert', 'execute', 'scan_and_blur', 'enhance'):
             output_index = 2 if method == 'execute' else 1
             output = result if isinstance(result, (str, Path)) else args[output_index] if len(args) > output_index else None
             if output and Path(output).is_file():

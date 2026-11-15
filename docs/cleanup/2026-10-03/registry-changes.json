@@ -1,0 +1,27 @@
+[
+  {
+    "id": "aa37350b-69f9-407f-b741-f4d38541d875",
+    "name": "NLLB-200 (Meta)",
+    "previous_local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\aa37350b-69f9-407f-b741-f4d38541d875\\nllb-200-distilled-600M"
+  },
+  {
+    "id": "8220b16c-4e55-4d85-92da-d8c2dee4b846",
+    "name": "XTTS v2 (Coqui)",
+    "previous_local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\8220b16c-4e55-4d85-92da-d8c2dee4b846\\XTTS-v2"
+  },
+  {
+    "id": "0a6522fa-d2eb-4a48-a269-9189b21710e3",
+    "name": "NSFW Image Detection (Falconsai)",
+    "previous_local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\0a6522fa-d2eb-4a48-a269-9189b21710e3\\nsfw_image_detection"
+  },
+  {
+    "id": "faf8fe20-15b7-43ee-aae3-21141ad8dfb5",
+    "name": "MuseTalk",
+    "previous_local_path": "C:\\Projects\\Reflow Studio\\core\\MuseTalk\\models"
+  },
+  {
+    "id": "5955dcca-ff80-4d49-b7e1-add7db17ef02",
+    "name": "XLM-RoBERTa (toxicity fine-tune)",
+    "previous_local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\5955dcca-ff80-4d49-b7e1-add7db17ef02\\xlmr-large-toxicity-classifier"
+  }
+]

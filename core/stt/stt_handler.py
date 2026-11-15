@@ -37,12 +37,18 @@ class STTHandler:
             raise e
 
     def transcribe(self, audio_path, source_language='auto'):
+        result = self._transcribe(audio_path, source_language)
+        del self.model
+        gc.collect()
+        return result
+
+    def _transcribe(self, audio_path, source_language, *, vad_filter=True):
         from core.recognition_language import whisper_language
         hint = whisper_language(source_language)
         if hint is not None and hint not in self.model.supported_languages:
             raise ValueError(f'This Whisper model does not support source language {source_language!r}.')
         # Beam size 5 gives better accuracy
-        segments, info = self.model.transcribe(audio_path, beam_size=5, vad_filter=True,
+        segments, info = self.model.transcribe(audio_path, beam_size=5, vad_filter=vad_filter,
                                                **({'language': hint} if hint else {}))
         
         result = []
@@ -53,11 +59,10 @@ class STTHandler:
                 "text": segment.text
             })
         
-        # Cleanup
-        del self.model
-        gc.collect()
-        
         if getattr(info, 'duration', None) is not None:
             require_media_bounds(result, info.duration)
         return TranscriptionResult(result, hint or getattr(info, "language", None),
                                    getattr(info, "language_probability", None), 'hint' if hint else None)
+
+    def transcribe_takes(self, audio_paths, source_language):
+        return [self._transcribe(path, source_language, vad_filter=False) for path in audio_paths]

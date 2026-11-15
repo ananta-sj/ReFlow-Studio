@@ -10,6 +10,7 @@ import { ConfirmDialogHost } from "@/lib/use-confirm"
 import { hasTourCompleted, startTour } from "@/lib/use-tour"
 import { HardwareIntelligence } from "@/components/panels/HardwareIntelligence"
 import { LogConsole } from "@/components/panels/LogConsole"
+import { CodeUpdateNotice } from "@/components/shared/CodeUpdateNotice"
 import { Dashboard } from "@/pages/Dashboard"
 import { NodesPage } from "@/pages/Nodes"
 import { AssetsPage } from "@/pages/Assets"
@@ -22,13 +23,26 @@ import { useTheme } from "@/lib/use-theme"
 import { useAccentColor } from "@/lib/use-accent-color"
 import { initializeJobs, runJobAction } from "@/lib/use-jobs"
 import { useExperienceLevel, levelAtLeast } from "@/lib/use-experience"
+import { preferenceStorage } from '@/lib/preference-storage'
 
 const MIN_BOOT_MS = 1400
 
 function App() {
   const [page, setPage] = useState<PageId>("dashboard")
   const [online, setOnline] = useState(false)
-  const [selectedDeviceId, setSelectedDeviceId] = useState("cpu")
+  const [selectedDeviceId, setSelectedDeviceId] = useState(preferenceStorage.getItem('reflow.device') ?? 'cpu')
+  function selectDevice(id: string) {
+    setSelectedDeviceId(id)
+    preferenceStorage.setItem('reflow.device', id)
+  }
+  useEffect(() => {
+    bridge.getHardwareSnapshot().then(snapshot => {
+      const saved = preferenceStorage.getItem('reflow.device')
+      if (!snapshot.devices.some(device => device.id === saved && device.backend !== 'unsupported')) {
+        selectDevice(snapshot.default_device_id)
+      }
+    }).catch(() => {})
+  }, [])
   const [booting, setBooting] = useState(true)
   const [bootStatus, setBootStatus] = useState("CONNECTING TO PYTHON CORE…")
   const [showWizard, setShowWizard] = useState(false)
@@ -67,12 +81,12 @@ function App() {
         if (!interrupted) return
         confirmChoice({
           title: "Resume interrupted render?",
-          description: `Reflow Studio closed unexpectedly while rendering "${interrupted.input_path.split(/[\\/]/).pop()}". Restart this render? Verified recognition and translation checkpoints may be reused; other stages run again. Other restored batch jobs stay paused. Closing this dialog keeps the recovery record for the next launch.`,
-          confirmLabel: "Resume Render",
+          description: `Continue "${interrupted.input_path.split(/[\\/]/).pop()}"? ReFlow will check saved extraction, separation, translation and voice lines and reuse matching work.${interrupted.queue_item_id ? ' Remaining accepted batch jobs will follow in order.' : ''} Closing this dialog keeps the recovery offer for the next launch.`,
+          confirmLabel: interrupted.queue_item_id ? "Resume Batch" : "Resume Render",
           cancelLabel: "Discard",
         }).then(async (choice) => {
           if (choice === 'confirm') {
-            const result = await runJobAction(() => bridge.resumeInterruptedRender(interrupted.recovery_token))
+            const result = await runJobAction(() => bridge.resumeInterruptedRender(interrupted.recovery_token, !!interrupted.queue_item_id))
             if (!result.ok) await confirmAction({ title: "Resume unavailable", description: result.message ?? "The restart was not accepted.", alertOnly: true })
           } else if (choice === 'cancel') {
             try {
@@ -118,6 +132,7 @@ function App() {
       <ProductTour currentPage={page} onNavigate={setPage} />
       <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <TitleBar onNavigate={setPage} theme={theme} onToggleTheme={toggleTheme} />
+        <CodeUpdateNotice />
         <PrimaryNav
           activePage={page}
           onNavigate={setPage}
@@ -133,7 +148,7 @@ function App() {
             {page === "dashboard" && (
               <Dashboard selectedDeviceId={selectedDeviceId} level={level} onNavigate={setPage} />
             )}
-            {page === "nodes" && levelAtLeast(level, "advanced") && <NodesPage />}
+            {page === "nodes" && levelAtLeast(level, "advanced") && <NodesPage selectedDeviceId={selectedDeviceId} onDeviceSelected={selectDevice} />}
             {page === "assets" && <AssetsPage onNavigate={setPage} />}
             {page === "marketplace" && <MarketplacePage />}
             {page === "logs" && <LogsPage />}
@@ -142,7 +157,7 @@ function App() {
 
           {page !== "logs" && (
             <aside className="flex w-80 shrink-0 flex-col gap-4 overflow-y-auto border-l border-border p-3">
-              <HardwareIntelligence onDeviceSelected={setSelectedDeviceId} />
+              <HardwareIntelligence selectedDeviceId={selectedDeviceId} onDeviceSelected={selectDevice} />
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-semibold tracking-wide text-muted-foreground">
                   08 // SYSTEM LOG

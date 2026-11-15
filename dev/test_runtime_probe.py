@@ -166,6 +166,7 @@ class RuntimeProbeTests(unittest.TestCase):
         from bridge.api import PythonBridge
         bridge = PythonBridge.__new__(PythonBridge)
         bridge.settings = Mock()
+        bridge.settings.all.return_value = {}
         bridge.settings.get.return_value = 'legacy'
         bridge._render_lock = threading.Lock()
         bridge._render_thread = None

@@ -1,0 +1,3 @@
+--- RUNNING INTEGRITY CHECKS ---
+   [+] Checking Core Libraries...
+--- CHECKS COMPLETE ---

@@ -9,6 +9,7 @@ async function report(send: Parameters<typeof runJobAction>[0]) {
 }
 export function addToQueue(paths: string[]) { return report(() => bridge.addQueueDrafts(paths)) }
 export function removeFromQueue(id: string) { return report(() => bridge.removeQueueItem(id)) }
+export function retryQueueItem(id: string) { return report(() => bridge.retryRender(id)) }
 export function pauseQueue() { return report(() => bridge.setQueuePaused(true)) }
 export function resumeQueue() { return report(bridge.resumeQueueBatch) }
 export function clearQueueHistory() { return report(bridge.clearCompletedQueue) }

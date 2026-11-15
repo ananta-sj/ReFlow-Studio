@@ -38,7 +38,8 @@ def assess(provider, transcript, cast, manifest=None, *, total_duration=None):
     for index, cue in enumerate(transcript):
         check_cancelled()
         following = transcript[index+1]['start'] if index+1 < len(transcript) else max(cue['end'],total_duration or cue['end'])
-        available = seconds(max(cue['end']-cue['start'], following-cue['start']))
+        from core.speech_timing import dialogue_end
+        available = seconds(dialogue_end(cue, following)-cue['start'])
         operation = manifest.operation('timing-preflight', provider, evidence=dict(
             cue_id=cue.get('cue_id'), available_seconds=available)) if manifest else nullcontext()
         with operation as observation:

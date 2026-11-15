@@ -19,8 +19,20 @@ def inspect(registry, template_id, parameters, verify_runtime=False, xtts_runtim
     rows = []
     runtime_results = {}
 
+    def cuda(row, stage):
+        from core.cuda_runtime import validate
+        selected = validate(stage)
+        row['runtime'] = dict(status='passed', selection='cuda',
+                              identity=selected['identity'], device='cuda:0')
+        row['details'].append('The isolated NVIDIA route passed its saved model test. '
+                              'Available GPU memory is checked again when the worker starts.')
+
     def xtts(row):
         selection = xtts_runtime if xtts_runtime is not None else os.environ.get('REFLOW_XTTS_RUNTIME', 'legacy')
+        if selection == 'cuda':
+            row['adapter'] = 'xtts'
+            cuda(row, 'speech')
+            return
         if selection == 'legacy':
             return
         if selection != 'isolated':
@@ -93,6 +105,10 @@ def inspect(registry, template_id, parameters, verify_runtime=False, xtts_runtim
         row['runtime'].update(selection='isolated',identity=selected['identity'])
 
     def recognition(row):
+        if recognition_runtime == 'cuda':
+            row['adapter'] = 'faster_whisper'
+            cuda(row, 'recognition')
+            return
         if recognition_runtime in (None, 'legacy'):
             return
         if recognition_runtime != 'isolated':
@@ -218,6 +234,8 @@ def inspect(registry, template_id, parameters, verify_runtime=False, xtts_runtim
             row['details'].append('NLLB uses the existing modern CPU environment in a separate translation process; model quality is unverified here.')
             runtime(row, 'nllb', route['executable'], 'cpu', artifact_checked=True)
             row['runtime'].update(selection='isolated', identity=route['identity'])
+        elif adapter == 'nllb' and nllb_runtime == 'cuda':
+            cuda(row, 'translation')
         if adapter == 'faster_whisper':
             recognition(row)
         if executable or adapter in ('gfpgan', 'image_classifier', 'text_classifier'):
@@ -238,6 +256,10 @@ def inspect(registry, template_id, parameters, verify_runtime=False, xtts_runtim
         check('preprocess', 'Media preparation', media)
         if params['keep_background']:
             def separation(row):
+                if separation_runtime == 'cuda':
+                    row['adapter'] = 'demucs'
+                    cuda(row, 'separate')
+                    return
                 if separation_runtime in (None, 'legacy'):
                     row['details'].append('Demucs dependencies, weights and speech removal must be checked during execution.')
                     return

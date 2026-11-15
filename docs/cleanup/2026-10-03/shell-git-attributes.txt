@@ -1,0 +1,2 @@
+LAUNCH_REFLOW.sh: text: set
+LAUNCH_REFLOW.sh: eol: lf

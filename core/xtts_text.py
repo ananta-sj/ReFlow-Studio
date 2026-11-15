@@ -1,4 +1,56 @@
-"""Preserve short XTTS cue context within the selected checkpoint's limits."""
+"""Prepare XTTS speech text and preserve short cues within checkpoint limits."""
+import re
+import unicodedata
+
+
+_HINDI_SMALL = (
+    'शून्य एक दो तीन चार पाँच छह सात आठ नौ दस ग्यारह बारह तेरह चौदह पंद्रह सोलह सत्रह अठारह उन्नीस '
+    'बीस इक्कीस बाईस तेईस चौबीस पच्चीस छब्बीस सत्ताईस अट्ठाईस उनतीस '
+    'तीस इकतीस बत्तीस तैंतीस चौंतीस पैंतीस छत्तीस सैंतीस अड़तीस उनतालीस '
+    'चालीस इकतालीस बयालीस तैंतालीस चवालीस पैंतालीस छियालीस सैंतालीस अड़तालीस उनचास '
+    'पचास इक्यावन बावन तिरपन चौवन पचपन छप्पन सत्तावन अट्ठावन उनसठ '
+    'साठ इकसठ बासठ तिरसठ चौंसठ पैंसठ छियासठ सड़सठ अड़सठ उनहत्तर '
+    'सत्तर इकहत्तर बहत्तर तिहत्तर चौहत्तर पचहत्तर छिहत्तर सतहत्तर अठहत्तर उनासी '
+    'अस्सी इक्यासी बयासी तिरासी चौरासी पचासी छियासी सतासी अट्ठासी नवासी '
+    'नब्बे इक्यानवे बानवे तिरानवे चौरानवे पचानवे छियानवे सत्तानवे अट्ठानवे निन्यानवे'
+).split()
+_HINDI_SCALES = ((10**11, 'खरब'), (10**9, 'अरब'), (10**7, 'करोड़'),
+                 (10**5, 'लाख'), (1000, 'हजार'), (100, 'सौ'))
+_NUMBER = re.compile(
+    r'(?<!\w)-?(?:\d{1,3}(?:,\d{3})+|\d{1,3}(?:,\d{2})*,\d{3}|\d+)(?:\.\d+)?'
+    r'|\d+(?:\.\d+)?'
+)
+
+
+def _hindi_integer(digits):
+    if len(digits) > 15 or (len(digits) > 1 and digits.startswith('0')):
+        return ' '.join(_HINDI_SMALL[int(digit)] for digit in digits)
+    number = int(digits)
+    if number < 100:
+        return _HINDI_SMALL[number]
+    for scale, name in _HINDI_SCALES:
+        if number >= scale:
+            quotient, remainder = divmod(number, scale)
+            result = _hindi_integer(str(quotient)) + ' ' + name
+            return result + (' ' + _hindi_integer(str(remainder)) if remainder else '')
+
+
+def prepare_speech_text(text, language):
+    """Expand Hindi digits before Coqui's unsupported Hindi number converter."""
+    if language != 'hi':
+        return text
+    text = ''.join(str(unicodedata.decimal(char)) if char.isdecimal() else char for char in text)
+
+    def expand(match):
+        raw = match.group().replace(',', '')
+        negative = raw.startswith('-')
+        whole, dot, fraction = raw.lstrip('-').partition('.')
+        spoken = _hindi_integer(whole)
+        if dot:
+            spoken += ' दशमलव ' + ' '.join(_HINDI_SMALL[int(digit)] for digit in fraction)
+        return ('ऋण ' if negative else '') + spoken
+
+    return _NUMBER.sub(expand, text)
 
 # Retain only the language routes that improved in the paired default-checkpoint
 # speech/ASR controls. Other languages keep their established delivery. This is

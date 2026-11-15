@@ -1,0 +1,22 @@
+[MODELS] Downloading test: weights/model.bin
+test_atomic_success (__main__.ModelAssetsTests) ... ok
+test_existing_valid_model_does_not_contact_network (__main__.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_failed_transfer_preserves_old_file (__main__.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+[MODELS] Downloading test: weights/model.bin
+test_html_error_page_is_not_installed (__main__.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_http_failure_is_not_installed (__main__.ModelAssetsTests) ... ok
+test_incomplete_transfer_is_not_installed (__main__.ModelAssetsTests) ... ok
+test_offline_missing_model_has_recovery_instruction (__main__.ModelAssetsTests) ... ok
+test_startup_integrity_does_not_download_models (__main__.ModelAssetsTests) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.072s
+
+OK
+--- RUNNING INTEGRITY CHECKS ---
+--- CHECKS COMPLETE ---
+--- RUNNING INTEGRITY CHECKS ---
+--- CHECKS COMPLETE (with warnings) ---

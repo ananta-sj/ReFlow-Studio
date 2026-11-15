@@ -28,6 +28,16 @@ class WhisperLocalProvider(STTProvider):
         self.runtime = runtime or 'legacy'
 
     def transcribe(self, audio_path, source_language='auto'):
+        return self._run(audio_path, source_language)
+
+    def transcribe_takes(self, audio_paths, source_language):
+        with tempfile.TemporaryDirectory(dir=current_job().workspace) as tmp_dir:
+            request = os.path.join(tmp_dir, 'takes.json')
+            with open(request, 'w', encoding='utf-8') as stream:
+                json.dump([os.fspath(path) for path in audio_paths], stream)
+            return self._run(request, source_language, takes=True)
+
+    def _run(self, audio_path, source_language, *, takes=False):
         from core.source_language import normalize_source_selection
         selected = normalize_source_selection(source_language)
         self.worker_interpreter = None
@@ -50,8 +60,9 @@ class WhisperLocalProvider(STTProvider):
                 with open(log_path, 'wb') as log:
                     run_process(
                         [self.worker_interpreter, '-B', _WORKER_SCRIPT, audio_path, out_json, self.model_size]
-                        + ([selected] if selected != 'auto' else []),
+                        + ([selected, '--takes'] if takes else [selected] if selected != 'auto' else []),
                         check=True, timeout=3600, stdout=log, stderr=subprocess.STDOUT,
+                        **({'env': {**os.environ, 'REFLOW_OFFLINE': '1', 'HF_HUB_OFFLINE': '1'}} if takes else {}),
                     )
             except subprocess.CalledProcessError as exc:
                 with open(log_path, 'rb') as log:
@@ -60,4 +71,6 @@ class WhisperLocalProvider(STTProvider):
                     detail = log.read().decode('utf-8', errors='replace')
                 raise RuntimeError(f'Transcription worker failed: {detail}') from exc
             with open(out_json, "r", encoding="utf-8") as f:
-                return normalize_transcription(json.load(f))
+                payload = json.load(f)
+                return ([normalize_transcription(item) for item in payload] if takes
+                        else normalize_transcription(payload))

@@ -31,9 +31,16 @@ if __name__ == "__main__":
     # Since this is a separate process, it won't crash the main app
     stt = STTHandler(device="cpu", model_size=model_size)
     source_language = sys.argv[4] if len(sys.argv) > 4 else 'auto'
-    transcript = stt.transcribe(video_path, source_language=source_language)
+    if len(sys.argv) > 5 and sys.argv[5] == '--takes':
+        with open(video_path, encoding='utf-8') as request:
+            paths = json.load(request)
+        if not isinstance(paths, list) or not 1 <= len(paths) <= 12 or not all(isinstance(p, str) for p in paths):
+            raise ValueError('Invalid speech check batch')
+        payload = [item.to_payload() for item in stt.transcribe_takes(paths, source_language)]
+    else:
+        payload = normalize_transcription(stt.transcribe(video_path, source_language=source_language)).to_payload()
     
     with open(json_output_path, 'w', encoding='utf-8') as f:
-        json.dump(normalize_transcription(transcript).to_payload(), f, ensure_ascii=False, indent=4)
+        json.dump(payload, f, ensure_ascii=False, indent=4)
         
     print("[WORKER] ✅ Mission Complete. Saving JSON.")

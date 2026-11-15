@@ -17,17 +17,24 @@ class WhisperTurboLocalProvider(STTProvider):
         self.worker_released = False
 
     def transcribe(self, audio_path, source_language='auto'):
+        result, = self._transcribe_many([audio_path], source_language)
+        return require_spoken_transcription(result)
+
+    def transcribe_takes(self, audio_paths, source_language):
+        return self._transcribe_many(audio_paths, source_language)
+
+    def _transcribe_many(self, audio_paths, source_language):
         from core.source_language import normalize_source_selection
         selected = normalize_source_selection(source_language)
-        audio_path = Path(audio_path).resolve()
-        if not audio_path.is_file():
+        paths = [Path(path).resolve() for path in audio_paths]
+        if not paths or not all(path.is_file() for path in paths):
             raise ValueError('Recognition audio is missing.')
         job = current_job()
         if job is None:
             owned = RenderContext(project_root()/'temp')
             try:
                 with bind_job(owned):
-                    return self.transcribe(audio_path, source_language=selected)
+                    return self._transcribe_many(paths, selected)
             finally:
                 owned.cleanup()
         from core.feature_session import FeatureSession
@@ -37,13 +44,16 @@ class WhisperTurboLocalProvider(STTProvider):
         self.worker_interpreter = session.executable
         self.worker_released = False
         try:
-            call = dict(audio_path=str(audio_path))
-            if selected != 'auto':
-                call['source_language'] = selected
-            self.last_result = session.call(call)
-            result = normalize_transcription(self.last_result['transcription'])
-            require_media_bounds(result,self.last_result['duration_seconds'])
-            return require_spoken_transcription(result)
+            results = []
+            for path in paths:
+                call = dict(audio_path=str(path))
+                if selected != 'auto':
+                    call['source_language'] = selected
+                self.last_result = session.call(call)
+                result = normalize_transcription(self.last_result['transcription'])
+                require_media_bounds(result, self.last_result['duration_seconds'])
+                results.append(result)
+            return results
         finally:
             session.close()
             self.worker_released = session.finished.is_set()

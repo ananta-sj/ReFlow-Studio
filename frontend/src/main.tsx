@@ -3,7 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initializePreferences } from './lib/preference-storage'
+import { initializeLogs } from './lib/use-logs'
 
+initializeLogs()
 initializePreferences().then(() => createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

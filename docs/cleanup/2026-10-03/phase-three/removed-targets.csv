@@ -1,0 +1,7 @@
+"Path","Bytes","Files","Reason"
+"core/Wav2Lip/temp_input.wav","21614512","1","Generated copy of input audio used by the Wav2Lip subprocess."
+"core/Wav2Lip/temp_input.mp4","6334571","1","Generated copy of input video used by the Wav2Lip subprocess."
+"temp","0","0","Disposable processing temporary directory."
+"build\windows-portable\Lib\site-packages\librosa\__pycache__","0","0","Disposable interpreter/tool cache; source and package metadata retained."
+"build\windows-portable\Lib\site-packages\librosa\util\__pycache__","1953751","40","Disposable interpreter/tool cache; source and package metadata retained."
+"build\windows-portable\Lib\site-packages\librosa\core\__pycache__","645573","12","Disposable interpreter/tool cache; source and package metadata retained."

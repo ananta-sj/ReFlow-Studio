@@ -3,6 +3,7 @@ import sys
 import torch
 import warnings
 import logging
+from contextlib import nullcontext
 from core.audio_utils import load_playable_audio, load_speech_audio
 from core.speech_language import require_xtts_language
 
@@ -73,8 +74,16 @@ class TTSHandler:
         if type(output_rate) is not int or not 8000 <= output_rate <= 192000:
             raise RuntimeError(f"XTTS decoder has an invalid output sample rate: {output_rate!r}")
         synthesizer.output_sample_rate = output_rate
+        model = synthesizer.tts_model
+        if callable(getattr(model,'get_conditioning_latents',None)):
+            from core.voice_conditioning import cached_conditioning
+            model.get_conditioning_latents = cached_conditioning(model.get_conditioning_latents)
+        inference = getattr(getattr(model,'gpt',None),'gpt_inference',None)
+        if inference is not None:
+            from core.speech_generation_budget import bounded_generate
+            inference.generate = bounded_generate(inference.generate)
 
-    def generate_audio(self, text, output_path, language="en", reference_audio=None):
+    def generate_audio(self, text, output_path, language="en", reference_audio=None, *, alternate_take=False, max_seconds=None):
         if not getattr(self, 'tts', None):
             raise RuntimeError("XTTS model is not initialized.")
         if not text or not text.strip():
@@ -82,6 +91,8 @@ class TTSHandler:
         if language == "source":
             raise ValueError("XTTS requires an explicit speech language; 'source' is not supported yet.")
         language = require_xtts_language(language, getattr(self, "model_path", None))
+        from core.xtts_text import prepare_speech_text
+        text = prepare_speech_text(text, language)
         # An explicit reference is authoritative; don't silently substitute it.
         if reference_audio is not None:
             speaker_wav = reference_audio
@@ -101,15 +112,28 @@ class TTSHandler:
                 # stutters in Hindi controls. Greedy Hindi takes passed the
                 # corresponding varied-text listening checks on both voices.
                 decoding = {'do_sample': False, 'num_beams': 1} if language == 'hi' else {}
+                temperature = 0.75
+                if language == 'hi' and alternate_take:
+                    decoding = {'do_sample': True, 'top_p': .82, 'top_k': 30}
+                    temperature = .55
                 from core.xtts_text import should_split_sentences
                 split = should_split_sentences(text, language, self.tts.synthesizer.tts_model)
-                self.tts.tts_to_file(text=text, file_path=pending, speaker_wav=speaker_wav,
-                                     language=language, split_sentences=split, temperature=0.75, speed=1.0,
-                                     **decoding, **generation_kwargs())
+                from core.speech_generation_budget import generation_budget
+                model = self.tts.synthesizer.tts_model
+                stride = getattr(getattr(model,'gpt',None),'code_stride_len',1024)
+                rate = getattr(getattr(model,'hifigan_decoder',None),'input_sample_rate',22050)
+                # Scoped FP32 inference: avoid extremely slow convolution
+                # choices without changing other engines or using unsafe AMP.
+                neural = torch.backends.cudnn.flags(enabled=True,benchmark=False,deterministic=False) if getattr(self,'use_gpu',False) else nullcontext()
+                with neural, generation_budget(max_seconds,stride/rate):
+                    self.tts.tts_to_file(text=text, file_path=pending, speaker_wav=speaker_wav,
+                                         language=language, split_sentences=split, temperature=temperature, speed=1.0,
+                                         **decoding, **generation_kwargs())
                 load_speech_audio(pending)
         except Exception as exc:
             from core.render_context import RenderCancelled
-            if isinstance(exc, RenderCancelled):
+            from core.speech_generation_budget import SpeechGenerationLimitExceeded
+            if isinstance(exc, (RenderCancelled,SpeechGenerationLimitExceeded)):
                 raise
             raise RuntimeError(f"XTTS speech generation failed: {exc}") from exc
         return output_path

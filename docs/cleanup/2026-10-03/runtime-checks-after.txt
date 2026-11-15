@@ -1,0 +1,8 @@
+{
+  "syntax_files_checked": 12,
+  "main_import": "ok",
+  "frontend_exists": true,
+  "ffmpeg_encode": "ok",
+  "ffprobe_codec": "h264",
+  "duration_seconds": "0.200000"
+}

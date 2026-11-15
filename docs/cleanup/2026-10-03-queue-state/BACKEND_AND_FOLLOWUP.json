@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-03",
+  "backend_tests": 319,
+  "backend_seconds": 40.747,
+  "new_backend_tests": 21,
+  "frontend_checks": 59,
+  "python_ast": [
+    {
+      "path": "C:\\Projects\\Reflow Studio\\bridge\\api.py",
+      "bytes": 62138,
+      "sha256": "499248fa896a6788b3ba2deecb3d1895deba2533a04261844975255f0fb3cf24"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\core\\queue_manager.py",
+      "bytes": 4284,
+      "sha256": "126a355f2d2e2d77400178718679b350511017b278a0822e8ab46583053d1b8d"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\core\\session_state.py",
+      "bytes": 2191,
+      "sha256": "559d3ab4e714d59e71a9d6e9a2f4758c6eaf4916eddecafb0eb69b4b41a1aa58"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\test_queue_session.py",
+      "bytes": 16754,
+      "sha256": "246a33a1cf38064b78987e7e705cb3fdb92db8945b39b0eefa36ed7f9429b9db"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\test_render_queue.py",
+      "bytes": 10872,
+      "sha256": "8f9d3332b42a79ecfde0b7928f8e68c29b43705fbceccffe1cacc09696115cca"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\run_cleanup_checks.py",
+      "bytes": 1723,
+      "sha256": "97d0b6c4ed1b7b74b7b7fb1c4302e55df2ab6f22ac2f147c19215b46d4ffde02"
+    }
+  ],
+  "log_sha256": "0283e87f245b3224a58bcf58b1b1c3f985f8b1a6df02c4475ae3e6e04e42f307",
+  "frontend_log_hashes": {
+    "2026-10-03-queue-ui-build.log": "b7e618e05678fa29ef3eda90489fb510798d98fc1a0b1c45b92e9e8f16844ef6",
+    "2026-10-03-queue-store-ui-checks.log": "8e05606e420f5192fa514f51bdc02a879c1b2f3e5286f1195325077b5026ce4b",
+    "2026-10-03-queue-source-ui-checks.log": "08c293b700e38e80f8613f8b00d725b987107587cba1a9d53d28b47f2713232e",
+    "2026-10-03-queue-cancellation-ui-checks.log": "a032e16e09e67d0246cb94ed908b3a7bbadebcc8f45373881be5a00aaae43466",
+    "2026-10-03-queue-deletion-ui-checks.log": "0a2b8bdcd5bd6cac87babe4fcdc00572961e067da871519d7fe2ffa1e5cd94d1",
+    "2026-10-03-queue-ui-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_test_job_workspaces": 0,
+  "historical_audit_preserved": true,
+  "followup": [
+    {
+      "id": "A04",
+      "status": "Backend-owned drafts/batch queue, claims and controls implemented; simulated acceptance passed; GUI/real-model acceptance pending"
+    },
+    {
+      "id": "A05",
+      "status": "Shared versioned render store and backend hydration implemented; simulated remount/reconnect passed; interactive acceptance pending"
+    },
+    {
+      "id": "A06",
+      "status": "Accepted-job result handling and rejection preservation implemented; programmatic checks passed; interactive acceptance pending"
+    }
+  ],
+  "limits": [
+    "Windows only; no actual user rendering/model inference/cloud requests/interactive GUI tests",
+    "Queue/session in memory; no persistent batch or mid-stage recovery across backend restart",
+    "No benchmark of large queue polling or real-model throughput",
+    "Graph cast/render params copied; runtime model registry activation remains existing behavior",
+    "A02 tooltip/ETA assumptions remain a separately approved follow-up"
+  ],
+  "other_findings": "No other full-audit findings closed in this iteration."
+}

@@ -1,0 +1,56 @@
+C:\Projects\Reflow Studio\build\windows-portable\lib\site-packages\transformers\utils\generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+{
+  "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+  "executable": "C:\\Projects\\Reflow Studio\\build\\windows-portable\\python.exe",
+  "imports": {
+    "torch": {
+      "status": "ok",
+      "version": "2.7.1+cpu"
+    },
+    "torchaudio": {
+      "status": "ok",
+      "version": "2.7.1+cpu"
+    },
+    "cv2": {
+      "status": "ok",
+      "version": "4.11.0"
+    },
+    "webview": {
+      "status": "ok",
+      "version": null
+    },
+    "TTS.api": {
+      "status": "ok",
+      "version": null
+    },
+    "rvc_python": {
+      "status": "ok",
+      "version": null
+    },
+    "faster_whisper": {
+      "status": "ok",
+      "version": "1.2.1"
+    },
+    "f5_tts": {
+      "status": "error",
+      "error": "ModuleNotFoundError: No module named 'f5_tts'"
+    },
+    "diffusers": {
+      "status": "error",
+      "error": "ModuleNotFoundError: No module named 'diffusers'"
+    },
+    "face_alignment": {
+      "status": "error",
+      "error": "ModuleNotFoundError: No module named 'face_alignment'"
+    },
+    "torchcodec": {
+      "status": "error",
+      "error": "ModuleNotFoundError: No module named 'torchcodec'"
+    },
+    "bridge.api": {
+      "status": "ok",
+      "version": null
+    }
+  }
+}

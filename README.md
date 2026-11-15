@@ -13,6 +13,31 @@ export your results from the same project.
 [Builds](https://github.com/ananta-sj/ReFlow-Studio/actions) ·
 [Report an issue](https://github.com/ananta-sj/ReFlow-Studio/issues)
 
+## Development checkout status
+
+ReFlow's goal includes family-friendly edits as well as language dubbing. Beeping
+selected words, rewriting a phrase, and translating a whole scene are different
+workflows. A validated automatic censor-only workflow is still needed; existing
+profanity-filter hooks do not guarantee precise audio edits. See
+[project direction and current limits](docs/PROJECT_DIRECTION.md).
+
+The current source contains recovery and review improvements beyond the published
+`v0.7.0-rc.2` binaries. Failed dialogue runs can be recovered into an editable saved
+review without repeating transcription; first-pass checks save each completed line.
+Recovered untranslated lines cannot be spoken until translated or corrected.
+Explicitly marked songs and sounds can retain their original audio.
+The caption-based workflow has an additional character-matching fallback, and
+failed-run reviews can replay saved overlong takes with their timing gaps.
+See [character matching and timing review](docs/CHARACTER_MATCHING_2026-11-15.md).
+Automatic disposable-cache cleanup is enabled by default; see
+[cleanup policy](docs/DISPOSABLE_CLEANUP.md) for the files it preserves.
+
+Reliable unattended multi-character episode/movie dubbing is **not yet validated**.
+Word and timing checks do not establish correct translation or natural acting.
+The experimental replacement translation model is not enabled by these changes.
+See [saved review workflow](docs/REVIEW_WORKFLOW_2026-11-15.md) and
+[development checkout](docs/DEVELOPMENT_CHECKOUT.md).
+
 > **Volunteer testers wanted:** `v0.7.0-rc.2` is a release candidate, not a stable
 > production release. We welcome testing on real Windows, Linux and Mac hardware.
 > Native CI desktop checks passed for all four targets, but complete engine and
@@ -137,8 +162,10 @@ ReFlow does not automatically install a manager model or select one for you.
 5. Accept suitable takes and export the result. Keep your original media.
 
 The Nodes page configures a fixed processing pipeline. It is not an arbitrary
-graph execution engine. Multiple voice nodes alternate cues; automatic speaker
-identification is not implemented. Worker counts control bounded preparation
+graph execution engine. Multiple voice nodes alternate cues. Current development
+builds also contain experimental character matching with a separately prepared
+speaker runtime; reliable unattended multi-character dubbing is not yet established.
+Unresolved dialogue needs review before final export. Worker counts control bounded preparation
 work and do not guarantee parallel model inference or faster renders.
 
 ## Engines and optional features

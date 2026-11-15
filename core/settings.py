@@ -25,6 +25,8 @@ DEFAULTS = {
     "keep_bg_default": True,
     "content_filter_default": False,
     "auto_cleanup_temp": True,
+    "auto_cleanup_cache": True,
+    "clear_temp_on_exit": False,
     "ollama_host": "http://localhost:11434",
     "whisper_model_size": "medium",
     "xtts_runtime": "legacy",

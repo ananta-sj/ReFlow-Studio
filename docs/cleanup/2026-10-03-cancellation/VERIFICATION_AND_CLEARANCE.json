@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-10-03T19:44:41.7597128+05:30",
+  "removed": [
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\node_modules",
+      "files": 11949,
+      "bytes": 162261960
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\.cancellation-npm-cache",
+      "files": 383,
+      "bytes": 40502122
+    }
+  ],
+  "total_removed_bytes": 202764082,
+  "empty_test_job_directories_removed": [
+    "job-_c6g0dky",
+    "job-0d886oq7",
+    "job-2sv9j1o4",
+    "job-38772z_h",
+    "job-41ao52x9",
+    "job-66o651a1",
+    "job-6qulosrn",
+    "job-a6yxv1tm",
+    "job-bza4rtzu",
+    "job-es_s6rhq",
+    "job-fia52eev",
+    "job-l41qkf0f",
+    "job-utsroi13",
+    "job-vdhm58hm",
+    "job-z3npfpts",
+    "job-zxa_g74y"
+  ],
+  "dist": [
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\favicon.svg",
+      "bytes": 9522,
+      "sha256": "61BC9A161DE58248288E6905425D7180F0624C2865007B97D763FDAC12043A66"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\icons.svg",
+      "bytes": 5031,
+      "sha256": "B45FA506195CFCDEF406BA9F0C77B36DDC1A7C224040926EC70ABC2FDEA7B93A"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\index.html",
+      "bytes": 2202,
+      "sha256": "E86A16C3D75C7EE30E7A99D721CAC3E3A72FF8FC37ED9ACD5BC4DBA1E6855F4D"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\assets\\index-BXuUU1wI.js",
+      "bytes": 876329,
+      "sha256": "B05D6D0FE0BBE34D297B1F37EAE2D87D7219D7A9F5DF4730A736297989CEB49A"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\assets\\index-U3Hyr_Hw.css",
+      "bytes": 124799,
+      "sha256": "FB41F3A34F56F2B8450157135251F163B74C7F7B8E8A169A7AF396D07830E2A0"
+    }
+  ],
+  "dist_bytes": 1017883,
+  "package_sha256": "59F8E6A506CA4AD9485A1A0C2967925B95CDA2975C3E6B2B8F3B2F26B4D88132",
+  "lock_sha256": "91954C16CED391D5F3CA5FE32D14222E4CA87276A4C4ABAFB2116BCD92C8DF41",
+  "backend_tests": 262,
+  "backend_seconds": 19.904,
+  "frontend_cancellation_checks": 12,
+  "frontend_source_language_checks": 26,
+  "frontend_modules": 2851,
+  "frontend_build_seconds": 2.01,
+  "frontend_lint": "passed on changed UI files",
+  "python_ast_files": 17,
+  "verification_limitations": [
+    "No actual model inference, live cloud calls or GUI exercise",
+    "Windows only; Linux and macOS not exercised",
+    "Opaque native calls finish before stopped acknowledgment",
+    "Process descendants discovered by psutil polling, not an OS job object"
+  ]
+}

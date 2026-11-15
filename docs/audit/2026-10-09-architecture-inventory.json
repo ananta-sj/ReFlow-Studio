@@ -1,0 +1,2880 @@
+{
+  "audit_date": "2026-10-09",
+  "scope": "Phase 1 static architecture audit of current working tree; prior test/media evidence referenced, no new inference, installs or production edits",
+  "base_git_commit": "d3408a587f734b99ea6e30cac3c503804677ea98",
+  "branch": "master",
+  "working_tree_status_count_before_audit_artifacts": 374,
+  "working_tree_dirty": true,
+  "reviewed_file_count": 62,
+  "files": [
+    {
+      "path": "main.py",
+      "bytes": 6866,
+      "sha256": "8354e857d4ce27fd341514daa57589c8956f6f26e933fffe4b21b64d636b9c45",
+      "symbols": [
+        {
+          "name": "_inject_portable_ffmpeg",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_force_exact_window_size",
+          "line": 91,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 128,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RECT",
+          "line": 107,
+          "kind": "ClassDef"
+        }
+      ]
+    },
+    {
+      "path": "config.py",
+      "bytes": 2441,
+      "sha256": "dfc6114a77b8e18c88859bb6fa4ea7a1c44b1130e68a3c6dad37b7d67095048e",
+      "symbols": []
+    },
+    {
+      "path": "bridge/api.py",
+      "bytes": 91635,
+      "sha256": "ea9db4a01c05b4b7dfab017b3586ac3355bdc54e6e5594974747bbc334d6bee8",
+      "symbols": [
+        {
+          "name": "_graph_change",
+          "line": 40,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_graph_read",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_safe_download_filename",
+          "line": 64,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "status_to_stage_id",
+          "line": 121,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_probe_duration",
+          "line": 129,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_active_stages",
+          "line": 148,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_parallel_speedup_factor",
+          "line": 169,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_fits_device",
+          "line": 176,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "PythonBridge",
+          "line": 199,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "changed",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "read",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 200,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_queue_persistence_warning",
+          "line": 239,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_flush_persistence_warnings",
+          "line": 243,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_settings",
+          "line": 255,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_languages",
+          "line": 260,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "update_settings",
+          "line": 269,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_source_languages",
+          "line": 272,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reset_settings",
+          "line": 276,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "minimize_window",
+          "line": 280,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_tray_handlers",
+          "line": 283,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "minimize_to_tray",
+          "line": 291,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "toggle_maximize_window",
+          "line": 301,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "close_window",
+          "line": 369,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_hardware_snapshot",
+          "line": 375,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_model_resource_override",
+          "line": 395,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_estimate_overrides",
+          "line": 415,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_estimate_routes",
+          "line": 466,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_resource_estimate",
+          "line": 500,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_job",
+          "line": 540,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_job_all_devices",
+          "line": 545,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_models",
+          "line": 561,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_active_models",
+          "line": 570,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_hindi_voices",
+          "line": 573,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "whisper_turbo_status",
+          "line": 577,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "connect_whisper_turbo",
+          "line": 586,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "indictrans2_status",
+          "line": 608,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "connect_indictrans2",
+          "line": 617,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preview_hindi_voice",
+          "line": 640,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "connect_hindi_voice",
+          "line": 647,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "capture_hardware_profile",
+          "line": 675,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_recommended_models",
+          "line": 685,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_active_model",
+          "line": 711,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_set_active_model_idle",
+          "line": 715,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_model_instructions",
+          "line": 738,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_set_model_instructions_idle",
+          "line": 742,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_deletion_busy",
+          "line": 756,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_make_deletion_plan",
+          "line": 761,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_preview_deletion",
+          "line": 770,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preview_model_removal",
+          "line": 783,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preview_factory_reset",
+          "line": 786,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_execute_deletion",
+          "line": 789,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove_model",
+          "line": 804,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "detect_model_type",
+          "line": 820,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_search_config",
+          "line": 830,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_search_credentials",
+          "line": 836,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "find_best_model",
+          "line": 845,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_cloud_model",
+          "line": 866,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_add_cloud_model_idle",
+          "line": 870,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_local_api_model",
+          "line": 896,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_add_local_api_model_idle",
+          "line": 900,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_airllm_model",
+          "line": 913,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_add_airllm_model_idle",
+          "line": 917,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_local_model",
+          "line": 933,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_add_local_model_idle",
+          "line": 937,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_download_tracked",
+          "line": 979,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cancel_model_download",
+          "line": 998,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run_local_download",
+          "line": 1008,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "browse_video",
+          "line": 1090,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "browse_audio",
+          "line": 1098,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "browse_subtitle",
+          "line": 1106,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_graph_definition",
+          "line": 1116,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_node_enabled",
+          "line": 1154,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_node_param",
+          "line": 1162,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_node_instance",
+          "line": 1182,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove_node_instance",
+          "line": 1212,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_node_position",
+          "line": 1216,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_cast_list",
+          "line": 1224,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run_integrity_check",
+          "line": 1238,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "factory_reset",
+          "line": 1248,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_pipeline_templates",
+          "line": 1253,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_session_state",
+          "line": 1257,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_snapshot",
+          "line": 1262,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_publish_session",
+          "line": 1268,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_session_state",
+          "line": 1276,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_emit_render",
+          "line": 1282,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_start_rejection",
+          "line": 1292,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_start_worker",
+          "line": 1300,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_worker_entry",
+          "line": 1324,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start_render",
+          "line": 1333,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "stop_render",
+          "line": 1355,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_cue_store",
+          "line": 1369,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list_cue_reviews",
+          "line": 1373,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_cue_review",
+          "line": 1379,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "edit_review_cue",
+          "line": 1385,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_review_timing",
+          "line": 1394,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "accept_review_cue",
+          "line": 1407,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "combine_review_cues",
+          "line": 1416,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_review_audio",
+          "line": 1425,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start_cue_review",
+          "line": 1433,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_review_source_audio",
+          "line": 1451,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start_review_action",
+          "line": 1457,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_interrupted_render",
+          "line": 1475,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "discard_interrupted_render",
+          "line": 1486,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run_render",
+          "line": 1496,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_resolve_cast_list",
+          "line": 1566,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_template_kwargs",
+          "line": 1576,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_queue_item",
+          "line": 1616,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_queue_drafts",
+          "line": 1622,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_begin_batch",
+          "line": 1631,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "start_queue_batch",
+          "line": 1658,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resume_queue_batch",
+          "line": 1662,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove_queue_item",
+          "line": 1666,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clear_completed_queue",
+          "line": 1674,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_queue_items",
+          "line": 1680,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_queue_paused",
+          "line": 1683,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run_hardware_benchmark",
+          "line": 1690,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run_render_inner",
+          "line": 1693,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RECT",
+          "line": 333,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "annotate",
+          "line": 701,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "bridge/push.py",
+      "bytes": 810,
+      "sha256": "a501e150e57786bcc4596df5928efd794d376b5bb517a770d18440d4e8360846",
+      "symbols": [
+        {
+          "name": "emit",
+          "line": 14,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/pipeline.py",
+      "bytes": 62857,
+      "sha256": "eeaac7e98f39d259cdde89c4d55640e7fa355d721ff6cf05013b679113b79a11",
+      "symbols": [
+        {
+          "name": "_preflight_native_cue_durations",
+          "line": 61,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_release_translation",
+          "line": 78,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run_media_command",
+          "line": 83,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run_ffmpeg",
+          "line": 108,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_staged_output",
+          "line": 113,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_validate_media",
+          "line": 136,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_bundle_path",
+          "line": 155,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_staged_bundle",
+          "line": 160,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_require_visual_output",
+          "line": 181,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "ReflowPipeline",
+          "line": 190,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 191,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clear_vram",
+          "line": 207,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "format_timestamp",
+          "line": 215,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "format_time",
+          "line": 224,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "generate_srt",
+          "line": 229,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_duration",
+          "line": 248,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "speed_change",
+          "line": 259,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "merge_av",
+          "line": 297,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_dub_segment",
+          "line": 350,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_dub_segment_bound",
+          "line": 358,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_require_dialogue",
+          "line": 465,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_maybe_locked",
+          "line": 470,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_merge_short_segments",
+          "line": 482,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_dub_all_segments",
+          "line": 514,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_resolve_translation_and_filter",
+          "line": 602,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_translation_target",
+          "line": 625,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_translate_line",
+          "line": 631,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_filter_line",
+          "line": 652,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_moderate_source",
+          "line": 662,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_transcribe_source",
+          "line": 674,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_report_source_language",
+          "line": 685,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_transcribe_and_translate",
+          "line": 701,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_check_speech_routes",
+          "line": 737,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_early_speech_check",
+          "line": 743,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "process_video_gen",
+          "line": 755,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_export_stems",
+          "line": 955,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "process_audio_dub_gen",
+          "line": 968,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "process_subtitle_translate_gen",
+          "line": 1077,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run",
+          "line": 1156,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "ensure_actor",
+          "line": 386,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/providers/base.py",
+      "bytes": 4487,
+      "sha256": "4d5a1302c0aceaeba85f110e6b79af81e265c0bc8b9e222fa154ef6e58dd97fe",
+      "symbols": [
+        {
+          "name": "require_translation_text",
+          "line": 14,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "STTProvider",
+          "line": 21,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "TranslationProvider",
+          "line": 32,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "TTSProvider",
+          "line": 46,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "VoiceProvider",
+          "line": 52,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "EnhancerProvider",
+          "line": 69,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "FilterProvider",
+          "line": 76,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "LipSyncProvider",
+          "line": 83,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "ProfanityFilterProvider",
+          "line": 90,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "transcribe",
+          "line": 23,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "translate",
+          "line": 34,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "synthesize",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "convert",
+          "line": 54,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "enhance",
+          "line": 71,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "scan_and_blur",
+          "line": 78,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "execute",
+          "line": 85,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "filter_text",
+          "line": 92,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/providers/resolve.py",
+      "bytes": 14338,
+      "sha256": "5b2c5d96d6762d2c238960a80b41a7a7beb42a45431a3950c5ecde002c92aab9",
+      "symbols": [
+        {
+          "name": "uses_exact_reference",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "confirmed_reference",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_local",
+          "line": 49,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "voice_entry",
+          "line": 61,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_stt",
+          "line": 74,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_translation",
+          "line": 99,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_tts",
+          "line": 131,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_voice_for_actor",
+          "line": 155,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_enhancer",
+          "line": 185,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_filter",
+          "line": 196,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_lipsync",
+          "line": 216,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_profanity_filter",
+          "line": 232,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/model_contract.py",
+      "bytes": 7729,
+      "sha256": "c81bbd670a40546ca197c793be40002759b4aa42d70fe7df91580164743aca75",
+      "symbols": [
+        {
+          "name": "_file",
+          "line": 7,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_json",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "local_contract",
+          "line": 26,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cloud_contract",
+          "line": 121,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/model_registry.py",
+      "bytes": 7586,
+      "sha256": "a3f814f098f03048096efd199c2d8250045c4ead18a1f82b40e9b4fb83b82580",
+      "symbols": [
+        {
+          "name": "_validate",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "ModelRegistry",
+          "line": 51,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_load",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_mutate",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get",
+          "line": 72,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add",
+          "line": 75,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "update",
+          "line": 110,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove",
+          "line": 121,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_active",
+          "line": 127,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_active",
+          "line": 143,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_active_map",
+          "line": 148,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 102,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 111,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 122,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 128,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/node_registry.py",
+      "bytes": 4296,
+      "sha256": "5bc9db1893aceb5314bc994fe5cb8231a64188e6f1827b2aa62493d584f98948",
+      "symbols": [
+        {
+          "name": "build_default_graph",
+          "line": 77,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/graph_model.py",
+      "bytes": 3128,
+      "sha256": "df4a83ebd86c2dbedb1981f2f56c32dd905ec93450149d335f45ac7d91d8e48f",
+      "symbols": [
+        {
+          "name": "NodeParam",
+          "line": 11,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "NodeSpec",
+          "line": 20,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "Node",
+          "line": 39,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "Edge",
+          "line": 55,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "Graph",
+          "line": 61,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 23,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_node",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove_node",
+          "line": 71,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "connect",
+          "line": 79,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "edges_from",
+          "line": 82,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "edges_to",
+          "line": 85,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/graph_state.py",
+      "bytes": 2876,
+      "sha256": "402ae407f1253431e2867b160c34f6898209444686b4918f9a7716d210269b57",
+      "symbols": [
+        {
+          "name": "snapshot",
+          "line": 9,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "restore",
+          "line": 15,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "GraphState",
+          "line": 55,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load",
+          "line": 64,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save",
+          "line": 67,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate",
+          "line": 59,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/transcription.py",
+      "bytes": 4157,
+      "sha256": "7b013dd11da77a19a2fc32e1675dca6f9093c587f776524167fd71f7b53e0ab7",
+      "symbols": [
+        {
+          "name": "TranscriptionResult",
+          "line": 11,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "normalize_transcription",
+          "line": 43,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_media_bounds",
+          "line": 55,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_spoken_transcription",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "to_payload",
+          "line": 34,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "with_segments",
+          "line": 38,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/source_language.py",
+      "bytes": 5036,
+      "sha256": "a44cce83c7157ea18a1141a68bbfeff7881b367dbb40f35b2f5ddbd52f2e7ebd",
+      "symbols": [
+        {
+          "name": "_valid_probability",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "SourceLanguage",
+          "line": 36,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "normalize_source_selection",
+          "line": 61,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolve_source_language",
+          "line": 75,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "coerce_source_language",
+          "line": 85,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_fixed_source",
+          "line": 90,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_prompt",
+          "line": 104,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__post_init__",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "resolved",
+          "line": 55,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/speech_language.py",
+      "bytes": 4996,
+      "sha256": "d82e8ee457cb3a87775b946a5c07e7adb0969792e57991605243adb0a3943e0e",
+      "symbols": [
+        {
+          "name": "resolve_speech_language",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_xtts_language",
+          "line": 24,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "actor_uses_f5",
+          "line": 49,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preflight_speech",
+          "line": 58,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/sentence_grouping.py",
+      "bytes": 2141,
+      "sha256": "dbfdb5e87e56d7621fd9c9d7af3fe5a0edb6c9860e48e87c2836513d36c0b975",
+      "symbols": [
+        {
+          "name": "group_sentences",
+          "line": 5,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "terminal",
+          "line": 7,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/cue_review.py",
+      "bytes": 29460,
+      "sha256": "7b83d70c8aa5d032a65559b304ef702d3bcc1fb1edc3004109f8bf8439d6994c",
+      "symbols": [
+        {
+          "name": "validate_manifest",
+          "line": 22,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "digest",
+          "line": 73,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "configuration",
+          "line": 82,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "review_transcription_bounds",
+          "line": 90,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "ReviewStore",
+          "line": 106,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "prepare",
+          "line": 303,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_timing",
+          "line": 402,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "operate",
+          "line": 424,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require",
+          "line": 24,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "number",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "sha",
+          "line": 29,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 107,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "safe",
+          "line": 112,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "folder",
+          "line": 123,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "asset",
+          "line": 128,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load",
+          "line": 136,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save",
+          "line": 147,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "list",
+          "line": 173,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "public",
+          "line": 185,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cue",
+          "line": 197,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "edit",
+          "line": 202,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "checked_audio",
+          "line": 239,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "combine",
+          "line": 245,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "accept",
+          "line": 261,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "audio",
+          "line": 275,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_audio",
+          "line": 287,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/indicf5_duration.py",
+      "bytes": 1467,
+      "sha256": "9eddda9ab5cdc689648601186b33c0c59fc1bbcb966d5330d2159ee6e2c1d218",
+      "symbols": [
+        {
+          "name": "segment_text",
+          "line": 6,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_minimum_sentence_seconds",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "sentence_hops",
+          "line": 24,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/audio_separator.py",
+      "bytes": 4845,
+      "sha256": "2bfd584787c138f41630c5dad62835d9140c2c8bcf7ae25a419d2e90136f473f",
+      "symbols": [
+        {
+          "name": "AudioSeparator",
+          "line": 12,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "separate",
+          "line": 28,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/audio_utils.py",
+      "bytes": 6358,
+      "sha256": "1d84114621a6964fc081ba0731bd24692b8cc4f8aba72196f93eba761cceddc6",
+      "symbols": [
+        {
+          "name": "load_playable_audio",
+          "line": 7,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load_speech_audio",
+          "line": 21,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "AudioEngineer",
+          "line": 28,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 29,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clean_reference_audio",
+          "line": 32,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "master_voice_segment",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "dynamic_mix",
+          "line": 90,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/render_context.py",
+      "bytes": 6255,
+      "sha256": "9d383719f8dafc9748ecd08c646a68c10269045b192f162c4b76dbadaa9bc7d4",
+      "symbols": [
+        {
+          "name": "RenderCancelled",
+          "line": 16,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "current_job",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "check_cancelled",
+          "line": 24,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "bind_job",
+          "line": 31,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RenderContext",
+          "line": 40,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "_stop_process",
+          "line": 95,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run_process",
+          "line": 126,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "wait_or_cancel",
+          "line": 179,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 41,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "on_cleanup",
+          "line": 53,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "check",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "request_stop",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "publish",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "cleanup",
+          "line": 71,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/render_state.py",
+      "bytes": 2870,
+      "sha256": "cfc4d08666a23e060bd95b30734d6231884bd24d4d19e3c49f81ab8bd3ed8f10",
+      "symbols": [
+        {
+          "name": "_validate",
+          "line": 29,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_store",
+          "line": 39,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "mark_started",
+          "line": 43,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clear",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_interrupted",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_token",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "discard",
+          "line": 71,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/session_state.py",
+      "bytes": 2191,
+      "sha256": "559d3ab4e714d59e71a9d6e9a2f4758c6eaf4916eddecafb0eb69b4b41a1aa58",
+      "symbols": [
+        {
+          "name": "SessionState",
+          "line": 12,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "event",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "snapshot",
+          "line": 42,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/queue_manager.py",
+      "bytes": 4284,
+      "sha256": "126a355f2d2e2d77400178718679b350511017b278a0822e8ab46583053d1b8d",
+      "symbols": [
+        {
+          "name": "synchronized",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "QueueItem",
+          "line": 19,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "QueueManager",
+          "line": 46,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "call",
+          "line": 14,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "to_dict",
+          "line": 32,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 51,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "add_item",
+          "line": 57,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "remove_item",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clear_completed",
+          "line": 74,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_items",
+          "line": 78,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_next_queued",
+          "line": 82,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "update_item",
+          "line": 91,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "set_paused",
+          "line": 101,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "is_paused",
+          "line": 105,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "claim_next",
+          "line": 109,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "freeze_drafts",
+          "line": 117,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "checkpoint",
+          "line": 126,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "restore",
+          "line": 130,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/feature_session.py",
+      "bytes": 5920,
+      "sha256": "42a45c6d59f794ecbc1c0d600b07d38f28771ac3cb0b459df1010bc39b3a75fe",
+      "symbols": [
+        {
+          "name": "FeatureSession",
+          "line": 14,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "run_cached_f5",
+          "line": 115,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 15,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run",
+          "line": 41,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_diagnostic",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "call",
+          "line": 64,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "close",
+          "line": 97,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/generation_control.py",
+      "bytes": 624,
+      "sha256": "5ab42be82d4cdc253715508af80e32658c582d29bee8ec68106d2e2a85ffef84",
+      "symbols": [
+        {
+          "name": "generation_kwargs",
+          "line": 5,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "CancelGeneration",
+          "line": 12,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__call__",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__deepcopy__",
+          "line": 17,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/settings.py",
+      "bytes": 3358,
+      "sha256": "4126658d3b38a2a5044b213ed4c952b30690b6ae632a30be763abdf45eead43c",
+      "symbols": [
+        {
+          "name": "_validate",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Settings",
+          "line": 57,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_load",
+          "line": 62,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "all",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get",
+          "line": 71,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "update",
+          "line": 74,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reset",
+          "line": 83,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 77,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "change",
+          "line": 85,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/hardware_monitor.py",
+      "bytes": 16712,
+      "sha256": "614350465c034ef40f4bccfe10bf7a0639965f371722a5103cebbbc72b1ed01b",
+      "symbols": [
+        {
+          "name": "GPUDevice",
+          "line": 22,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "HardwareMonitor",
+          "line": 69,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 23,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "label",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 70,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_detect_cpu_name",
+          "line": 75,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_guess_adapter_kind",
+          "line": 95,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_detect_devices",
+          "line": 111,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_detect_other_adapters",
+          "line": 147,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_nvidia_smi_snapshot",
+          "line": 173,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "default_device_id",
+          "line": 200,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "device_kind",
+          "line": 213,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "sample",
+          "line": 219,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "base_stage_cost",
+          "line": 250,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "base_stage_vram_mb",
+          "line": 257,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_eta_seconds",
+          "line": 260,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_peak_vram_mb",
+          "line": 277,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run_benchmark",
+          "line": 287,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/hardware_profile.py",
+      "bytes": 3537,
+      "sha256": "b24c630df0121b0e1faae1b65d1c84374608fb3e6c370f6bce79e372b13b145c",
+      "symbols": [
+        {
+          "name": "_validate",
+          "line": 24,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "HardwareProfileStore",
+          "line": 36,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_load",
+          "line": 41,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "capture",
+          "line": 49,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_capture_locked",
+          "line": 61,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/runtime_checks.py",
+      "bytes": 5015,
+      "sha256": "a018812962240b96bf5a04ad74efad2712bb0838448b791f8616ba1a5fba07f5",
+      "symbols": [
+        {
+          "name": "_engine",
+          "line": 11,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_selection",
+          "line": 21,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preflight",
+          "line": 30,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/optional_runtime.py",
+      "bytes": 2980,
+      "sha256": "57c65a03fa272a11dc9646f243abd55026519b9446a64e306a38cb2e85702d45",
+      "symbols": [
+        {
+          "name": "interpreter",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "run_feature",
+          "line": 24,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/model_assets.py",
+      "bytes": 6854,
+      "sha256": "e7b13f669a23fb07e2bcce53ae42f9a92b1ef275c2a8dbe5716e029c85f1f72a",
+      "symbols": [
+        {
+          "name": "require_asset_hash",
+          "line": 65,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_valid",
+          "line": 69,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "ensure_assets",
+          "line": 82,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/downloader.py",
+      "bytes": 16122,
+      "sha256": "5dd8c0ae5d7082b24f8d2721a9395df42e84a7ae2ddb6cfecc765f9c86aae636",
+      "symbols": [
+        {
+          "name": "resolve_download_url",
+          "line": 48,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "hf_repo_id_for_url",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_dir_size",
+          "line": 64,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_snapshot_progress",
+          "line": 78,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_download_hf_snapshot",
+          "line": 160,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "download_with_progress",
+          "line": 188,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "extract_archive",
+          "line": 278,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_run",
+          "line": 111,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/llm_translator.py",
+      "bytes": 8662,
+      "sha256": "1f7bc325280ca4c1a268307a3d4b0bb74a13fdd34c5cd6c92fc2dfec9159280a",
+      "symbols": [
+        {
+          "name": "LLMTranslator",
+          "line": 12,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_fallback",
+          "line": 51,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "init_m2m100",
+          "line": 70,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "translate",
+          "line": 89,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/translation_completion.py",
+      "bytes": 2029,
+      "sha256": "70efb1ed08ed41a6deb548e5c620d7795f435b01a27c3b0837838a802deb634b",
+      "symbols": [
+        {
+          "name": "require_input_window",
+          "line": 4,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_finished",
+          "line": 15,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/python_runtime.py",
+      "bytes": 1104,
+      "sha256": "42ece6dca68dff8da0c82fef21db314b6cbee2b0723beb8c43b86feb5243791b",
+      "symbols": [
+        {
+          "name": "project_root",
+          "line": 7,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "worker_python",
+          "line": 11,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/json_store.py",
+      "bytes": 4375,
+      "sha256": "4efabfaba6e0d01be1a64d535cfd26b344b3cb46fbf498b1ac858af807abeeef",
+      "symbols": [
+        {
+          "name": "_reject_constant",
+          "line": 17,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "atomic_bytes",
+          "line": 21,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "JsonStore",
+          "line": 38,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "require",
+          "line": 120,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "__init__",
+          "line": 41,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "locked",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_read",
+          "line": 59,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "read",
+          "line": 89,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "mutate",
+          "line": 93,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "replace",
+          "line": 103,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "clear",
+          "line": 112,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/deletion_plan.py",
+      "bytes": 6212,
+      "sha256": "f4b2c98c055d1b2df063e4a4f64aec0b1e6fab7673c70c8e7d11914e10b19b93",
+      "symbols": [
+        {
+          "name": "_inside",
+          "line": 10,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "safe_path",
+          "line": 14,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "inventory",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "fingerprint",
+          "line": 51,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "model_plan",
+          "line": 55,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "reset_plan",
+          "line": 82,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "public_preview",
+          "line": 110,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "execute",
+          "line": 118,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/credential_store.py",
+      "bytes": 1782,
+      "sha256": "d06b760bcab7fbe6fa6e38c3f953015faae048b0cc4dc80e3680bfc6d2bbd4c5",
+      "symbols": [
+        {
+          "name": "CredentialError",
+          "line": 19,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "set_credential",
+          "line": 23,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "get_credential",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "delete_credential",
+          "line": 40,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/whisper_turbo_assets.py",
+      "bytes": 1307,
+      "sha256": "3c0151748dbf41c799f44f8810dfd4a4307fba0dd09dffa7e97f86b468477659",
+      "symbols": [
+        {
+          "name": "installed_path",
+          "line": 8,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_assets",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "isolated_interpreter",
+          "line": 29,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/whisper_turbo_worker.py",
+      "bytes": 8082,
+      "sha256": "5a8e4bcbec8eb1178dcfa48e6da1e4bdb7f06c888c878007c7b39117755acab4",
+      "symbols": [
+        {
+          "name": "session",
+          "line": 14,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "check_stop",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Stop",
+          "line": 36,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__call__",
+          "line": 37,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/indictrans2_assets.py",
+      "bytes": 1819,
+      "sha256": "e1c82b7016ba1ed9683940173ed98bc80873e1733d6456943d031b03928d9cdc",
+      "symbols": [
+        {
+          "name": "validate_assets",
+          "line": 8,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "isolated_interpreter",
+          "line": 31,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "installed_path",
+          "line": 38,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/indictrans2_worker.py",
+      "bytes": 4667,
+      "sha256": "dac0a30e76c555d030157d1a8bb9068b7e3e7bcc789c487bf2304b1abfda235e",
+      "symbols": [
+        {
+          "name": "session",
+          "line": 16,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "Stop",
+          "line": 36,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__call__",
+          "line": 37,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/providers/tts/indicf5_local.py",
+      "bytes": 9979,
+      "sha256": "ab0b4d3764d0b596aaba4203613ef43f7062ba8e8e7d453f60cfec41f6b7ea9f",
+      "symbols": [
+        {
+          "name": "digest",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_supported_text",
+          "line": 17,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_native_duration_seconds",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load_reference_profile",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "isolated_interpreter",
+          "line": 84,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "IndicF5TTSProvider",
+          "line": 97,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 102,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "estimate_duration_seconds",
+          "line": 114,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "synthesize",
+          "line": 119,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "release",
+          "line": 170,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/indictrans2_local.py",
+      "bytes": 2422,
+      "sha256": "da5013f2d1e65af9ef7d3ae92e176faf466802a5eca3f6d725277959434c6b8d",
+      "symbols": [
+        {
+          "name": "IndicTrans2LocalProvider",
+          "line": 9,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "translate",
+          "line": 17,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "release",
+          "line": 46,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/nllb_local.py",
+      "bytes": 4590,
+      "sha256": "a608b758abe5961e0d50d3c8ef9509c764e9fce1c38248727166768f6da35173",
+      "symbols": [
+        {
+          "name": "NLLBLocalProvider",
+          "line": 16,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "__init__",
+          "line": 17,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_ensure_loaded",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "translate",
+          "line": 48,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "bytes": 7248,
+      "sha256": "0ef41545e6bc08debfb766196d8787c92398d164dcacb71ae314ec5ec87823b2"
+    },
+    {
+      "path": "frontend/src/lib/api.ts",
+      "bytes": 22134,
+      "sha256": "ffc54fd9efc82b445ed059f1f14fccf15658c60937458e65f5620d7fe11340ef"
+    },
+    {
+      "path": "frontend/src/lib/render-params.ts",
+      "bytes": 1081,
+      "sha256": "fcd99551cb8ed985e99f3dcce84bd2a20f6e7a09980544febcf1e05dcab3f6bc"
+    },
+    {
+      "path": "frontend/src/lib/use-render-config.ts",
+      "bytes": 4755,
+      "sha256": "b2221d8047caef49cbfd4f85a76c165e16e6468f39a6b7783ec901a9c65c58f7"
+    },
+    {
+      "path": "frontend/src/components/shared/CueReviewPanel.tsx",
+      "bytes": 13154,
+      "sha256": "3b31b65abc8443b5d20118cb3c81ba82e7751cd66b4d8084f967bddb71467642"
+    },
+    {
+      "path": "frontend/src/pages/Nodes.tsx",
+      "bytes": 17781,
+      "sha256": "61efaf3de613ea49f94a5329db766e7d0cc331a367a0775081c129b302de1923"
+    },
+    {
+      "path": "frontend/src/pages/Marketplace.tsx",
+      "bytes": 44809,
+      "sha256": "550a0f945a21f9887d9254f22e312729464bfb85f4aeee98d7abb41c7b993b25"
+    },
+    {
+      "path": "frontend/package.json",
+      "bytes": 1255,
+      "sha256": "59f8e6a506ca4ad9485a1a0c2967925b95cda2975c3e6b2b8f3b2f26b4d88132"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 4316,
+      "sha256": "bc8f6cc07eba9109a11ffa572d5c982e2ac04a178e9df7b54d9ef6c4d9760b98"
+    },
+    {
+      "path": "portable_requirements.txt",
+      "bytes": 997,
+      "sha256": "c5d7bf2d78da82549c18cd956b863ed0204355797bc3a46f69a9a326c81c31c6"
+    },
+    {
+      "path": "Launch_Reflow.bat",
+      "bytes": 3139,
+      "sha256": "aaef119199d602da0946b9a0b475e14c07ffeb4f62f28413959ed5824a742ef0"
+    },
+    {
+      "path": "LAUNCH_REFLOW.sh",
+      "bytes": 3709,
+      "sha256": "433eedb1a1e9b19b058709f6125be5ae33ecdb79071bf0726cf9dc09dafc1e44"
+    },
+    {
+      "path": "packaging/build_portable.py",
+      "bytes": 4603,
+      "sha256": "13a3a552ed0392e6059be38ad51e30b5ae92d69ff76ae8e0cd895e4078e7e899",
+      "symbols": [
+        {
+          "name": "entries",
+          "line": 20,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 54,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "packaging/build_dist.py",
+      "bytes": 2440,
+      "sha256": "7869da07e0729f92ec28bf4e6e08eeda91c7e749f3872bce812ad88a18918805",
+      "symbols": [
+        {
+          "name": "run_pyinstaller",
+          "line": 30,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "copy_asset_folders",
+          "line": 38,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 52,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/build.yml",
+      "bytes": 1776,
+      "sha256": "868cd4b366ca83fe85783274b481a9f70328f30ef2bc4b4f8dc82448c66774a1"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 5937,
+      "sha256": "2004f12ef296c25dad8960275492e8808baa62d869624a45e04a5d610d152a37"
+    }
+  ],
+  "registry_summary": {
+    "entry_count": 46,
+    "counts_by_stage": {
+      "translation": 2,
+      "tts": 2,
+      "filter": 2,
+      "lipsync": 1,
+      "profanity_filter": 1,
+      "voice": 37,
+      "stt": 1
+    },
+    "active": {
+      "translation": {
+        "id": "46071594-480f-4035-ae8c-2e0701a19c73",
+        "display_name": "IndicTrans2 — English to Hindi",
+        "stage_type": "translation",
+        "kind": "local_file",
+        "request_preset": "indictrans2",
+        "status": "installed",
+        "local_artifact_exists": true
+      },
+      "tts": {
+        "id": "b7bc4114-0308-453c-93dc-a4e33b37700e",
+        "display_name": "Hindi — Abhishek",
+        "stage_type": "tts",
+        "kind": "local_file",
+        "request_preset": "indicf5",
+        "status": "installed",
+        "local_artifact_exists": true
+      },
+      "filter": null,
+      "lipsync": null,
+      "profanity_filter": null,
+      "stt": {
+        "id": "a8ecd3d7-c58d-4baa-8a6b-165d06d856b8",
+        "display_name": "Whisper — stronger recognition",
+        "stage_type": "stt",
+        "kind": "local_file",
+        "request_preset": "whisper_turbo",
+        "status": "installed",
+        "local_artifact_exists": true
+      }
+    }
+  },
+  "runtime_profiles": [
+    {
+      "profile": "f5",
+      "metadata_path": "runtime_profiles\\f5\\profile.json",
+      "status": "ready",
+      "python_version": null,
+      "windows_executable_present": true
+    },
+    {
+      "profile": "indicf5-evaluation",
+      "metadata_path": "runtime_profiles\\indicf5-evaluation\\profile.json",
+      "status": "prepared",
+      "python_version": null,
+      "windows_executable_present": true
+    },
+    {
+      "profile": "indicf5-gpu-evaluation",
+      "metadata_path": "runtime_profiles\\indicf5-gpu-evaluation\\profile.json",
+      "status": "gpu-environment-verified",
+      "python_version": null,
+      "windows_executable_present": true
+    },
+    {
+      "profile": "indictrans2-evaluation",
+      "metadata_path": "runtime_profiles\\indictrans2-evaluation\\profile.json",
+      "status": "prepared-not-ready",
+      "python_version": null,
+      "windows_executable_present": true
+    },
+    {
+      "profile": "musetalk",
+      "metadata_path": "runtime_profiles\\musetalk\\profile.json",
+      "status": "ready",
+      "python_version": null,
+      "windows_executable_present": true
+    },
+    {
+      "profile": "vision",
+      "metadata_path": "runtime_profiles\\vision\\profile.json",
+      "status": "ready",
+      "python_version": null,
+      "windows_executable_present": true
+    }
+  ],
+  "latest_prior_backend_result": "Ran 581 tests in 80.098s",
+  "prior_backend_log": "docs/validation/2026-10-09-budgeted-review-backend-final.log",
+  "new_backend_tests_run": false,
+  "credential_values_collected": false,
+  "model_weights_hashed_this_audit": false,
+  "note": "Symbol locations support source links. Paths and adapter code are inspected; physical existence is not proof of artifact integrity, runtime compatibility or perceptual quality.",
+  "observed_interpreter_versions": {
+    "build/windows-portable/python.exe": "3.10.11",
+    "runtime_profiles/indicf5-gpu-evaluation/python.exe": "3.10.11",
+    "runtime_profiles/indictrans2-evaluation/python.exe": "3.10.11"
+  }
+}

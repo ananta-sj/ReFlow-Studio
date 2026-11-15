@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import gc
+import logging
 import psutil
 import time
 from pathlib import Path
@@ -22,7 +23,7 @@ class Janitor:
 
     def kill_rogue_processes(self):
         """Kills background tasks (FFmpeg, Python Subprocesses) that cause freezes."""
-        print("[JANITOR] 🔫 Hunting rogue processes...")
+        logging.getLogger(__name__).info('Checking owned worker processes')
         current_process = psutil.Process()
         children = current_process.children(recursive=True)
 
@@ -31,7 +32,7 @@ class Janitor:
                 stem = os.path.splitext(child.name())[0].lower()
                 # Kill FFmpeg or subprocesses, but NOT the main GUI
                 if stem in ROGUE_PROCESS_STEMS:
-                    print(f"[JANITOR] 💥 Killing {child.name()} (PID: {child.pid})")
+                    logging.getLogger(__name__).info('Stopping owned worker %s (PID %s)',child.name(),child.pid)
                     child.kill()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
@@ -66,30 +67,22 @@ class Janitor:
                         shutil.rmtree(entry)
                     else:
                         entry.unlink()
-                print(f"[JANITOR] ✅ Legacy temp cleared; job workspaces preserved.")
+                logging.getLogger(__name__).info('Legacy temp cleared; job workspaces preserved')
             except Exception as e:
-                print(f"[JANITOR] ⚠️ Temp Clean Warning: {e}")
+                logging.getLogger(__name__).warning('Temporary cleanup could not finish: %s',e)
 
         # 3. Deep Clean (PyCache)
         if deep:
             self.remove_pycache()
 
     def remove_pycache(self):
-        """Recursively burns all __pycache__ folders."""
-        print("[JANITOR] 🧽 Scrubbing __pycache__...")
-        count = 0
-        for root, dirs, files in os.walk(self.root_dir):
-            if "__pycache__" in dirs:
-                try:
-                    shutil.rmtree(os.path.join(root, "__pycache__"))
-                    count += 1
-                except OSError as e:
-                    print(f"[JANITOR] ⚠️ Could not remove {root}\\__pycache__: {e}")
-        print(f"[JANITOR] ✅ Removed {count} cache nests.")
+        """Use the same bounded policy as automatic disposable cleanup."""
+        from core.cache_maintenance import bytecode
+        return bytecode(self.root_dir)
 
     def destroy_all_data(self):
         """Factory Reset: Wipes Temp, Output, and Cache."""
-        print("[JANITOR] ☢️ INITIATING FACTORY RESET...")
+        logging.getLogger(__name__).info('Starting factory reset')
         self.kill_rogue_processes()
         self.sweep(deep=True)
         
@@ -98,6 +91,6 @@ class Janitor:
             try:
                 shutil.rmtree(self.output_dir)
                 os.makedirs(self.output_dir)
-                print("[JANITOR] ✅ Output Directory Wiped.")
+                logging.getLogger(__name__).info('Output directory cleared')
             except Exception as e:
-                print(f"[JANITOR] ❌ Could not wipe output: {e}")
+                logging.getLogger(__name__).warning('Could not clear output: %s',e)

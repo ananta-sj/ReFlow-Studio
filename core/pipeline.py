@@ -317,7 +317,7 @@ class ReflowPipeline:
         for source in (video_path, audio_path):
             if not os.path.isfile(source) or os.path.getsize(source) == 0:
                 raise RuntimeError(f"Missing or empty merge input: {source}")
-        has_subtitles = os.path.isfile(subtitle_path) and os.path.getsize(subtitle_path) > 10
+        has_subtitles = bool(subtitle_path and os.path.isfile(subtitle_path) and os.path.getsize(subtitle_path) > 10)
         if burn_subs and not has_subtitles:
             raise RuntimeError("Subtitle burn-in was requested but no usable subtitles were produced.")
 
@@ -326,10 +326,20 @@ class ReflowPipeline:
         with _staged_output(output_path) as pending:
             with tempfile.TemporaryDirectory(prefix=".reflow-mux-", dir=os.path.dirname(pending)) as work_dir:
                 clean_output = os.path.join(work_dir, "clean.mp4")
+                copy_video = False
+                try:
+                    probe = _run_media_command(['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                        '-show_entries', 'stream=codec_name,pix_fmt', '-of', 'json', video_path],
+                        _FFPROBE_TIMEOUT_SEC, stdout=subprocess.PIPE)
+                    stream = json.loads(probe.stdout)['streams'][0]
+                    copy_video = stream.get('codec_name') == 'h264' and stream.get('pix_fmt') == 'yuv420p'
+                except (RuntimeError, OSError, ValueError, KeyError, IndexError, TypeError):
+                    pass
+                video_options = (['-c:v', 'copy'] if copy_video else
+                    ['-c:v', 'libx264', '-preset', ffmpeg_preset, '-crf', '18', '-pix_fmt', 'yuv420p'])
                 _run_ffmpeg([
                     'ffmpeg', '-y', '-i', video_path, '-i', audio_path,
-                    '-c:v', 'libx264', '-preset', ffmpeg_preset, '-crf', '18',
-                    '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
+                    *video_options, '-c:a', 'aac', '-b:a', '192k',
                     '-map', '0:v:0', '-map', '1:a:0', clean_output,
                 ])
                 expected_streams = {'video', 'audio'}
@@ -353,6 +363,7 @@ class ReflowPipeline:
                         _run_ffmpeg([
                             'ffmpeg', '-y', '-i', clean_output,
                             '-vf', f"subtitles='{escaped_sub}':force_style='{force_style}'",
+                            '-c:v', 'libx264', '-preset', ffmpeg_preset, '-crf', '18', '-pix_fmt', 'yuv420p',
                             '-c:a', 'copy', pending,
                         ])
                     else:
@@ -373,18 +384,56 @@ class ReflowPipeline:
         operation = manifest.operation('cue-processing', evidence={'cue_id': segment.get('cue_id')}) if manifest else nullcontext()
         with bind_job(job), operation:
             check_cancelled()
+            audio_cache = getattr(self, '_audio_checkpoints', None)
+            key = None
+            if audio_cache is not None:
+                import inspect
+                bound = inspect.signature(self._dub_segment_bound).bind(*args, **kwargs)
+                bound.apply_defaults()
+                values = bound.arguments
+                reference = values['clean_ref_wav'] or values['source_reference']
+                if not values['allow_overflow'] and reference:
+                    actor = values['cast_list'][values['index'] % len(values['cast_list'])]
+                    try:
+                        inputs = dict(text=segment['text'], start=segment['start'], end=segment['end'],
+                            language=values['target_lang'], next_start=values['next_start'],
+                            preserve_delivery=values['preserve_delivery'], alternate_take=values['alternate_take'],
+                            reference=audio_cache.fingerprint(reference))
+                        key = audio_cache.key('speech', inputs, values['tts_provider'], actor)
+                    except (OSError, ValueError) as error:
+                        logging.warning('Voice reference cannot be fingerprinted for recovery: %s', error)
+                    cached = audio_cache.load('speech', key)
+                    if not cached and key is not None and not values['alternate_take']:
+                        alternate_key = audio_cache.key('speech', dict(inputs, alternate_take=True),
+                                                        values['tts_provider'], actor)
+                        cached = audio_cache.load('speech', alternate_key)
+                    if cached:
+                        return load_speech_audio(cached['take'])
             result = self._dub_segment_bound(*args, **kwargs)
             check_cancelled()
+            if key is not None and result is not None:
+                try:
+                    if audio_cache.fingerprint(reference) == inputs['reference']:
+                        with tempfile.TemporaryDirectory(prefix='speech-recovery-', dir=self.temp_dir) as folder:
+                            pending = os.path.join(folder, 'take.wav')
+                            result.export(pending, format='wav').close()
+                            audio_cache.store('speech', key, {'take': pending})
+                except (OSError, ValueError) as error:
+                    logging.warning('Could not retain the completed take for recovery: %s', error)
             return result
 
     def _dub_segment_bound(self, index, segment, cast_list, target_lang, tts_provider,
                       voice_providers_by_actor, clean_ref_wav, source_reference,
                       effective_device, sound_engineer, inference_lock=None, actor_lock=None,
-                      next_start=None, allow_overflow=False):
+                      next_start=None, allow_overflow=False, preserve_delivery=False, alternate_take=False,
+                      retain_overflow=True):
         """Return a playable clip, or None only for a legitimate blank gap."""
         text = segment['text'].strip()
         if not text:
             return None
+        from core.dialogue_integrity import require_reasonable, require_speech_window
+        require_reasonable(segment.get('source_text') or text, text)
+        require_speech_window(text, segment['end']-segment['start'])
         actor = cast_list[index % len(cast_list)]
         is_cloned = actor == "CLONED_USER"
         stage = "timing validation"
@@ -419,8 +468,20 @@ class ReflowPipeline:
                 else:
                     stage = "speech generation"
                     preflight_speech(self.registry, [actor], target_lang)
-                    self._maybe_locked(inference_lock, lambda: self._observe('speech', tts_provider, 'synthesize',
-                        text, seg_tts, language=target_lang, reference_audio=reference, cue_id=segment.get('cue_id')))
+
+                    def synthesize():
+                        if callable(getattr(type(tts_provider),'synthesize_bounded',None)):
+                            from core.speech_timing import dialogue_end
+                            budget = max(1.,(dialogue_end(segment,next_start)-start)*1.15+.25)
+                            return self._observe('speech',tts_provider,'synthesize_bounded',text,seg_tts,
+                                language=target_lang,reference_audio=reference,max_seconds=budget,
+                                alternate_take=alternate_take,cue_id=segment.get('cue_id'))
+                        method = 'synthesize_retry' if (alternate_take and
+                            callable(getattr(type(tts_provider), 'synthesize_retry', None))) else 'synthesize'
+                        return self._observe('speech', tts_provider, method, text, seg_tts,
+                            language=target_lang, reference_audio=reference, cue_id=segment.get('cue_id'))
+
+                    self._maybe_locked(inference_lock, synthesize)
                     raw = load_speech_audio(seg_tts)
                     if is_cloned:
                         shutil.copy(seg_tts, seg_final)
@@ -446,17 +507,26 @@ class ReflowPipeline:
                 else:
                     sound_engineer.master_voice_segment(seg_final)
                 clip = load_speech_audio(seg_final)
+                character = getattr(self, '_batch_speaker_rows', {}).get(segment.get('cue_id'))
+                if character and character.get('source_measure'):
+                    from core.speech_performance import shape_take
+                    clip, onset, _, _ = shape_take(clip, character['source_measure'])
+                    if onset:
+                        clip = AudioSegment.silent(duration=onset)+clip
                 generated_seconds = len(clip)/1000
                 stage = "timing adjustment"
-                max_allowed_dur = max(target_dur, (next_start - start) * 1000) if next_start is not None else target_dur
+                from core.speech_timing import dialogue_end
+                max_allowed_dur = (dialogue_end(segment, next_start)-start)*1000
                 # Use available inter-cue silence before accelerating speech.
                 fit_duration = max_allowed_dur if len(clip) > target_dur else target_dur
                 from core.speech_timing import speed_for_window,measured_conflict,SpeechTimingReviewRequired
-                speed = speed_for_window(len(clip),fit_duration,target_lang,native_delivery)
+                speed = speed_for_window(len(clip), fit_duration, target_lang,
+                                         native_delivery or preserve_delivery)
                 clip = self.speed_change(clip, speed)
                 if len(clip) > max_allowed_dur and not allow_overflow:
                     if clip[int(max_allowed_dur):].max:
-                        raise SpeechTimingReviewRequired(measured_conflict(getattr(self,'_manifest',None),clip,
+                        manifest = getattr(self, '_manifest', None) if retain_overflow else None
+                        raise SpeechTimingReviewRequired(measured_conflict(manifest, clip,
                             index=index,segment=segment,actor=actor,generated_seconds=generated_seconds,
                             available_seconds=max_allowed_dur/1000,speed=speed,native_delivery=native_delivery))
                     # Discard only exact digital silence, never audible content.
@@ -474,7 +544,8 @@ class ReflowPipeline:
                 return clip
         except Exception as exc:
             from core.speech_timing import SpeechTimingReviewRequired
-            if isinstance(exc, (RenderCancelled,SpeechTimingReviewRequired)):
+            from core.speech_generation_budget import SpeechGenerationLimitExceeded
+            if isinstance(exc, (RenderCancelled,SpeechTimingReviewRequired,SpeechGenerationLimitExceeded)):
                 raise
             raise RuntimeError(f"Segment {index+1}, voice '{actor}', {stage} failed: {exc}") from exc
 
@@ -536,7 +607,8 @@ class ReflowPipeline:
 
     def _dub_all_segments(self, transcript, cast_list, target_lang, tts_provider, voice_providers_by_actor,
                            clean_ref_wav, source_reference, effective_device, sound_engineer,
-                           total_duration, progress_start, progress_span, max_workers=1):
+                           total_duration, progress_start, progress_span, max_workers=1,
+                           preserved=None, retry_overflow=False):
         """Generator - yields (percent, status, None) tuples as segments
         complete, and returns the finished voice_track AudioSegment
         (retrievable via `voice_track = yield from self._dub_all_segments(...)`).
@@ -552,7 +624,9 @@ class ReflowPipeline:
         self._require_dialogue(transcript)
         if not math.isfinite(total_duration) or total_duration <= 0:
             raise ValueError("Source duration must be finite and positive.")
-        from core.speech_timing import bounded_cues
+        from core.speech_timing import bounded_cues, SpeechTimingReviewRequired
+        from core.speech_generation_budget import SpeechGenerationLimitExceeded
+        from core.dialogue_integrity import DialogueIntegrityReviewRequired
         bounded=bounded_cues(transcript,total_duration)
         changes=[dict(cue_id=old.get('cue_id'),original_end=old['end'],end=new['end'])
                  for old,new in zip(transcript,bounded) if old['end']!=new['end']]
@@ -561,6 +635,63 @@ class ReflowPipeline:
         transcript=bounded
         voice_track = AudioSegment.silent(duration=int(total_duration * 1000))
         total = len(transcript)
+        known_music = dict(preserved or {})
+        can_retry = (retry_overflow or preserved is not None) and callable(
+            getattr(type(tts_provider), 'synthesize_retry', None))
+
+        def generate(index, inference_lock=None, actor_lock=None, job=None):
+            if index in known_music:
+                return None, known_music[index]
+            segment = transcript[index]
+            character = getattr(self, '_batch_speaker_rows', {}).get(segment.get('cue_id'))
+            reference = source_reference
+            if character is not None:
+                reference = character.get('reference')
+                if not reference:
+                    if preserved is not None:
+                        preserved[index] = 'character_reference_uncertain'
+                        return None, 'character_reference_uncertain'
+                    raise RuntimeError(f"Dialogue {index+1} needs a clear character reference; see the batch character report.")
+            next_start = transcript[index+1]['start'] if index+1 < total else max(segment['end'], total_duration)
+            args = (index, segment, cast_list, target_lang, tts_provider, voice_providers_by_actor,
+                    clean_ref_wav, reference, effective_device, sound_engineer)
+            options = dict(next_start=next_start, job_context=job)
+            if inference_lock is not None:
+                options.update(inference_lock=inference_lock, actor_lock=actor_lock)
+            try:
+                return self._dub_segment(*args, **options,
+                                         **({'retain_overflow': False} if can_retry else {})), None
+            except DialogueIntegrityReviewRequired as error:
+                manifest = getattr(self, '_manifest', None)
+                if manifest:
+                    manifest.report('dialogue-integrity', dict(status='needs_review', index=index,
+                        cue_id=segment.get('cue_id'), start=segment['start'], end=segment['end'], reason=str(error)))
+                if preserved is None:
+                    raise
+                preserved[index] = 'dialogue_integrity_review_required'
+                return None, 'dialogue_integrity_review_required'
+            except (SpeechTimingReviewRequired,SpeechGenerationLimitExceeded):
+                if can_retry:
+                    try:
+                        return self._dub_segment(*args, **options, alternate_take=True), None
+                    except (SpeechTimingReviewRequired,SpeechGenerationLimitExceeded):
+                        if preserved is None:
+                            raise
+                elif preserved is None:
+                    raise
+                return None, 'timing_overflow'
+
+        def check_take(index, clip, reason):
+            if reason == 'timing_overflow':
+                preserved[index] = reason
+            elif reason is None and clip is None and transcript[index]['text'].strip():
+                raise RuntimeError(f"Segment {index+1} produced no dialogue audio.")
+            character = getattr(self, '_batch_speaker_rows', {}).get(transcript[index].get('cue_id'))
+            manifest = getattr(self, '_manifest', None)
+            if clip is not None and character and manifest:
+                from core.batch_speakers import assess_take
+                assessment = assess_take(clip, character)
+                manifest.report('batch-delivery', dict(index=index, cue_id=transcript[index].get('cue_id'), **assessment))
 
         window_size = segment_buffer_window(max_workers)
         if max_workers <= 1:
@@ -569,14 +700,8 @@ class ReflowPipeline:
                 percent = progress_start + int((i / total) * progress_span)
                 check_cancelled()
                 yield (percent, f"DUBBING SEG {i+1}/{total}", None)
-                next_start = transcript[i + 1]['start'] if i + 1 < total else max(segment['end'],total_duration)
-                clip = self._dub_segment(
-                    i, segment, cast_list, target_lang, tts_provider, voice_providers_by_actor,
-                    clean_ref_wav, source_reference, effective_device, sound_engineer,
-                    next_start=next_start,
-                )
-                if clip is None and segment['text'].strip():
-                    raise RuntimeError(f"Segment {i+1} produced no dialogue audio.")
+                clip, reason = generate(i, job=current_job())
+                check_take(i, clip, reason)
                 if clip is not None:
                     voice_track = voice_track.overlay(clip, position=int(segment['start'] * 1000))
             return voice_track
@@ -598,20 +723,14 @@ class ReflowPipeline:
                     # cursor. A slow first segment cannot grow the buffer forever.
                     while next_submit < min(total, next_mix + window_size):
                         index = next_submit
-                        future = pool.submit(self._dub_segment, index, transcript[index],
-                            cast_list, target_lang, tts_provider, voice_providers_by_actor,
-                            clean_ref_wav, source_reference, effective_device, sound_engineer,
-                            inference_lock, actor_lock,
-                            transcript[index + 1]['start'] if index + 1 < total else max(transcript[index]['end'],total_duration),
-                            job_context=current_job())
+                        future = pool.submit(generate, index, inference_lock, actor_lock, current_job())
                         futures[future] = index
                         next_submit += 1
                     completed, _ = wait(futures, timeout=.2, return_when=FIRST_COMPLETED)
                     for future in completed:
                         index = futures.pop(future)
-                        clip = future.result()
-                        if clip is None and transcript[index]['text'].strip():
-                            raise RuntimeError(f'Segment {index + 1} produced no dialogue audio')
+                        clip, reason = future.result()
+                        check_take(index, clip, reason)
                         clips_by_index[index] = clip
                         done_count += 1
                         check_cancelled()
@@ -637,7 +756,7 @@ class ReflowPipeline:
         that stage, and callers should skip calling it entirely in that
         case rather than passing through a no-op."""
         translation_provider = providers.resolve_translation(self.registry, settings.get("ollama_host"),
-            **({'runtime': settings.get('nllb_runtime')} if settings.get('nllb_runtime') == 'isolated' else {}),
+            **({'runtime': settings.get('nllb_runtime')} if settings.get('nllb_runtime') in ('isolated', 'cuda') else {}),
             **({'fallback_runtime':'isolated'} if settings.get('m2m100_runtime') == 'isolated' else {}))
         translation_entry = self.registry.get_active("translation")
         translation_instructions = (translation_entry or {}).get("custom_instructions") or ""
@@ -666,14 +785,36 @@ class ReflowPipeline:
         if not text.strip():
             return text
         try:
+            source_text = text
             text = require_translation_text(observe_provider(current_manifest(), 'translation',
                 translation_provider, 'translate', text, target_name,
                 custom_instructions=translation_instructions, source_language=source_language,
                 cue_id=cue.get('cue_id') if cue else None))
+            from core.dialogue_integrity import require_reasonable, recovery_parts, DialogueIntegrityReviewRequired
+            try:
+                require_reasonable(source_text, text)
+            except DialogueIntegrityReviewRequired:
+                parts = recovery_parts(source_text)
+                if not parts:
+                    raise
+                recovered = []
+                for part in parts:
+                    check_cancelled()
+                    candidate = require_translation_text(observe_provider(current_manifest(), 'translation',
+                        translation_provider, 'translate', part, target_name,
+                        custom_instructions=translation_instructions, source_language=source_language,
+                        cue_id=cue.get('cue_id') if cue else None))
+                    recovered.append(require_reasonable(part, candidate))
+                text = require_reasonable(source_text, ' '.join(recovered))
+            from core.dialogue_integrity import require_explicit_facts
+            require_explicit_facts(source_text,text,source_language,target_name)
             if cue is not None:
                 cue['translated_text'] = text
         except Exception as exc:
             if isinstance(exc, RenderCancelled):
+                raise
+            from core.dialogue_integrity import DialogueIntegrityReviewRequired
+            if isinstance(exc, DialogueIntegrityReviewRequired):
                 raise
             raise RuntimeError(f"{context}, translation to {target_name} failed: {exc}") from exc
         if filter_provider:
@@ -711,7 +852,7 @@ class ReflowPipeline:
                 raise RuntimeError('Profanity filtering removed all dialogue; no output was published')
         return transcript
 
-    def _transcribe_source(self, stt_provider, audio_path, allow_sentence_continuations=False, source_language='auto'):
+    def _transcribe_source(self, stt_provider, audio_path, allow_sentence_continuations=False, source_language='auto', preserve_turns=False):
         check_cancelled()
         source_language = normalize_source_selection(source_language)
         from core.stage_checkpoints import recognition_inputs
@@ -720,6 +861,8 @@ class ReflowPipeline:
         if checkpoints:
             try:
                 inputs = recognition_inputs(audio_path, allow_sentence_continuations, stt_provider, source_language)
+                if preserve_turns:
+                    inputs['preserve_source_turns'] = True
             except (OSError, ValueError, EOFError, wave.Error):
                 checkpoints.event('stt', 'disabled', reason='unreadable-pcm-input')
             else:
@@ -731,7 +874,9 @@ class ReflowPipeline:
             **({'source_language': source_language} if source_language != 'auto' else {})))
         transcript = transcript.with_segments(identify_cues(transcript, self._cue_namespace('recognition')))
         self._require_dialogue(transcript)
-        if (allow_sentence_continuations and
+        if preserve_turns:
+            grouped = transcript.with_segments([dict(cue) for cue in transcript])
+        elif (allow_sentence_continuations and
                 getattr(stt_provider, 'prefers_sentence_groups', False) is True):
             from core.sentence_grouping import group_sentences
             grouped = group_sentences(transcript)
@@ -744,8 +889,41 @@ class ReflowPipeline:
             checkpoints.store('stt', key, inputs, result, stt_provider)
         return result
 
+    def _automatic_character_mode(self, cast_list, user_voice_path):
+        if user_voice_path or (cast_list and cast_list != ['CLONED_USER']):
+            return False
+        entry = self.registry.get_active('tts')
+        if not entry or entry.get('kind') != 'local_file':
+            return False
+        from core.model_contract import local_contract
+        return local_contract('tts', entry.get('local_path'), entry.get('request_preset'))['adapter'] == 'xtts'
+
+    def _prepare_batch_characters(self, audio_path, transcript, effective_device, excluded=(), reference_audio_path=None):
+        from core.batch_speakers import prepare, refine_turns
+        settings = self._settings()
+        recognizer = providers.resolve_stt(self.registry, settings.get('whisper_model_size'),
+            **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') in ('isolated', 'cuda') else {}))
+        if (Path(config.BASE_DIR)/'runtime_profiles/speaker-diarization/profile.json').is_file():
+            from core.diarization import prepare as prepare_diarized
+            refined, self._batch_speaker_rows = prepare_diarized(audio_path, transcript, recognizer,
+                effective_device, getattr(self, '_manifest', None), self._cue_namespace('diarized'), excluded,
+                reference_audio_path=reference_audio_path)
+            transcript[:] = refined
+            self._save_cues('source-character-turns', transcript)
+            from core.dub_quality import assess
+            assess(transcript, {i:'character_reference_uncertain' for i,cue in enumerate(transcript)
+                if not self._batch_speaker_rows.get(cue.get('cue_id'),{}).get('reference')},
+                'source character matching',getattr(self,'_manifest',None),allowed_fraction=.2)
+            return
+        refined = refine_turns(audio_path, transcript, recognizer)
+        transcript[:] = refined
+        self._save_cues('source-character-turns', transcript)
+        entry = self.registry.get_active('tts')
+        self._batch_speaker_rows = prepare(reference_audio_path or audio_path, transcript, entry['local_path'],
+            effective_device, getattr(self, '_manifest', None))
+
     def _translate_cues(self, transcript, target_name, provider, instructions,
-                        filter_provider, filter_instructions, source, context='Segment'):
+                        filter_provider, filter_instructions, source, context='Segment', preserve=()):
         from copy import deepcopy
         checkpoints = getattr(self, '_checkpoints', None)
         inputs = dict(transcript=deepcopy(normalize_transcription(transcript).to_payload()), target=target_name,
@@ -760,11 +938,39 @@ class ReflowPipeline:
                 yield index
             return
         for index, cue in enumerate(transcript):
-            cue['text'] = self._translate_line(cue['text'], target_name, provider, instructions,
-                filter_provider, filter_instructions, context=f'{context} {index+1}',
-                source_language=source, cue=cue)
+            if index in (preserve or ()):
+                continue
+            line_inputs = dict(inputs, transcript=normalize_transcription(transcript).with_segments([deepcopy(cue)]).to_payload())
+            line_key = checkpoints.key('translation', provider, line_inputs, disabled=bool(filter_provider)) if checkpoints else None
+            reused = checkpoints.load('translation', line_key, line_inputs) if checkpoints else None
+            if reused is not None:
+                cue.update(reused[0])
+                yield index
+                continue
+            try:
+                cue['text'] = self._translate_line(cue['text'], target_name, provider, instructions,
+                    filter_provider, filter_instructions, context=f'{context} {index+1}',
+                    source_language=source, cue=cue)
+            except Exception as error:
+                from core.dialogue_integrity import DialogueIntegrityReviewRequired
+                if not isinstance(error, DialogueIntegrityReviewRequired):
+                    raise
+                manifest = getattr(self, '_manifest', None)
+                if manifest:
+                    manifest.report('translation-integrity', dict(status='needs_review', index=index,
+                        cue_id=cue.get('cue_id'), start=cue['start'], end=cue['end'], reason=str(error)))
+                if not isinstance(preserve, dict) or filter_provider:
+                    raise
+                preserve[index] = 'translation_review_required'
+                cue['translation_review'] = str(error)
+                cue['text'] = ''
+                yield index
+                continue
+            if checkpoints:
+                checkpoints.store('translation', line_key, line_inputs,
+                    normalize_transcription(transcript).with_segments([cue]), provider)
             yield index
-        if checkpoints:
+        if checkpoints and not preserve:
             checkpoints.store('translation', key, inputs, normalize_transcription(transcript), provider)
 
     def _report_source_language(self, source, transcript=None):
@@ -789,18 +995,22 @@ class ReflowPipeline:
         except Exception as exc:
             logging.warning("Could not deliver source language feedback: %s", exc)
 
-    def _transcribe_and_translate(self, audio_path, target_lang, settings, source_language="auto", speech_cast=None):
+    def _transcribe_and_translate(self, audio_path, target_lang, settings, source_language="auto", speech_cast=None, preserve_turns=False, before_translation=None):
         """STT + (optional) translation - shared by every template that
         starts from an audio/video source (video_dub, audio_dub). Not used
         by subtitle_translate, which already has text and skips STT
         entirely."""
         source_language = normalize_source_selection(source_language)
         stt_provider = providers.resolve_stt(self.registry, settings.get("whisper_model_size"),
-            **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') == 'isolated' else {}))
+            **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') in ('isolated', 'cuda') else {}))
         transcript = self._transcribe_source(stt_provider, audio_path,
-            allow_sentence_continuations=len(speech_cast or ['CLONED_USER']) == 1, source_language=source_language)
+            allow_sentence_continuations=len(speech_cast or ['CLONED_USER']) == 1, source_language=source_language,
+            **({'preserve_turns': True} if preserve_turns else {}))
         source = resolve_source_language(source_language, transcript.language, transcript.language_probability)
         self._report_source_language(source, transcript)
+
+        if before_translation is not None:
+            before_translation(transcript, source)
 
         if speech_cast is not None:
             self._check_speech_routes(speech_cast, resolve_speech_language(target_lang, source), transcript)
@@ -908,7 +1118,16 @@ class ReflowPipeline:
             sound_engineer.clean_reference_audio(user_voice_path, clean_ref_wav)
         
         # Extraction
-        _run_ffmpeg(['ffmpeg', '-y', '-i', video_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', temp_audio_in], stdout=subprocess.DEVNULL)
+        audio_cache = getattr(self, '_audio_checkpoints', None)
+        extraction_key = audio_cache.key('extract', dict(rate=44100, channels=2, codec='pcm_s16le')) if audio_cache else None
+        extracted = audio_cache.load('extract', extraction_key) if audio_cache else None
+        if extracted:
+            shutil.copyfile(extracted['audio'], temp_audio_in)
+            yield (5, 'REUSED EXTRACTED AUDIO', None)
+        else:
+            _run_ffmpeg(['ffmpeg', '-y', '-i', video_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', temp_audio_in], stdout=subprocess.DEVNULL)
+            if audio_cache:
+                audio_cache.store('extract', extraction_key, {'audio': temp_audio_in})
         total_duration = self.get_duration(video_path)
 
         # STAGE 0: SEPARATION (UVR5 Logic)
@@ -916,8 +1135,20 @@ class ReflowPipeline:
         yield (10, "SEPARATING AUDIO", None)
         bg_track = None
         if keep_background:
-            separator = AudioSeparator(device=effective_device, **({'runtime': 'isolated'} if settings.get('separation_runtime') == 'isolated' else {}))
-            vocals_path, bg_path = self._observe('separate', separator, 'separate', temp_audio_in)
+            if settings.get('separation_runtime') == 'cuda':
+                from core.cuda_providers import CudaSeparator
+                separator = CudaSeparator(device=effective_device)
+            else:
+                separator = AudioSeparator(device=effective_device, **({'runtime': 'isolated'} if settings.get('separation_runtime') == 'isolated' else {}))
+            separation_key = audio_cache.key('separate', dict(audio_path=temp_audio_in), separator) if audio_cache else None
+            separated = audio_cache.load('separate', separation_key) if audio_cache else None
+            if separated:
+                vocals_path, bg_path = separated['vocals'], separated['background']
+                yield (15, 'REUSED VOCALS AND BACKGROUND', None)
+            else:
+                vocals_path, bg_path = self._observe('separate', separator, 'separate', temp_audio_in)
+                if audio_cache and bg_path:
+                    audio_cache.store('separate', separation_key, {'vocals': vocals_path, 'background': bg_path})
             if bg_path:
                 bg_track = AudioSegment.from_file(bg_path)
         else:
@@ -926,16 +1157,62 @@ class ReflowPipeline:
         # STAGE 1: TRANSCRIBING
         check_cancelled()
         yield (20, "TRANSCRIBING", None)
-        transcription_source = vocals_path if (keep_background and vocals_path) else temp_audio_in
+        # Separation is for mixing/reference cleanup; it must not decide which
+        # source characters the recognizer is allowed to hear.
+        transcription_source = temp_audio_in
         whisper_model_size = settings.get("whisper_model_size")
         stt_provider = providers.resolve_stt(self.registry, whisper_model_size,
-            **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') == 'isolated' else {}))
-        transcript = self._transcribe_source(stt_provider, transcription_source,
-            allow_sentence_continuations=len(cast_list) == 1, source_language=source_language)
+            **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') in ('isolated', 'cuda') else {}))
+        automatic_characters = self._automatic_character_mode(cast_list, user_voice_path)
+        self._batch_speaker_rows = {}
+        from core.source_captions import extract as extract_source_captions
+        from core.transcription import TranscriptionResult, require_media_bounds
+        caption_evidence = None
+        try:
+            caption_evidence = extract_source_captions(video_path, source_language, self.temp_dir)
+            if caption_evidence:
+                require_media_bounds(caption_evidence['dialogue'], total_duration)
+                require_media_bounds(caption_evidence['preserved_events'], total_duration)
+        except (ValueError, OSError, subprocess.SubprocessError) as error:
+            logging.warning('Source captions unavailable; using recognition: %s', error)
+            caption_evidence = None
+        if caption_evidence:
+            transcript = TranscriptionResult(identify_cues(caption_evidence['dialogue'],
+                self._cue_namespace('source-captions')), source_language, None, 'hint')
+            self._save_cues('source-captions', transcript)
+            if getattr(self, '_manifest', None):
+                self._manifest.report('source-captions', dict(status='validated', **caption_evidence))
+            yield (25, 'USING SAME-LANGUAGE SOURCE CAPTIONS', None)
+        else:
+            transcript = self._transcribe_source(stt_provider, transcription_source,
+                allow_sentence_continuations=len(cast_list) == 1, source_language=source_language,
+                **({'preserve_turns': True} if automatic_characters else {}))
         source = resolve_source_language(source_language, transcript.language, transcript.language_probability)
         self._report_source_language(source, transcript)
         speech_lang = resolve_speech_language(target_lang, source)
         self._check_speech_routes(cast_list, speech_lang, transcript)
+        # Keep the original audio only when it cannot bypass requested
+        # moderation or be altered again by the lip-sync stage.
+        from core.dub_recovery import music_cues, restore_source_ranges
+        preserved = None
+        if (target_lang != 'source' and not lip_sync_active
+                and not self.registry.get_active('profanity_filter')):
+            preserved = {} if caption_evidence else music_cues(transcript, bg_track, source.code)
+
+        if automatic_characters:
+            yield (32, 'MATCHING SOURCE CHARACTER VOICES', None)
+            excluded = [(transcript[index]['start'], transcript[index]['end']) for index in (preserved or {})]
+            excluded += [(event['start'], event['end']) for event in
+                         (caption_evidence or {}).get('preserved_events', [])]
+            self._prepare_batch_characters(transcription_source, transcript, effective_device, excluded,
+                reference_audio_path=vocals_path if keep_background else None)
+            if preserved is not None and not caption_evidence:
+                preserved = music_cues(transcript, bg_track, source.code)
+            for index, cue in enumerate(transcript):
+                if not cue['text'].strip():
+                    if preserved is None:
+                        raise RuntimeError('Source dialogue could not be transcribed reliably; review the character report before continuing.')
+                    preserved[index] = 'source_transcription_uncertain'
 
         # STAGE 2: TRANSLATION (Hybrid Logic)
         if target_lang != "source":
@@ -946,17 +1223,16 @@ class ReflowPipeline:
                 self._resolve_translation_and_filter(settings)
             with _translation_stage(translation_provider):
                 for _ in self._translate_cues(transcript, target_name, translation_provider,
-                        translation_instructions, filter_provider, filter_instructions, source):
+                        translation_instructions, filter_provider, filter_instructions, source,
+                        **({'preserve': preserved} if preserved is not None else {})):
                     pass
 
         if target_lang == "source":
             self._moderate_source(transcript, settings)
         self._save_cues('speech-input', transcript)
-        if include_subtitles:
-            self.generate_srt(transcript, temp_srt)
-        elif burn_subtitles:
+        if not include_subtitles and burn_subtitles:
             raise ValueError("Subtitle burn-in requires subtitles to be enabled")
-        else:
+        if not include_subtitles:
             temp_srt = None
 
         if target_lang != "source":
@@ -983,7 +1259,11 @@ class ReflowPipeline:
             transcript, cast_list, speech_lang, tts_provider, voice_providers_by_actor,
             clean_ref_wav, source_reference, effective_device, sound_engineer,
             total_duration, progress_start=45, progress_span=30, max_workers=parallel_workers,
+            preserved=preserved, retry_overflow=True,
         )
+
+        from core.dub_quality import assess
+        assess(transcript,preserved or {},'speech timing and wording',getattr(self,'_manifest',None))
 
         # Mix Background
         if bg_track:
@@ -993,10 +1273,38 @@ class ReflowPipeline:
         else:
             final_mix = voice_track
 
+        if preserved:
+            reports = [dict(index=index, reason=reason, cue_id=transcript[index].get('cue_id'),
+                            start=transcript[index]['start'], end=transcript[index]['end'])
+                       for index, reason in sorted(preserved.items())]
+            spoken = sum(bool(cue['text'].strip()) for cue in transcript)
+            if sum(bool(transcript[index]['text'].strip()) for index in preserved) >= spoken:
+                raise RuntimeError('No lines could be dubbed. The original audio and available takes are preserved.')
+            ranges = [(0 if item['index'] == 0 and item['reason'] == 'likely_opening_song' else item['start'],
+                       item['end']) for item in reports]
+            final_mix = restore_source_ranges(final_mix, load_playable_audio(temp_audio_in), ranges)
+            manifest = getattr(self, '_manifest', None)
+            if manifest:
+                manifest.report('original-audio-kept', dict(status='preserved', cues=reports))
+        if caption_evidence and preserved is not None:
+            events = caption_evidence['preserved_events']
+            final_mix = restore_source_ranges(final_mix, load_playable_audio(temp_audio_in),
+                [(event['start'], event['end']) for event in events])
+        if include_subtitles:
+            self.generate_srt([cue for index, cue in enumerate(transcript) if index not in (preserved or {})], temp_srt)
+
         final_mix.export(master_audio_path, format="wav")
         release_speech(tts_provider)
         del tts_provider, voice_providers_by_actor
         self.clear_vram()
+        if getattr(self, '_batch_speaker_rows', None):
+            yield (78, 'CHECKING GENERATED DIALOGUE', None)
+            from core.batch_intelligibility import verify
+            verifier = providers.resolve_stt(self.registry, settings.get('whisper_model_size'),
+                **({'runtime': settings.get('recognition_runtime')} if settings.get('recognition_runtime') in ('isolated', 'cuda') else {}))
+            readback = verify(voice_track, transcript, verifier, speech_lang, preserved, getattr(self, '_manifest', None))
+            from core.dub_quality import assess_readback
+            assess_readback(transcript,readback,preserved,getattr(self,'_manifest',None))
 
         # STAGE 5: LIP SYNC
         video_to_merge = temp_video_out
@@ -1044,6 +1352,9 @@ class ReflowPipeline:
             f"⏱️ Total Time: {elapsed}\n"
             f"📂 Output: {os.path.basename(final_output)}"
         )
+        if preserved:
+            overflows = sum(reason == 'timing_overflow' for reason in preserved.values())
+            log_message += f"\nOriginal audio kept for {len(preserved)-overflows} music cues and {overflows} timing conflicts."
         check_cancelled()
         yield (100, log_message, final_output)
 
@@ -1118,8 +1429,21 @@ class ReflowPipeline:
         yield (10, "SEPARATING AUDIO", None)
         bg_track = None
         if keep_background:
-            separator = AudioSeparator(device=effective_device, **({'runtime': 'isolated'} if settings.get('separation_runtime') == 'isolated' else {}))
-            vocals_path, bg_path = self._observe('separate', separator, 'separate', audio_path)
+            if settings.get('separation_runtime') == 'cuda':
+                from core.cuda_providers import CudaSeparator
+                separator = CudaSeparator(device=effective_device)
+            else:
+                separator = AudioSeparator(device=effective_device, **({'runtime': 'isolated'} if settings.get('separation_runtime') == 'isolated' else {}))
+            audio_cache = getattr(self, '_audio_checkpoints', None)
+            separation_key = audio_cache.key('separate', dict(audio_path=audio_path), separator) if audio_cache else None
+            separated = audio_cache.load('separate', separation_key) if audio_cache else None
+            if separated:
+                vocals_path, bg_path = separated['vocals'], separated['background']
+                yield (15, 'REUSED VOCALS AND BACKGROUND', None)
+            else:
+                vocals_path, bg_path = self._observe('separate', separator, 'separate', audio_path)
+                if audio_cache and bg_path:
+                    audio_cache.store('separate', separation_key, {'vocals': vocals_path, 'background': bg_path})
             if bg_path:
                 bg_track = AudioSegment.from_file(bg_path)
         else:
@@ -1127,8 +1451,17 @@ class ReflowPipeline:
 
         check_cancelled()
         yield (20, "TRANSCRIBING", None)
-        transcription_source = vocals_path if (keep_background and vocals_path) else audio_path
-        transcript = self._transcribe_and_translate(transcription_source, target_lang, settings, source_language, speech_cast=cast_list)
+        transcription_source = audio_path
+        automatic_characters = self._automatic_character_mode(cast_list, user_voice_path)
+        self._batch_speaker_rows = {}
+        def match_audio_characters(transcript, source):
+            self._prepare_batch_characters(transcription_source, transcript, effective_device,
+                reference_audio_path=vocals_path if keep_background else None)
+            if any(not cue['text'].strip() for cue in transcript):
+                raise RuntimeError('Source dialogue needs review before an audio-only multi-character dub can continue.')
+        transcript = self._transcribe_and_translate(transcription_source, target_lang, settings, source_language,
+            speech_cast=cast_list, **({'preserve_turns': True, 'before_translation': match_audio_characters}
+                                    if automatic_characters else {}))
         speech_lang = resolve_speech_language(target_lang, resolve_source_language(
             source_language, transcript.language, transcript.language_probability))
 
@@ -1262,8 +1595,10 @@ class ReflowPipeline:
         old_settings = getattr(self, '_run_settings', None)
         old_manifest = getattr(self, '_manifest', None)
         old_checkpoints = getattr(self, '_checkpoints', None)
+        old_audio_checkpoints = getattr(self, '_audio_checkpoints', None)
         frozen_registry = registry.snapshot()
-        frozen_settings = SettingsSnapshot(Settings().all())
+        from core.cuda_runtime import settings_for_device
+        frozen_settings = SettingsSnapshot(settings_for_device(Settings().all(), spec.parameters.get('compute_device')))
         manifest = RunManifest(os.path.join(self.output_dir, 'run_records'), spec, input_path,
                                frozen_registry, frozen_settings)
         self.registry = frozen_registry
@@ -1272,6 +1607,8 @@ class ReflowPipeline:
         from core.stage_checkpoints import StageCheckpoints
         self._checkpoints = StageCheckpoints(Path(self.output_dir) / 'stage_checkpoints',
             manifest, frozen_registry, config.BASE_DIR)
+        from core.audio_checkpoints import AudioCheckpoints
+        self._audio_checkpoints = AudioCheckpoints(self._checkpoints, frozen_settings)
         self.last_manifest_path = str(manifest.path)
         generator = None
         try:
@@ -1304,3 +1641,4 @@ class ReflowPipeline:
                 self._run_settings = old_settings
                 self._manifest = old_manifest
                 self._checkpoints = old_checkpoints
+                self._audio_checkpoints = old_audio_checkpoints

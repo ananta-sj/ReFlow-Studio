@@ -1,13 +1,6 @@
-import { useEffect, useRef, useState } from "react"
-import { subscribe } from "@/lib/events"
+import { useEffect, useRef } from "react"
+import { useLogs, type LogEntry } from "@/lib/use-logs"
 import { cn } from "@/lib/utils"
-
-interface LogEntry {
-  id: number
-  time: string
-  level: "info" | "success" | "warning" | "error"
-  message: string
-}
 
 const LEVEL_COLOR: Record<LogEntry["level"], string> = {
   info: "text-primary",
@@ -29,8 +22,6 @@ const TAG_COLOR: Record<string, string> = {
   STOP: "text-destructive",
 }
 
-let nextId = 1
-
 function renderMessage(message: string) {
   const match = message.match(/^(\[[A-Z_]+\])(\s*.*)$/)
   if (!match) return <>{message}</>
@@ -45,18 +36,8 @@ function renderMessage(message: string) {
 }
 
 export function LogConsole({ className }: { className?: string }) {
-  const [entries, setEntries] = useState<LogEntry[]>([])
+  const entries = useLogs()
   const bottomRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    return subscribe("log", (payload) => {
-      const { level = "info", message = "" } = (payload ?? {}) as { level?: LogEntry["level"]; message?: string }
-      setEntries((prev) => [
-        ...prev,
-        { id: nextId++, time: new Date().toLocaleTimeString(), level, message },
-      ].slice(-300))
-    })
-  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" })
@@ -72,7 +53,7 @@ export function LogConsole({ className }: { className?: string }) {
       {entries.length === 0 && <div className="text-muted-foreground">Waiting for activity…</div>}
       {entries.map((entry) => (
         <div key={entry.id}>
-          <span className="text-muted-foreground/60">[{entry.time}] </span>
+          <span className="text-muted-foreground/60">[{new Date(entry.time_ms).toLocaleTimeString()}] </span>
           <span className={LEVEL_COLOR[entry.level]}>{renderMessage(entry.message)}</span>
         </div>
       ))}

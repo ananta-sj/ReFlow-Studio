@@ -6,7 +6,7 @@ import config
 from core.json_store import JsonStore, require
 
 KEYS = {'reflow-theme', 'reflow-experience-level', 'reflow.accentColor',
-        'reflow.helpTooltipsEnabled', 'reflow.tourComplete', 'reflow.renderConfig'}
+        'reflow.helpTooltipsEnabled', 'reflow.tourComplete', 'reflow.renderConfig', 'reflow.device'}
 
 def validate(data):
     require(isinstance(data, dict) and set(data) <= KEYS, 'Unknown UI preference')
@@ -20,6 +20,8 @@ def validate(data):
             require(re.fullmatch(r'#?[a-fA-F0-9]{6}', value) is not None, 'Invalid accent color')
         elif key in ('reflow.helpTooltipsEnabled', 'reflow.tourComplete'):
             require(value in ('true', 'false'), 'Invalid UI boolean')
+        elif key == 'reflow.device':
+            require(value in ('cpu', 'mps') or re.fullmatch(r'cuda:\d+', value) is not None, 'Invalid processing device')
         else:
             from core.languages import LANGUAGE_NAMES
             from core.source_language import SOURCE_LANGUAGE_NAMES

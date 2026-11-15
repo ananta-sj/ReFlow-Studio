@@ -9,7 +9,8 @@ render erroring out on its own all clear it via bridge/api.py's
 _run_render()/stop_render() - only the process itself dying mid-render
 (crash, force-kill, power loss) leaves it behind. Resume re-runs the same job, reusing verified recognition and translation
 checkpoints for supported selected local engines. Other stages run again;
-partial translations and generated speech are not resumed.
+Completed supported translations and XTTS lines, extraction and separation can
+be reused from verified recovery files on a matching retry.
 """
 
 import os

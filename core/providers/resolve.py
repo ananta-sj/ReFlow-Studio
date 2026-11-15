@@ -83,6 +83,9 @@ def resolve_stt(registry, model_size, runtime=None):
             entry["api_base_url"], entry.get("credential_ref"), entry.get("request_preset") or "custom",
             extra=(entry.get("meta") or {}).get("stt_request")
         )
+    if runtime == 'cuda':
+        from core.cuda_providers import CudaWhisperProvider
+        return CudaWhisperProvider(entry['local_path'] if contract else model_size)
     from core.providers.stt.whisper_local import WhisperLocalProvider
     options = {'runtime': runtime} if runtime is not None else {}
     # faster-whisper's WhisperModel accepts either a named size ("medium",
@@ -123,6 +126,9 @@ def resolve_translation(registry, ollama_host, runtime=None, fallback_runtime=No
     # only such recommended model today, see core/recommended_models.py)
     # loads through transformers directly rather than Ollama/M2M100.
     if contract:
+        if runtime == 'cuda':
+            from core.cuda_providers import CudaNLLBProvider
+            return CudaNLLBProvider(entry['local_path'])
         from core.providers.translation.nllb_local import NLLBLocalProvider
         return NLLBLocalProvider(entry["local_path"], **({'runtime': runtime} if runtime is not None else {}))
     from core.providers.translation.ollama_m2m100_local import OllamaM2M100LocalProvider
@@ -146,6 +152,9 @@ def resolve_tts(registry, device, runtime=None):
             voice=(entry.get("meta") or {}).get("voice_id")
         )
     from core.providers.tts.xtts_local import XTTSLocalProvider
+    if runtime == 'cuda':
+        from core.cuda_providers import CudaXTTSProvider
+        return CudaXTTSProvider(entry['local_path'] if contract else None)
     options = {'runtime': runtime} if runtime is not None else {}
     # A downloaded coqui/XTTS-v2 (or compatible) repo is the same model
     # architecture as the bundled default, just a different checkpoint

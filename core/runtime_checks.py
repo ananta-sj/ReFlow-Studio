@@ -45,6 +45,9 @@ def preflight(registry, params, template):
                 isolated_interpreter()
                 if params.get('lang') != 'hi':
                     raise ValueError('This IndicTrans2 route supports Hindi output only; select NLLB for other languages.')
+            elif contract['adapter'] == 'nllb' and params.get('nllb_runtime') == 'cuda':
+                from core.cuda_runtime import validate
+                validate('translation')
             elif contract['adapter'] == 'nllb' and params.get('nllb_runtime') == 'isolated':
                 from core.nllb_runtime import validate
                 validate()
@@ -61,7 +64,10 @@ def preflight(registry, params, template):
                 isolated_interpreter()
             else:
                 selection = params.get('recognition_runtime') or 'legacy'
-                if selection == 'isolated':
+                if selection == 'cuda':
+                    from core.cuda_runtime import validate
+                    validate('recognition')
+                elif selection == 'isolated':
                     from core.recognition_runtime import validate
                     validate()
                 elif selection == 'legacy':
@@ -69,7 +75,10 @@ def preflight(registry, params, template):
                 else:
                     raise ValueError('Unknown recognition runtime selection')
         if params.get('keep_bg', True):
-            if params.get('separation_runtime', 'legacy') == 'isolated':
+            if params.get('separation_runtime') == 'cuda':
+                from core.cuda_runtime import validate
+                validate('separate')
+            elif params.get('separation_runtime', 'legacy') == 'isolated':
                 if (params.get('compute_device') or 'cpu') != 'cpu':
                     raise ValueError('The isolated separation runtime supports CPU only')
                 from core.separation_runtime import validate, model_contract
@@ -101,7 +110,10 @@ def preflight(registry, params, template):
                     isolated_interpreter(meta.get('speech_device') or 'cpu')
                 else:
                     runtime = params.get('xtts_runtime', 'legacy')
-                    if runtime == 'isolated':
+                    if runtime == 'cuda':
+                        from core.cuda_runtime import validate
+                        validate('speech')
+                    elif runtime == 'isolated':
                         device = params.get('compute_device') or 'cpu'
                         if device.startswith('other:'):
                             device = 'cpu'

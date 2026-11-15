@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-03",
+  "backend_tests": 268,
+  "backend_seconds": 23.465,
+  "new_tests": 6,
+  "python_ast_files": [
+    {
+      "path": "C:\\Projects\\Reflow Studio\\core\\pipeline.py",
+      "sha256": "4ca770a069afc41e56f99349b78f721e25db03eda34385d38a508960e70b7627",
+      "bytes": 49571
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\test_parallel_speech.py",
+      "sha256": "70048e876e86eeea57b3e063a909c67bf4bfcffe8b257ebe02d00604eb6f0bfc",
+      "bytes": 7704
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\run_cleanup_checks.py",
+      "sha256": "1f8037daff06ec9d0a968b7f6e4d61be463b8a0c0f47ffce4135d8ea59feb742",
+      "bytes": 1547
+    }
+  ],
+  "log_sha256": "70c6e5b45dcc0ab1c795793449cb4bd73cbdad6d74e94ac16c7cf93a8b3d5bc5",
+  "dependencies_added": false,
+  "frontend_changed": false,
+  "retained_test_job_workspaces": 0,
+  "audit_followup": {
+    "id": "A02",
+    "status": "managed pipeline inference serialized; synthetic regression verification passed; real-model acceptance pending"
+  },
+  "limits": [
+    "Windows only",
+    "Simulated engines; no actual AI model loading/inference or benchmark",
+    "Direct concurrent provider callers and concurrent standalone pipelines remain outside the guarantee"
+  ]
+}

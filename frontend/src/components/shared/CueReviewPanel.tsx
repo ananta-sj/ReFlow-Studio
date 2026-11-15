@@ -1,10 +1,27 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { bridge, type CueReview, type CueReviewResult, type CueTimingResult, type RenderParams, type DialogueReadiness } from '@/lib/api'
+import { bridge, type CueReview, type CueReviewResult, type CueTimingResult, type RenderParams, type DialogueReadiness, type ReviewAction } from '@/lib/api'
 import { runJobAction, useJobs } from '@/lib/use-jobs'
 import { CueAudioPlayer } from './CueAudioPlayer'
 import { confirmAction } from '@/lib/use-confirm'
+
+const reviewReasons = {
+  timing_and_words: 'Passed timing and spoken-word checks. Translation meaning and acting still need listening review.',
+  too_long: 'The take runs past the original speech window at its recorded pace.',
+  ends_early: 'The take is much shorter than the source line. Check delivery and sync.',
+  delivery_uncertain: 'Compare the ending, pauses, or pitch with the original.',
+  words_uncertain: 'The local word check did not match the script.',
+  generation_failed: 'The speech engine could not produce a take.',
+}
+
+const speakerReasons = {
+  confirmed: 'Character confirmed by you.',
+  matched: 'Matched to a confirmed voice sample.',
+  insufficient_speech: 'There was too little clear speech to match this line.',
+  ambiguous: 'The voice match was uncertain. Listen and confirm the character.',
+  mixed_speakers: 'This line may contain more than one speaker.',
+}
 
 export function CueReviewPanel({ inputPath, params }: { inputPath: string | null; params: Partial<RenderParams> }) {
   const jobs = useJobs()
@@ -12,6 +29,10 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
   const [selected, setSelected] = useState('')
   const [review, setReview] = useState<CueReview | null>(null)
   const [index, setIndex] = useState(0)
+  const [showAccepted, setShowAccepted] = useState(false)
+  const [onlyUnassigned, setOnlyUnassigned] = useState(false)
+  const [speaker, setSpeaker] = useState('')
+  const speakerListId = useId()
   const [sourceText, setSourceText] = useState('')
   const [text, setText] = useState('')
   const [startSeconds, setStartSeconds] = useState('')
@@ -28,6 +49,18 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
   dirtyRef.current = dirty
   const busy = jobs.busy || pending
   const currentTiming = !dirty && timing?.id === review?.id && timing?.revision === review?.revision && timing?.index === index ? timing : null
+  const characters = new Set(review?.cues.flatMap(item =>
+    item.speaker_match === 'confirmed' && item.speaker ? [item.speaker] : []))
+  const hasReference = (item: NonNullable<typeof cue>) =>
+    !!item.speaker && !!review?.speaker_references?.includes(item.speaker)
+  const unassigned = review?.speaker_matching ? review.cues.filter(item => !hasReference(item)).length : 0
+  const firstPending = review?.cues.findIndex(item => !item.accepted && (!onlyUnassigned || !hasReference(item))) ?? -1
+  const remaining = review?.cues.filter(item => !item.accepted).length ?? 0
+
+  useEffect(() => {
+    if (!dirty && firstPending >= 0 && (!cue || (!showAccepted && cue.accepted) ||
+      (onlyUnassigned && cue.speaker && review?.speaker_references?.includes(cue.speaker)))) setIndex(firstPending)
+  }, [cue, dirty, firstPending, onlyUnassigned, review?.speaker_references, showAccepted])
 
   useEffect(() => {
     if (jobs.busy) return
@@ -66,6 +99,7 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
     setText(cue?.text ?? '')
     setStartSeconds(cue ? String(cue.start) : '')
     setEndSeconds(cue ? String(cue.end) : '')
+    setSpeaker(cue?.speaker ?? '')
     setAudio(null)
   }, [cue])
 
@@ -87,23 +121,33 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
     try { await work() } catch (reason) { setError(String(reason)) }
     finally { setPending(false) }
   }
-  async function start(action: 'generate' | 'translate' | 'adapt' | 'supervise' | 'render') {
+  async function start(action: ReviewAction) {
     const saved = await save()
     const result = await runJobAction(() => bridge.startReviewAction(saved.id, saved.revision, action, index))
     if (!result.ok) throw new Error(result.message ?? 'The job was not accepted')
   }
-  const allAccepted = !!review?.cues.length && review.cues.every(item => item.accepted?.fits)
+  async function prepare(firstPass: boolean, speakerMatching = false) {
+    if (!inputPath) return
+    const result = await runJobAction(() => bridge.startCueReview(inputPath, {
+      ...params, review_first_pass: firstPass, review_speaker_matching: speakerMatching,
+    }))
+    if (!result.ok) throw new Error(result.message ?? 'Preparation was not accepted')
+    setSelected(''); setReview(null); setIndex(0); setAudio(null)
+  }
+  const allAccepted = !!review?.cues.length && !review.speaker_dirty && review.cues.every(item => item.accepted?.fits)
   return (
     <Card className="border-border bg-card">
-      <CardHeader><CardTitle className="text-sm">Review your dub, one line at a time</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm">Prepare and review your dub</CardTitle></CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <p className="text-xs text-muted-foreground">Single-voice dub review. Prepare the text, correct it, then listen and accept each take. Saved reviews use their original voice and model settings. Rendering reuses accepted takes and preserves the video when one was provided.</p>
-        <Button disabled={busy || !inputPath || dirty} onClick={() => void perform(async () => {
-          if (!inputPath) return
-          const result = await runJobAction(() => bridge.startCueReview(inputPath, params))
-          if (!result.ok) throw new Error(result.message ?? 'Preparation was not accepted')
-          setSelected(''); setReview(null); setIndex(0); setAudio(null)
-        })}>Prepare selected media for review</Button>
+        <p className="text-xs text-muted-foreground">ReFlow checks timing and spoken words with local Whisper, retries uncertain takes once, and saves each checked line. Resume a saved review to keep completed takes. These checks do not verify translation meaning or natural acting. For multiple original voices, choose character matching below.</p>
+        <div className="flex flex-wrap gap-2">
+          <Button disabled={busy || !inputPath || dirty}
+            onClick={() => void perform(() => prepare(true))}>Prepare and check selected media</Button>
+          <Button variant="outline" disabled={busy || !inputPath || dirty}
+            onClick={() => void perform(() => prepare(false))}>Prepare text only</Button>
+          <Button variant="outline" disabled={busy || !inputPath || dirty}
+            onClick={() => void perform(() => prepare(false, true))}>Prepare for character matching</Button>
+        </div>
         {!!reviews.length && (
           <label className="flex flex-col gap-1 text-xs">Saved review
             <select className="rounded border border-border bg-background p-2" value={selected}
@@ -117,14 +161,57 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
           </label>
         )}
         {review && cue && <>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs">{remaining} of {review.cues.length} lines need review</span>
+            <Button size="sm" variant="outline" disabled={busy || dirty || !remaining || !!review.speaker_dirty || (review.speaker_matching && !review.cues.some(item => !item.accepted && hasReference(item)))}
+              onClick={() => void perform(() => start('first_pass'))}>Run first pass on remaining lines</Button>
+            {!!remaining && <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" checked={showAccepted} disabled={busy || dirty}
+                onChange={event => setShowAccepted(event.target.checked)} /> Show accepted lines
+            </label>}
+          </div>
+          {review.speaker_matching && <div className="flex flex-col gap-2 rounded border border-border p-2 text-xs">
+            <p>Listen to clear source lines and confirm a name for each character. Start with one line longer than a second per character. A second sample from a different scene can help with uncertain matches.</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="outline" disabled={busy || dirty || characters.size < 2}
+                onClick={() => void perform(() => start('match_speakers'))}>Match characters</Button>
+              <span>{review.speaker_dirty ? 'Match characters before generating takes.' : `${unassigned} lines need a character or voice reference.`}</span>
+              {!review.speaker_dirty && !!unassigned && <label className="flex items-center gap-2">
+                <input type="checkbox" checked={onlyUnassigned} disabled={busy || dirty}
+                  onChange={event => setOnlyUnassigned(event.target.checked)} /> Only unresolved characters
+              </label>}
+            </div>
+            <div className="flex flex-wrap items-end gap-2">
+              <label className="flex flex-col gap-1">Character on this line
+                <input value={speaker} list={speakerListId} maxLength={64} disabled={busy || dirty}
+                  onChange={event => setSpeaker(event.target.value)}
+                  className="rounded border border-border bg-background p-2" />
+                <datalist id={speakerListId}>{Array.from(characters, name => <option key={name} value={name} />)}</datalist>
+              </label>
+              <Button size="sm" disabled={busy || dirty || !speaker.trim()}
+                onClick={() => void perform(async () => apply(await bridge.setReviewSpeaker(review.id, review.revision, index, speaker)))}>Confirm character</Button>
+              <Button size="sm" variant="outline" disabled={busy || dirty || !cue.speaker}
+                onClick={() => void perform(async () => apply(await bridge.setReviewSpeaker(review.id, review.revision, index, '')))}>Clear assignment</Button>
+            </div>
+            {cue.speaker_match && <p>{speakerReasons[cue.speaker_match]}</p>}
+          </div>}
           <label className="flex flex-col gap-1 text-xs">Line
             <select className="rounded border border-border bg-background p-2" value={index} disabled={busy || dirty}
               onChange={event => { setIndex(Number(event.target.value)); setError(null) }}>
-              {review.cues.map((item, number) => <option key={item.cue_id || number} value={number}>
-                {number + 1} · {item.start.toFixed(2)}–{item.end.toFixed(2)}s · {item.accepted ? 'Accepted' : 'Needs review'}
+              {review.cues.map((item, number) => (number === index || ((!onlyUnassigned || !unassigned || !hasReference(item)) && (showAccepted || !remaining || !item.accepted))) && <option key={item.cue_id || number} value={number}>
+                {number + 1} · {item.start.toFixed(2)}–{item.end.toFixed(2)}s · {item.accepted ? 'Accepted' : 'Needs review'}{item.speaker ? ` · ${item.speaker}` : ''}
               </option>)}
             </select>
           </label>
+          {cue.first_pass && <p className="text-xs text-muted-foreground">
+            {reviewReasons[cue.first_pass.reason]}{cue.first_pass.status === 'needs_review' && cue.first_pass.heard ? ` Heard: ${cue.first_pass.heard}` : ''}
+          </p>}
+          {cue.translation_pending && <p className="text-xs text-amber-500">This recovered line has no saved translation. Translate it or save corrected target wording before generating speech. The first pass skips it.</p>}
+          {cue.first_pass?.reason === 'delivery_uncertain' && cue.first_pass.performance &&
+            Math.abs(cue.first_pass.performance.end_delta_ms) >= 240 && <p className="text-xs text-muted-foreground">
+              Detected speech ends {Math.abs(cue.first_pass.performance.end_delta_ms)} ms
+              {' '}{cue.first_pass.performance.end_delta_ms < 0 ? 'earlier' : 'later'} than the original.
+            </p>}
           <div className="grid gap-3 md:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs">Recognized source text
               <textarea className="min-h-24 rounded border border-border bg-background p-2" value={sourceText}
@@ -179,7 +266,7 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
               })
               if (confirmed) await start('supervise')
             })}>Suggest shorter wording with assistance</Button>
-            <Button size="sm" disabled={busy || !text.trim()} onClick={() => void perform(() => start('generate'))}>Generate a new take</Button>
+            <Button size="sm" disabled={busy || !text.trim() || (review.speaker_matching && (review.speaker_dirty || !hasReference(cue)))} onClick={() => void perform(() => start('generate'))}>Generate a new take</Button>
             <Button size="sm" variant="outline" disabled={busy || dirty || !cue.candidate} onClick={() => void perform(async () => {
               const result = await bridge.getReviewAudio(review.id, index)
               if (!result.ok || !result.audio) throw new Error(result.message ?? 'Audio is unavailable')

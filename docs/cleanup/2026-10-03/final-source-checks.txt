@@ -1,0 +1,9 @@
+{
+  "restored_registry_preserves_identity_and_active_selection": true,
+  "final_syntax_checks": [
+    "core/model_assets.py",
+    "dev/restore_models.py",
+    "dev/verify_cleanup_runtime.py"
+  ],
+  "shell_launcher_lf_only": true
+}

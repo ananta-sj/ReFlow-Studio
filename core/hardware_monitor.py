@@ -231,11 +231,13 @@ class HardwareMonitor:
                 vram_total_mb = torch.cuda.get_device_properties(idx).total_memory // (1024 * 1024)
             except (RuntimeError, ValueError, IndexError, AssertionError):
                 pass
-        elif device_id and device_id.startswith("other:") and "nvidia" in device_id.lower():
+        elif device_id and (device_id.startswith("other:") and "nvidia" in device_id.lower()
+                or any(device.id == device_id and device.backend == 'cuda_worker' for device in self.devices)):
             # An NVIDIA GPU torch can't drive directly (no CUDA build) can
             # usually still be read live via nvidia-smi - real numbers
             # beat leaving the panel blank for a GPU that's clearly there.
-            name = device_id.split(":", 1)[1]
+            device = next((device for device in self.devices if device.id == device_id), None)
+            name = device.name if device is not None else device_id.split(":", 1)[1]
             total, used = self._nvidia_smi_snapshot().get(name, (None, None))
             vram_total_mb, vram_used_mb = total, used
 

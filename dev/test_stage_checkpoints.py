@@ -27,6 +27,43 @@ class Provider:
 
 
 class StageCheckpointTests(unittest.TestCase):
+    def test_cuda_translation_validates_once_per_job_and_again_for_a_new_job(self):
+        inputs=self.translation_inputs()
+        adapter='core.cuda_providers.CudaNLLBProvider'
+        with patch('core.stage_checkpoints.provider_identity',return_value={'adapter':adapter}), \
+                patch('core.cuda_runtime.validate',return_value={'executable':str(self.root/'runtime/python.exe')}) as validate:
+            first=self.cache.key('translation',self.provider,inputs)
+            second=self.cache.key('translation',self.provider,dict(inputs,instructions='different'))
+            self.assertIsNotNone(first)
+            self.assertNotEqual(first,second)
+            validate.assert_called_once_with('translation')
+            self.assertIsNotNone(self.new_cache().key('translation',self.provider,inputs))
+            self.assertEqual(validate.call_count,2)
+
+    def test_translation_retry_reuses_lines_saved_before_failure(self):
+        from core.run_manifest import bind_manifest
+        transcript = self.transcript.with_segments(identify_cues([
+            dict(start=0, end=1, text='Hello'), dict(start=1, end=2, text='Again')]))
+        subject = ReflowPipeline.__new__(ReflowPipeline)
+        subject._checkpoints = self.cache
+        provider = Provider()
+        original = provider.translate
+        def fail_second(text, *args, **kwargs):
+            if text == 'Again':
+                raise RuntimeError('model failed')
+            return original(text, *args, **kwargs)
+        with bind_manifest(self.manifest), patch.object(provider, 'translate', side_effect=fail_second):
+            with self.assertRaisesRegex(RuntimeError, 'model failed'):
+                list(subject._translate_cues(transcript, 'Hindi', provider, '', None, '',
+                                             resolve_source_language('en')))
+        fresh = self.transcript.with_segments(identify_cues([
+            dict(start=0, end=1, text='Hello'), dict(start=1, end=2, text='Again')]))
+        subject._checkpoints = self.new_cache()
+        with bind_manifest(self.manifest):
+            list(subject._translate_cues(fresh, 'Hindi', provider, '', None, '', resolve_source_language('en')))
+        self.assertEqual(provider.calls, 2)
+        self.assertEqual([cue['text'] for cue in fresh], ['Hindi: Hello', 'Hindi: Again'])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -142,18 +179,21 @@ class StageCheckpointTests(unittest.TestCase):
         self.assertEqual(self.provider.calls,1)
         self.assertEqual(first.to_payload(),second.to_payload())
 
-    def test_partial_translation_never_publishes_checkpoint(self):
+    def test_completed_translation_line_is_saved_before_generator_closes(self):
         subject=ReflowPipeline.__new__(ReflowPipeline);subject._checkpoints=self.cache
         generator=subject._translate_cues(deepcopy(self.transcript),'Hindi',self.provider,'',None,'',resolve_source_language('en'))
         next(generator);generator.close()
-        self.assertFalse(list((self.root/'cache').rglob('*.json')))
+        stored = list((self.root/'cache').rglob('*.json'))
+        self.assertEqual(len(stored), 1)
+        payload = json.loads(stored[0].read_text())['payload']
+        self.assertEqual(payload['segments'][0]['text'], 'Hindi: Hello')
 
     def test_translation_cannot_replace_original_source(self):
         inputs=self.translation_inputs();changed=deepcopy(self.transcript.to_payload())
         changed['segments'][0].update(text='Hindi',translated_text='Hindi',source_text='Changed')
         with self.assertRaises(ValueError):validate_payload(changed,'translation',inputs)
 
-    def test_restart_after_partial_translation_reuses_recognition_and_recomputes_translation(self):
+    def test_restart_after_partial_translation_reuses_recognition_and_completed_translation(self):
         audio = self.root / 'source.wav'
         with wave.open(str(audio), 'wb') as stream:
             stream.setnchannels(1); stream.setsampwidth(2); stream.setframerate(8000)
@@ -179,13 +219,13 @@ class StageCheckpointTests(unittest.TestCase):
             first._transcribe_and_translate(str(audio), 'hi', SettingsSnapshot({}), source_language='en')
         self.provider.release.assert_called_once()
         self.assertTrue(any(event['stage']=='stt' and event['status']=='stored' for event in first_manifest.data['checkpoints']))
-        self.assertFalse(list((self.root/'cache/translation').glob('*.json')))
-        self.provider.translate.side_effect = ['Hindi: Hello.', 'Hindi: Thanks.']
+        self.assertEqual(len(list((self.root/'cache/translation').glob('*.json'))), 1)
+        self.provider.translate.side_effect = ['Hindi: Thanks.']
         second, second_manifest = new_run()
         with patch('core.pipeline.providers.resolve_stt', return_value=self.provider), bind_manifest(second_manifest):
             translated = second._transcribe_and_translate(str(audio), 'hi', SettingsSnapshot({}), source_language='en')
         self.provider.transcribe.assert_called_once()
-        self.assertEqual(self.provider.translate.call_count, 4)
+        self.assertEqual(self.provider.translate.call_count, 3)
         self.assertEqual(self.provider.release.call_count, 2)
         self.assertEqual([cue['text'] for cue in translated], ['Hindi: Hello.', 'Hindi: Thanks.'])
         hit = next(event for event in second_manifest.data['checkpoints'] if event['stage']=='stt' and event['status']=='hit')

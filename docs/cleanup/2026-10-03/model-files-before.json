@@ -1,0 +1,450 @@
+[
+  {
+    "Path": "models\\rvc\\hubert_base.pt",
+    "Length": 189507909
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\.no_exist\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\added_tokens.json",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\.no_exist\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\model.safetensors",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\.no_exist\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\model.safetensors.index.json",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\.no_exist\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\tokenizer.json",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\blobs\\ba941101cd3e90b113db16712f4a20372268e767",
+    "Length": 233
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\blobs\\d907ea45e4e4b9db163382a6674f6218b3c59566fe06d77f4055c208b4e87ed1",
+    "Length": 1935796948
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\refs\\main",
+    "Length": 40
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\config.json",
+    "Length": 908
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\generation_config.json",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\pytorch_model.bin",
+    "Length": 0
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\sentencepiece.bpe.model",
+    "Length": 2423393
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\special_tokens_map.json",
+    "Length": 1140
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\tokenizer_config.json",
+    "Length": 298
+  },
+  {
+    "Path": "models\\translation\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636\\vocab.json",
+    "Length": 3708092
+  },
+  {
+    "Path": "models\\xtts\\default\\config.json",
+    "Length": 4368
+  },
+  {
+    "Path": "models\\xtts\\default\\hash.md5",
+    "Length": 32
+  },
+  {
+    "Path": "models\\xtts\\default\\model.pth",
+    "Length": 1867929118
+  },
+  {
+    "Path": "models\\xtts\\default\\speakers_xtts.pth",
+    "Length": 7754818
+  },
+  {
+    "Path": "models\\xtts\\default\\tos_agreed.txt",
+    "Length": 63
+  },
+  {
+    "Path": "models\\xtts\\default\\vocab.json",
+    "Length": 361219
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\9Du_HWNWNyUYPNSOsdRi4axFwY4=.83c53a3fdd98705f0b1ca7c0ab84f77d8170a41e09b3ae55b51c7e1690121006.incomplete",
+    "Length": 67023911
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\BOzbWGVU4qpR-bbYDjnivz4iPL4=.5f5aaa39f1ef195e575e16c46d1d39671687645e2f7684b332e334dd525d9238.incomplete",
+    "Length": 1073741824
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\eUx_C-nd2XKu7LT_iOnaK9GA-p0=.3265be5a8cdda396334e6cc0faab3fdd16260dc31c9ac55848044600325c19bf.incomplete",
+    "Length": 871644281
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\gmT060pQUO5M-eZQvDqRMWBH2aQ=.65724924d51c5baeed3ee00476fe9dead8f3d0e01ab3923d6eab7439a3993010.incomplete",
+    "Length": 200260497
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\IHxlqkSgnj09Mwb9ris4o4lVg8U=.1aa93082624ba3f9f39ff03f567e1cac0a7b25faaad15e8e719ad9543bedcd47.incomplete",
+    "Length": 1073741824
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\Pnxt6sgx85gyK5gka-TxYwntuPo=.87fe7619af6a6ddf58c9445b17beb567a620ed7efad5eb8bec1dededc05295c0.incomplete",
+    "Length": 402261664
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta-20230513.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta-v2-0528.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta-v2-0618.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta-v20230331.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta0717.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta20230416.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\RVC-beta20230428.7z.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\X2xLzvGmNdTC6VFlGx9BKmqxdUM=.92b334bb30a7f55d2da3f2dc8f63c083cd94645163a3cf9fb4c1e93bca96c2ae.incomplete",
+    "Length": 1090762537
+  },
+  {
+    "Path": "models\\_downloads\\45689713-1f63-494b-8174-a3f1702224ee\\VoiceConversionWebUI\\.cache\\huggingface\\download\\Ym040Iu05mbpFt6f571-8_DSjoc=.92b334bb30a7f55d2da3f2dc8f63c083cd94645163a3cf9fb4c1e93bca96c2ae.incomplete",
+    "Length": 1023731502
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\_vpcFBJ_Z3DzD5dXVzzYXxbJ26s=.2d0960ae4abecc9a33cd989b8e124c13a436e54db8dc5ae32cd5a82e1bfc1a93.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\bigvgan_discriminator_optimizer_3msteps.pt.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\bigvgan_discriminator_optimizer.pt.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\bigvgan_generator_3msteps.pt.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\bigvgan_generator.pt.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\crcv-PgE-2TCoxjB5f2ynwoFZTk=.e95ba25972d3de0628d99cd156e9315a9c018899bf739988959ebe3544080ced.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\Ng4gJpCRpNK5pGuYs_4mwPT7SmE=.3a6179837741c10337a8bd1a7fd2a2df3dfbc50d67c0be2c1567e09e58675d46.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\63dc8d6b-0638-4ad0-a667-eebfe92fd626\\bigvgan_v2_22khz_80band_256x\\.cache\\huggingface\\download\\xSuanb4-SmX8xPCiOfvL7rUc2o4=.ee7862b70ad758a26e61f9901f3d3cbd187c26ea52d8adf8bded12bfe0603edb.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.gitattributes",
+    "Length": 1519
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\.gitignore",
+    "Length": 1
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\.gitattributes.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\CQAfg6qpwZyPBQDRKF8hFS_kJz0=.bf0987c0d8c3fe180877b12ba5b4ac1d890e011f2103926e53186089feced575.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\model.mlmodel.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.273d6cd004f95763e9d03e5d36622f11038819a81b9eafed64b1d95444e04f62.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\analytics\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\analytics\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.195e35e9fbaa218cd59eca69988a2165245e5bfccc4a5d9776847e8955d1625a.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.8406a888fff74171e94d937de18b722373f083232782132ffbe5cd0ecc0f41db.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.f3c5778c86d6fbc6a9817a56dbcac05a946a4d95c77f6db8355572f3be9e9a68.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\analytics\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\analytics\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.091a361134891f94e613562771beea0d93a9aefbc6984ba86c60f856e07a508f.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.1f0c972cf2fd8de717c5129818259ff2a79ba41552b51a024c8d89eaf6fe4496.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\MelSpectrogram.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\TextDecoder.mlmodelc\\analytics\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d3cf3893-a084-4532-96fa-5ea0a3d8dc72\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\TextDecoder.mlmodelc\\analytics\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.a7a330a17952d9875fbb276af9f556979618bbe6b3087e22efe96a92f51efac2.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\.gitignore",
+    "Length": 1
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.8406a888fff74171e94d937de18b722373f083232782132ffbe5cd0ecc0f41db.incomplete",
+    "Length": 1073741824
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\AudioEncoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\TextDecoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.0a38bc3b78a21d5bd912bd8ce72762456f8cdcfdfec5ce3767d678584e6e8d6c.incomplete",
+    "Length": 202753204
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3\\TextDecoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_594MB\\AudioEncoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.8f3ac62177a84bba905517f2546f559fff48c8b27eb57139f8dd7b11a283bc4d.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_594MB\\AudioEncoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_594MB\\TextDecoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.0a38bc3b78a21d5bd912bd8ce72762456f8cdcfdfec5ce3767d678584e6e8d6c.incomplete",
+    "Length": 238986036
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_594MB\\TextDecoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\config.json.metadata",
+    "Length": 103
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\generation_config.json.metadata",
+    "Length": 103
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\AudioEncoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.3a99a8d81ecb0ffa65d9e66dfc12da26a91c86cdd369db3d98aed777e8e15b68.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\AudioEncoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\metadata.json.metadata",
+    "Length": 103
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\model.mil.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.f3c5778c86d6fbc6a9817a56dbcac05a946a4d95c77f6db8355572f3be9e9a68.incomplete",
+    "Length": 329
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\weights\\weight.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\coremldata.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\metadata.json.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\model.mil.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\model.mlmodel.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\analytics\\coremldata.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.4e8e3906c4f1717fe848f6d45e6e052fc3d6048ec24d3a34e23e1c972b10bc84.incomplete",
+    "Length": 150593450
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\coremldata.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\metadata.json.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\model.mil.metadata",
+    "Length": 104
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\analytics\\coremldata.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\weights\\duQN6wuCDNw1I1uzxCzdsNSiQxM=.26266f85b3830f13b43e4fec705e3999329b1af171b23f6eff4e89fe9c137ae0.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\weights\\weight.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo_600MB\\AudioEncoder.mlmodelc\\coremldata.bin.lock",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo_600MB\\AudioEncoder.mlmodelc\\wEjY6HXYJWTTsS_LT0u-8GZu81w=.ed121e756d637301566cc86a4787e2adece71c438774ed1e5652a76d4f9ed62b.incomplete",
+    "Length": 0
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\.cache\\huggingface\\download\\distil-whisper_distil-large-v3_turbo_600MB\\AudioEncoder.mlmodelc\\analytics\\coremldata.bin.metadata",
+    "Length": 128
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\config.json",
+    "Length": 1156
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\generation_config.json",
+    "Length": 2854
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\metadata.json",
+    "Length": 1850
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\model.mil",
+    "Length": 10187
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\MelSpectrogram.mlmodelc\\weights\\weight.bin",
+    "Length": 373376
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\coremldata.bin",
+    "Length": 633
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\metadata.json",
+    "Length": 4750
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\model.mil",
+    "Length": 102862
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\model.mlmodel",
+    "Length": 83662
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoder.mlmodelc\\analytics\\coremldata.bin",
+    "Length": 243
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\coremldata.bin",
+    "Length": 380
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\metadata.json",
+    "Length": 2232
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\model.mil",
+    "Length": 3761
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo\\TextDecoderContextPrefill.mlmodelc\\analytics\\coremldata.bin",
+    "Length": 243
+  },
+  {
+    "Path": "models\\_downloads\\d4ce8ebf-2df2-4871-875e-48cfb320bc10\\whisperkit-coreml\\distil-whisper_distil-large-v3_turbo_600MB\\AudioEncoder.mlmodelc\\analytics\\coremldata.bin",
+    "Length": 243
+  }
+]

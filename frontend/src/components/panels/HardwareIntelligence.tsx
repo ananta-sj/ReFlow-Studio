@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadialGauge } from "@/components/panels/RadialGauge"
 import { CornerFrame } from "@/components/panels/CornerFrame"
@@ -10,6 +9,7 @@ import { useHardware } from "@/lib/use-hardware"
 import type { DeviceInfo } from "@/lib/api"
 
 interface HardwareIntelligenceProps {
+  selectedDeviceId: string
   onDeviceSelected?: (deviceId: string) => void
 }
 
@@ -26,8 +26,10 @@ function DeviceRow({
     <button
       type="button"
       onClick={onSelect}
+      disabled={device.backend === 'unsupported'}
+      title={device.backend === 'unsupported' ? 'Detected hardware. The current processing runtime cannot accelerate jobs on this device.' : device.label}
       className={cn(
-        "flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs transition-colors",
+        "flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         selected
           ? "border-primary bg-primary text-primary-foreground shadow-[0_0_10px_-2px_var(--primary)]"
           : "border-border text-muted-foreground hover:border-muted-foreground/40"
@@ -50,12 +52,10 @@ function DeviceRow({
   )
 }
 
-export function HardwareIntelligence({ onDeviceSelected }: HardwareIntelligenceProps) {
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
+export function HardwareIntelligence({ selectedDeviceId, onDeviceSelected }: HardwareIntelligenceProps) {
   const { snapshot, history } = useHardware(selectedDeviceId)
 
   function selectDevice(id: string) {
-    setSelectedDeviceId(id)
     onDeviceSelected?.(id)
   }
 
@@ -90,7 +90,7 @@ export function HardwareIntelligence({ onDeviceSelected }: HardwareIntelligenceP
       <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs font-semibold tracking-wide text-muted-foreground">
-            06 // GPU SELECTOR
+            06 // PROCESSING DEVICE
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1.5 pt-2">
@@ -102,6 +102,8 @@ export function HardwareIntelligence({ onDeviceSelected }: HardwareIntelligenceP
               onSelect={() => selectDevice(device.id)}
             />
           ))}
+          {snapshot?.devices.some(device => device.backend === 'unsupported' && device.kind === 'dedicated') &&
+            <p className="mt-2 text-xs text-muted-foreground">The GPU is detected, but the current processing runtime uses CPU. GPU acceleration requires a compatible GPU runtime.</p>}
         </CardContent>
       </Card>
 

@@ -17,6 +17,8 @@ port and a file:// URI load does not.
 import os
 import shutil
 import sys
+sys.dont_write_bytecode = True
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 from pathlib import Path
 
 # Several handlers (TTS, Vision/NudeNet, Wav2Lip, ...) print emoji status
@@ -159,6 +161,19 @@ def main():
 
     _set_windows_app_id()
     bridge = PythonBridge()
+    bridge.get_code_update()
+    from core.interface_watcher import InterfaceWatcher
+    watcher = InterfaceWatcher(BASE_DIR)
+    bridge._interface_watcher_stop_fn = watcher.close
+    from bridge.push import install_logging
+    install_logging()
+    if bridge.settings.get('auto_cleanup_cache'):
+        try:
+            from core.cache_maintenance import maintain
+            maintain(BASE_DIR)
+        except Exception as error:
+            import logging
+            logging.getLogger(__name__).warning('Disposable cleanup could not finish: %s',error)
     window = webview.create_window(
         "Reflow Studio",
         url=DIST_INDEX.as_uri(),
@@ -181,6 +196,12 @@ def main():
     # window object and its native COM proxies).
     tray = TrayController(window)
     bridge.set_tray_handlers(tray.minimize_to_tray, tray.stop)
+    def closing():
+        if getattr(bridge, '_shutdown_ready', False):
+            return True
+        bridge.close_window()
+        return False
+    window.events.closing += closing
     webview.start(icon=_application_icon_path())
 
 

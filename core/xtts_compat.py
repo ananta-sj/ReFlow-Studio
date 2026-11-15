@@ -1,4 +1,4 @@
-"""Version-bound adapter for Coqui 0.27.5's removed Transformers import.
+"""Version-bound adapter for Coqui 0.27.5's CPU inference.
 
 Uses the supported native Torch operation; changes no third-party source and
 restores no obsolete generation/checkpoint-loading implementation.
@@ -54,6 +54,23 @@ def activate():
         values['attention_mask']=attention_mask
         return values
     GPT2InferenceModel.prepare_inputs_for_generation=prepare_with_explicit_mask
+    # The pinned TorchCodec decoder and Python binding disagree on the
+    # metadata return type on Windows. Use the installed libsndfile decoder
+    # just for XTTS reference audio, keeping Coqui's mono/resample contract.
+    import soundfile
+    from torchaudio.functional import resample
+    from TTS.tts.models import xtts
+
+    def load_reference(path, sample_rate):
+        samples, input_rate = soundfile.read(path, dtype='float32', always_2d=True)
+        audio = torch.from_numpy(samples.T).mean(dim=0, keepdim=True)
+        if not audio.numel() or not bool(torch.isfinite(audio).all()):
+            raise ValueError('XTTS reference audio is empty or contains invalid samples')
+        if input_rate != sample_rate:
+            audio = resample(audio, input_rate, sample_rate)
+        return audio.clamp_(-1, 1)
+
+    xtts.load_audio = load_reference
     return dict(activated=True,legacy_import='transformers.pytorch_utils.isin_mps_friendly',
         native_operation='torch.isin',explicit_dense_attention_mask=True,preserve_mask_for_position_embedding=True,
-        third_party_files_modified=False,scope='exact validated CPU stack only')
+        reference_decoder='soundfile',third_party_files_modified=False,scope='exact validated CPU stack only')

@@ -25,6 +25,24 @@ export interface QueueJob {
 
 export interface JobActionResult { ok: boolean; message?: string }
 
+export interface BatchReviewCue {
+  has_saved_take?: boolean
+  timing?: { measured_seconds:number;available_seconds:number;excess_seconds:number }
+  cue_id: string | null
+  index: number | null
+  start: number | null
+  end: number | null
+  reasons: string[]
+  text?: string
+  source_text?: string
+  observed?: string
+}
+export interface BatchReviewResponse {
+  ok: boolean
+  message?: string
+  review?: { status: string; human_quality_accepted: boolean; cues: BatchReviewCue[]; coverage?: {ready:number;total:number;unresolved:number} | null }
+}
+
 export interface SessionSnapshot {
   sessionId: string
   revision: number
@@ -194,6 +212,8 @@ export interface RenderParams {
   device_id: string
   parallel_workers: number
   include_subtitles?: boolean
+  review_first_pass?: boolean
+  review_speaker_matching?: boolean
   export_stems?: boolean
   sub_style?: { font_size: number }
 }
@@ -210,7 +230,24 @@ export interface SourceLanguageFeedback {
 }
 
 export interface ReviewTake { seconds: number; fits: boolean }
+export type ReviewAction = 'match_speakers' | 'first_pass' | 'generate' | 'translate' | 'adapt' | 'supervise' | 'render'
 export interface ReviewCue {
+  translation_pending?: boolean
+  speaker?: string
+  speaker_match?: 'confirmed' | 'matched' | 'insufficient_speech' | 'ambiguous' | 'mixed_speakers'
+  first_pass?: {
+    status: 'passed' | 'needs_review'
+    reason: 'timing_and_words' | 'too_long' | 'ends_early' | 'words_uncertain' | 'generation_failed' | 'delivery_uncertain'
+    attempts: number
+    heard?: string
+    performance?: {
+      source_onset_ms: number
+      source_end_ms: number
+      end_delta_ms: number
+      source_pitch_hz: number | null
+      take_pitch_hz: number | null
+    }
+  }
   dialogue_supervision?: {
     meaning_review_protocol?: 'quoted-spans.v1' | 'legacy-reasons.v1'
     status: string; outcome: string; writer_requests: number; reviewer_requests: number
@@ -225,6 +262,9 @@ export interface ReviewCue {
   candidate: ReviewTake | null; accepted: ReviewTake | null
 }
 export interface CueReview {
+  speaker_matching?: boolean
+  speaker_dirty?: boolean
+  speaker_references?: string[]
   output_kind?: 'audio' | 'video'
   id: string; name: string; revision: number; duration: number; target_lang: string
   cues: ReviewCue[]
@@ -253,6 +293,7 @@ export interface InterruptedRender {
   params: Partial<RenderParams>
   template_id: PipelineTemplateId
   started_at: number
+  queue_item_id?: string
 }
 
 export interface PipelineTemplate {
@@ -270,6 +311,8 @@ export interface AppSettings {
   keep_bg_default: boolean
   content_filter_default: boolean
   auto_cleanup_temp: boolean
+  auto_cleanup_cache?: boolean
+  clear_temp_on_exit?: boolean
   ollama_host: string
   whisper_model_size: string
   xtts_runtime: 'legacy' | 'isolated'
@@ -323,6 +366,7 @@ export interface SettingsResponse {
   values: AppSettings
   whisper_model_sizes: string[]
   xtts_runtime_status?: string
+  cuda_runtime_status?: string
   recognition_runtime_status?: string
   nllb_runtime_status?: string
   m2m100_runtime_status?: string
@@ -398,6 +442,7 @@ declare global {
         browse_subtitle: () => Promise<string | null>
         list_cue_reviews: () => Promise<CueReviewListResult>
         get_cue_review: (id: string) => Promise<CueReviewResult>
+        set_review_speaker: (id: string, revision: number, index: number, name: string) => Promise<CueReviewResult>
         edit_review_cue: (id: string, revision: number, index: number, sourceText: string, text: string, start?: number, end?: number) => Promise<CueReviewResult>
         combine_review_cues: (id: string, revision: number, index: number) => Promise<CueReviewResult>
         accept_review_cue: (id: string, revision: number, index: number) => Promise<CueReviewResult>
@@ -405,7 +450,8 @@ declare global {
         get_review_audio: (id: string, index: number, accepted: boolean) => Promise<CueReviewResult>
         get_review_source_audio: (id: string, index: number) => Promise<CueReviewResult>
         start_cue_review: (path: string, params: Partial<RenderParams>) => Promise<JobActionResult>
-        start_review_action: (id: string, revision: number, action: "generate" | "translate" | "adapt" | "supervise" | "render", index: number | null) => Promise<JobActionResult>
+        recover_failed_review: () => Promise<JobActionResult>
+        start_review_action: (id: string, revision: number, action: ReviewAction, index: number | null) => Promise<JobActionResult>
         detect_model_type: (link: string, linkKind: "url" | "api_base_url") => Promise<ModelTypeDetection>
         find_best_model: (stageType: StageType) => Promise<BestModelResult>
         get_search_config: () => Promise<SearchConfig>
@@ -425,8 +471,15 @@ declare global {
           templateId: PipelineTemplateId
         ) => Promise<{ ok: boolean; message?: string }>
         stop_render: () => Promise<{ ok: boolean; stopping: boolean }>
+        retry_render: (itemId?: string) => Promise<JobActionResult>
+        get_logs: () => Promise<import('./use-logs').LogEntry[]>
+        get_render_review: (outputPath: string) => Promise<BatchReviewResponse>
+        get_failed_render_review: () => Promise<BatchReviewResponse>
+        get_failed_render_take: (cueId:string) => Promise<{ok:boolean;audio?:string;message?:string}>
+        get_code_update: () => Promise<{ interface_version: string; restart_required: boolean }>
+        restart_window: () => Promise<JobActionResult>
         get_interrupted_render: () => Promise<InterruptedRender | null>
-        resume_interrupted_render: (recoveryToken: string) => Promise<{ ok: boolean; message?: string }>
+        resume_interrupted_render: (recoveryToken: string, resumeBatch?: boolean) => Promise<{ ok: boolean; message?: string }>
         cancel_model_download: (modelId: string) => Promise<{ ok: boolean; message?: string }>
         discard_interrupted_render: (recoveryToken: string) => Promise<{ ok: boolean; message?: string }>
         get_session_state: () => Promise<SessionSnapshot>
@@ -522,6 +575,7 @@ export const bridge = {
   browseSubtitle: async () => (await api()).browse_subtitle(),
   listCueReviews: async () => (await api()).list_cue_reviews(),
   getCueReview: async (id: string) => (await api()).get_cue_review(id),
+  setReviewSpeaker: async (id: string, revision: number, index: number, name: string) => (await api()).set_review_speaker(id, revision, index, name),
   editReviewCue: async (id: string, revision: number, index: number, sourceText: string, text: string, start?: number, end?: number) => (await api()).edit_review_cue(id, revision, index, sourceText, text, start, end),
   combineReviewCues: async (id: string, revision: number, index: number) => (await api()).combine_review_cues(id, revision, index),
   acceptReviewCue: async (id: string, revision: number, index: number) => (await api()).accept_review_cue(id, revision, index),
@@ -529,7 +583,8 @@ export const bridge = {
   getReviewAudio: async (id: string, index: number, accepted = false) => (await api()).get_review_audio(id, index, accepted),
   getReviewSourceAudio: async (id: string, index: number) => (await api()).get_review_source_audio(id, index),
   startCueReview: async (path: string, params: Partial<RenderParams>) => (await api()).start_cue_review(path, params),
-  startReviewAction: async (id: string, revision: number, action: "generate" | "translate" | "adapt" | "supervise" | "render", index: number | null = null) => (await api()).start_review_action(id, revision, action, index),
+  recoverFailedReview: async () => (await api()).recover_failed_review(),
+  startReviewAction: async (id: string, revision: number, action: ReviewAction, index: number | null = null) => (await api()).start_review_action(id, revision, action, index),
   detectModelType: async (link: string, linkKind: "url" | "api_base_url" = "url") =>
     (await api()).detect_model_type(link, linkKind),
   findBestModel: async (stageType: StageType) => (await api()).find_best_model(stageType),
@@ -547,9 +602,16 @@ export const bridge = {
   factoryReset: async (previewToken?: string) => (await api()).factory_reset(previewToken),
   startRender: async (inputPath: string, params: Partial<RenderParams>, templateId: PipelineTemplateId = "video_dub") =>
     (await api()).start_render(inputPath, params, templateId),
+  retryRender: async (itemId?: string) => (await api()).retry_render(itemId),
+  getLogs: async () => (await api()).get_logs(),
+  getRenderReview: async (outputPath: string) => (await api()).get_render_review(outputPath),
+  getFailedRenderReview: async () => (await api()).get_failed_render_review(),
+  getFailedRenderTake: async (cueId:string) => (await api()).get_failed_render_take(cueId),
+  getCodeUpdate: async () => (await api()).get_code_update(),
+  restartWindow: async () => (await api()).restart_window(),
   stopRender: async () => (await api()).stop_render(),
   getInterruptedRender: async () => (await api()).get_interrupted_render(),
-  resumeInterruptedRender: async (recoveryToken: string) => (await api()).resume_interrupted_render(recoveryToken),
+  resumeInterruptedRender: async (recoveryToken: string, resumeBatch = false) => (await api()).resume_interrupted_render(recoveryToken, resumeBatch),
   cancelModelDownload: async (modelId: string) => (await api()).cancel_model_download(modelId),
   discardInterruptedRender: async (recoveryToken: string) => (await api()).discard_interrupted_render(recoveryToken),
   getSessionState: async () => (await api()).get_session_state(),

@@ -5,9 +5,10 @@
 import type { DeviceEtaMap, JobEstimate } from "@/lib/api"
 
 export function formatDuration(seconds: number | undefined | null) {
-  if (seconds == null) return "—"
-  const m = Math.floor(seconds / 60)
-  const s = Math.round(seconds % 60)
+  if (seconds == null || !Number.isFinite(seconds) || seconds < 0) return "—"
+  const rounded = Math.round(seconds)
+  const m = Math.floor(rounded / 60)
+  const s = rounded % 60
   if (m === 0) return `${s}s`
   const h = Math.floor(m / 60)
   if (h === 0) return `${m}m ${s}s`

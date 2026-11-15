@@ -2,11 +2,12 @@ import { Store, AlertTriangle, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { bridge } from "@/lib/api"
-import { addToQueue, removeFromQueue, pauseQueue, resumeQueue, clearQueueHistory } from "@/lib/use-queue"
+import { addToQueue, removeFromQueue, retryQueueItem, pauseQueue, resumeQueue, clearQueueHistory } from "@/lib/use-queue"
 import { useJobs } from "@/lib/use-jobs"
 import { confirmAction } from "@/lib/use-confirm"
 import { describeDeletion, describeDeletionResult } from "@/lib/deletion-preview"
 import type { PageId } from "@/components/shell/PrimaryNav"
+import { ErrorDetails } from '@/components/shared/ErrorDetails'
 
 interface AssetsPageProps {
   onNavigate: (page: PageId) => void
@@ -66,7 +67,11 @@ export function AssetsPage({ onNavigate }: AssetsPageProps) {
                   {job.status === 'processing' ? ` · ${job.progress}% · ${session.render.status === 'stopping' ? session.render.statusText : job.status_text}` : ''}
                 </div>
                 {job.output_path && <div className="break-all text-xs">Output: {job.output_path}</div>}
-                {job.error && <div className="break-words text-xs text-destructive">{job.error}</div>}
+                {job.error && <ErrorDetails message={job.error} />}
+                {(job.status === 'failed' || job.status === 'cancelled') && (
+                  <Button size="sm" variant="outline" className="mt-2" disabled={session.busy}
+                    onClick={() => void retryQueueItem(job.id)}>Retry</Button>
+                )}
               </div>
               <button type="button" disabled={job.status === 'processing'} onClick={() => removeFromQueue(job.id)} title={job.status === 'processing' ? 'Stop the active job first' : 'Remove job'} className="text-muted-foreground hover:text-destructive disabled:opacity-40">
                 <X className="h-4 w-4" />

@@ -2,10 +2,32 @@
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock
-from core.xtts_text import should_split_sentences
+from core.xtts_text import should_split_sentences, prepare_speech_text
 
 
 class XTTSTextTests(unittest.TestCase):
+    def test_hindi_episode_numbers_are_spoken_in_words(self):
+        self.assertEqual(prepare_speech_text('यह लगभग 100 साल पहले था।', 'hi'), 'यह लगभग एक सौ साल पहले था।')
+        self.assertEqual(prepare_speech_text('मैं 13 साल का हूँ.', 'hi'), 'मैं तेरह साल का हूँ.')
+        self.assertEqual(prepare_speech_text('१०० और १३', 'hi'), 'एक सौ और तेरह')
+
+    def test_hindi_grouped_numbers_decimals_and_leading_zeros_preserve_value(self):
+        self.assertEqual(prepare_speech_text('1,00,000 और 1,000,000', 'hi'), 'एक लाख और दस लाख')
+        self.assertEqual(prepare_speech_text('-3.14 और 007', 'hi'), 'ऋण तीन दशमलव एक चार और शून्य शून्य सात')
+        self.assertEqual(prepare_speech_text('1, 2 और 13-15', 'hi'), 'एक, दो और तेरह-पंद्रह')
+        self.assertEqual(prepare_speech_text('3. 14.', 'hi'), 'तीन. चौदह.')
+
+    def test_other_language_number_rules_keep_their_existing_input(self):
+        for language in ('en', 'de', 'fr', 'ja', 'ar'):
+            self.assertEqual(prepare_speech_text('100, 13, 3.14', language), '100, 13, 3.14')
+
+    def test_hindi_number_scale_boundaries_and_full_small_number_table(self):
+        from core.xtts_text import _HINDI_SMALL
+
+        self.assertEqual(len(_HINDI_SMALL), 100)
+        self.assertEqual(prepare_speech_text('99 1000 10000000 1000000000 100000000000', 'hi'),
+                         'निन्यानवे एक हजार एक करोड़ एक अरब एक खरब')
+
     def model(self, count=10, limit=402, char_limit=253, language='de'):
         return SimpleNamespace(args=SimpleNamespace(gpt_max_text_tokens=limit),
                                tokenizer=SimpleNamespace(char_limits={language: char_limit},

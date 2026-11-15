@@ -1,0 +1,57 @@
+{
+  "frontendChecks": 65,
+  "build": "passed",
+  "removed": [
+    {
+      "files": 11957,
+      "bytes": 162275478.0,
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\node_modules"
+    },
+    {
+      "files": 381,
+      "bytes": 40500790.0,
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\.persistence-npm-cache"
+    }
+  ],
+  "packages": [
+    {
+      "sha256": "59F8E6A506CA4AD9485A1A0C2967925B95CDA2975C3E6B2B8F3B2F26B4D88132",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\package.json"
+    },
+    {
+      "sha256": "91954C16CED391D5F3CA5FE32D14222E4CA87276A4C4ABAFB2116BCD92C8DF41",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\package-lock.json"
+    }
+  ],
+  "date": "2026-10-03",
+  "newDependencies": 0,
+  "dist": [
+    {
+      "bytes": 9522,
+      "sha256": "61BC9A161DE58248288E6905425D7180F0624C2865007B97D763FDAC12043A66",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\favicon.svg"
+    },
+    {
+      "bytes": 5031,
+      "sha256": "B45FA506195CFCDEF406BA9F0C77B36DDC1A7C224040926EC70ABC2FDEA7B93A",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\icons.svg"
+    },
+    {
+      "bytes": 2202,
+      "sha256": "22EC677A10A624D1BF08178BA578724A5990D78422DC3376C3427936E5AC555A",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\index.html"
+    },
+    {
+      "bytes": 880595,
+      "sha256": "DBCA3EA31FD9DA0BE901CB4B4066BA1C4968FFFCAA84A2A22A0A6CA8C1CB338B",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\assets\\index-DlUW9D2L.js"
+    },
+    {
+      "bytes": 124911,
+      "sha256": "C77ED40336A68B65BB3E4CC52F2EBB4618B08AD6B48AF1C6AB9DF8A98877D3BC",
+      "path": "C:\\Projects\\Reflow Studio\\frontend\\dist\\assets\\index-jk86WgkQ.css"
+    }
+  ],
+  "backendAggregateTests": 345,
+  "additionalBackendChecks": 1
+}

@@ -8,6 +8,7 @@ import threading
 import unittest
 from unittest.mock import Mock, patch
 
+from pydub import AudioSegment
 from pydub.generators import Sine
 from core import cue_review as review
 from core.render_context import RenderContext, bind_job, RenderCancelled
@@ -17,6 +18,80 @@ from dev.test_render_queue import api
 
 
 class CueReviewTests(unittest.TestCase):
+    def test_overlong_generation_is_a_review_decision_not_engine_circuit_failure(self):
+        from core.speech_generation_budget import SpeechGenerationLimitExceeded
+        saved=self.store.load(self.identifier);saved['duration']=4
+        saved['cues']=[dict(start=i,end=i+1,available_seconds=1,source_text='Hello',text='नमस्ते',candidate=None,accepted=None) for i in range(4)]
+        saved['revision']+=1;self.store.save(saved,expected_revision=1)
+        self.pipe._dub_segment.side_effect=SpeechGenerationLimitExceeded('unfinished within budget')
+        recognizer=Mock()
+        with patch.object(providers,'resolve_stt',return_value=recognizer):self.operate('first_pass',None)
+        cues=self.store.load(self.identifier)['cues']
+        self.assertTrue(all(c['first_pass']['reason']=='too_long' and not c['accepted'] for c in cues))
+        self.assertEqual(self.pipe._dub_segment.call_count,8)
+        recognizer.transcribe_takes.assert_not_called()
+
+    def test_one_failed_line_is_saved_for_review_and_does_not_block_next_line(self):
+        self.pipe._dub_segment.side_effect=[RuntimeError('temporary inference failure'),RuntimeError('temporary inference failure'),self.clip]
+        recognizer=Mock();recognizer.transcribe_takes.return_value=[[{'text':'अलविदा'}]]
+        with patch.object(providers,'resolve_stt',return_value=recognizer):self.operate('first_pass',None)
+        cues=self.store.load(self.identifier)['cues']
+        self.assertEqual(cues[0]['first_pass']['reason'],'generation_failed')
+        self.assertIsNone(cues[0]['accepted']);self.assertIsNotNone(cues[1]['accepted'])
+
+    def test_repeated_engine_failure_stops_after_three_saved_lines(self):
+        saved=self.store.load(self.identifier);saved['duration']=4
+        saved['cues']=[dict(start=i,end=i+1,available_seconds=1,source_text='Hello',text='नमस्ते',candidate=None,accepted=None) for i in range(4)]
+        saved['revision']+=1;self.store.save(saved,expected_revision=1)
+        self.pipe._dub_segment.side_effect=RuntimeError('engine unavailable')
+        with patch.object(providers,'resolve_stt',return_value=Mock()),self.assertRaisesRegex(RuntimeError,'three consecutive'):
+            self.operate('first_pass',None)
+        saved=self.store.load(self.identifier)
+        self.assertTrue(all(c.get('first_pass') for c in saved['cues'][:3]))
+        self.assertNotIn('first_pass',saved['cues'][3])
+        self.assertEqual(self.pipe._dub_segment.call_count,6)
+
+    def test_cache_preferences_do_not_invalidate_saved_review_takes(self):
+        original=review.configuration(self.pipe,self.settings)
+        self.settings.all.return_value={'mode':'fixture','auto_cleanup_cache':False}
+        self.assertEqual(review.configuration(self.pipe,self.settings),original)
+        self.settings.all.return_value={'mode':'fixture','auto_cleanup_cache':True}
+        self.assertEqual(review.configuration(self.pipe,self.settings),original)
+
+    def test_recovery_prepares_saved_text_without_recognition_or_translation(self):
+        source=self.root/'recovery.wav'
+        self.clip.export(source,format='wav').close()
+        recovery=dict(run_id='b'*32,source=dict(bytes=source.stat().st_size,sha256=review.digest(source)),
+            cues=[dict(start=0,end=.4,text='Original',recovered_translation=None)],preserved_events=[])
+        self.pipe._transcribe_source=Mock(side_effect=AssertionError('must reuse recognition'))
+        self.pipe._resolve_translation_and_filter=Mock(side_effect=AssertionError('must reuse wording'))
+        self.pipe._check_speech_routes=Mock()
+        params=dict(target_lang='hi',source_language='en',keep_background=False,cast_list=['CLONED_USER'])
+        job=RenderContext(self.root/'temp')
+        try:
+            with bind_job(job),patch.object(providers,'resolve_stt',side_effect=AssertionError('must not load recognizer')):
+                path=review.prepare(self.store,self.pipe,str(source),params,self.settings,self.progress,recovery=recovery)
+            saved=self.store.load(Path(path).parent.name)
+            self.assertEqual(saved['recovered_from_run'],'b'*32)
+            self.assertTrue(saved['cues'][0]['translation_pending'])
+            self.assertIsNone(saved['cues'][0]['accepted'])
+            self.pipe._transcribe_source.assert_not_called()
+        finally:job.cleanup()
+
+    def test_recovered_untranslated_line_cannot_be_spoken_or_accepted(self):
+        saved=self.store.load(self.identifier)
+        saved['cues'][0]['translation_pending']=True
+        saved['revision']+=1
+        self.store.save(saved,expected_revision=1)
+        with self.assertRaisesRegex(ValueError,'Translate this recovered'):
+            self.operate('generate',0)
+        with self.assertRaisesRegex(ValueError,'Translate this recovered'):
+            self.store.accept(self.identifier,2,0)
+        saved=self.store.edit(self.identifier,2,0,'Corrected original',saved['cues'][0]['text'])
+        self.assertTrue(saved['cues'][0]['translation_pending'])
+        saved=self.store.edit(self.identifier,saved['revision'],0,'Corrected original','नई पंक्ति')
+        self.assertNotIn('translation_pending',saved['cues'][0])
+
     def setUp(self):
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)
@@ -58,6 +133,162 @@ class CueReviewTests(unittest.TestCase):
     def accept(self, index=0):
         revision = self.store.load(self.identifier)['revision']
         return self.store.accept(self.identifier, revision, index)
+
+    def test_first_pass_accepts_matching_words_retries_uncertain_and_resumes(self):
+        def words(text):
+            return [{'start': 0, 'end': .3, 'text': text}]
+
+        recognizer = Mock()
+        recognizer.transcribe_takes.side_effect = [
+            [words('नमस्ते।')], [words('अलग शब्द')], [words('कुछ और')], [words('अलविदा')]]
+        self.pipe._dub_segment.side_effect = [self.clip, self.clip, self.clip.apply_gain(-2), self.clip]
+        with patch.object(providers, 'resolve_stt', return_value=recognizer):
+            self.operate('first_pass', None)
+            first, second = self.store.load(self.identifier)['cues']
+            self.assertEqual(first['first_pass']['attempts'], 1)
+            self.assertEqual(first['accepted'], first['candidate'])
+            self.assertEqual(second['first_pass']['reason'], 'words_uncertain')
+            self.assertEqual(second['first_pass']['attempts'], 2)
+            self.assertIsNone(second['accepted'])
+            self.assertTrue(second['candidate']['fits'])
+            self.operate('first_pass', None)
+        after_first, after_second = self.store.load(self.identifier)['cues']
+        self.assertEqual(first['accepted'], after_first['accepted'])
+        self.assertEqual(after_second['first_pass']['status'], 'passed')
+        self.assertEqual([call.args[0] for call in self.pipe._dub_segment.call_args_list], [0, 1, 1, 1])
+        self.assertTrue(all(call.kwargs['preserve_delivery'] for call in self.pipe._dub_segment.call_args_list))
+        events = [call.args for call in self.progress.call_args_list]
+        first_run = events[:next(index for index, event in enumerate(events) if event[0] == 100)+1]
+        percentages = [percent for percent, _ in first_run]
+        self.assertEqual(percentages, sorted(percentages))
+        second_line = next(percent for percent, status in first_run if 'Generating line 2/2' in status)
+        self.assertGreater(second_line, 0)
+
+    def test_first_pass_does_not_approve_audio_that_only_fits_by_using_the_pause(self):
+        saved = self.store.load(self.identifier)
+        saved['cues'][0]['end'] = .2
+        saved['revision'] += 1
+        self.store.save(saved, expected_revision=1)
+        recognizer = Mock()
+        recognizer.transcribe_takes.return_value = [[{'start': 0, 'end': .3, 'text': 'अलविदा'}]]
+        with patch.object(providers, 'resolve_stt', return_value=recognizer):
+            self.operate('first_pass', None)
+        first, second = self.store.load(self.identifier)['cues']
+        self.assertEqual(first['first_pass']['reason'], 'too_long')
+        self.assertTrue(first['candidate']['fits'])  # The user can still choose to use the pause.
+        self.assertIsNone(first['accepted'])
+        self.assertIsNotNone(second['accepted'])
+        self.assertEqual(recognizer.transcribe_takes.call_count, 1)
+
+    def test_first_pass_aligns_source_onset_and_keeps_verified_words_when_a_retry_is_worse(self):
+        saved = self.store.load(self.identifier)
+        lead = AudioSegment.silent(200, frame_rate=self.clip.frame_rate)
+        first_source = lead + self.clip + lead + lead
+        second_source = self.clip + lead + self.clip
+        vocals = self.folder / 'vocals.wav'
+        (first_source + second_source).export(vocals, format='wav').close()
+        saved['assets']['vocals.wav'] = review.digest(vocals)
+        saved['revision'] += 1
+        self.store.save(saved, expected_revision=1)
+        recognizer = Mock()
+        recognizer.transcribe_takes.side_effect = [
+            [[{'text': 'नमस्ते'}]], [[{'text': 'अलविदा'}]], [[{'text': 'गलत'}]]]
+        self.pipe._dub_segment.side_effect = [self.clip, self.clip, self.clip.apply_gain(-8)]
+        with patch.object(providers, 'resolve_stt', return_value=recognizer):
+            self.operate('first_pass', None)
+        first, second = self.store.load(self.identifier)['cues']
+        self.assertIsNotNone(first['accepted'])
+        with (self.folder / first['accepted']['file']).open('rb') as stream:
+            take = AudioSegment.from_wav(stream)
+        self.assertEqual(take[:180].max, 0)
+        self.assertGreater(take[230:350].max, 0)
+        self.assertEqual(second['first_pass']['reason'], 'delivery_uncertain')
+        self.assertEqual(second['first_pass']['heard'], 'अलविदा')
+        self.assertLess(second['first_pass']['performance']['end_delta_ms'], -500)
+        self.assertIsNone(second['accepted'])
+
+    def test_first_pass_keeps_each_completed_line_when_cancelled(self):
+        saved = self.store.load(self.identifier)
+        saved['duration'] = 13
+        saved['cues'] = [dict(start=i, end=i+1, available_seconds=1, source_text='Hello',
+                              text='नमस्ते', candidate=None, accepted=None) for i in range(13)]
+        saved['revision'] += 1
+        self.store.save(saved, expected_revision=1)
+        recognizer = Mock()
+        recognizer.transcribe_takes.return_value = [[{'start': 0, 'end': .3, 'text': 'नमस्ते'}]]
+        self.pipe._dub_segment.side_effect = [self.clip] * 2 + [RenderCancelled('cancelled')]
+        with patch.object(providers, 'resolve_stt', return_value=recognizer):
+            with self.assertRaises(RenderCancelled):
+                self.operate('first_pass', None)
+        saved = self.store.load(self.identifier)
+        self.assertEqual(saved['revision'], 4)
+        self.assertTrue(all(cue['accepted'] for cue in saved['cues'][:2]))
+        self.assertIsNone(saved['cues'][2]['accepted'])
+
+    def test_character_review_matches_clear_lines_and_uses_distinct_references(self):
+        import numpy as np
+        from core.character_review import set_speaker
+
+        manifest = self.store.load(self.identifier)
+        manifest.update(duration=6, speaker_matching=True, speaker_dirty=True, speaker_references={})
+        manifest['cues'] = [dict(start=i*1.5, end=(i+1)*1.5, available_seconds=1.5,
+                                source_text='Hello', text='नमस्ते', candidate=None, accepted=None)
+                            for i in range(4)]
+        audio = sum((Sine(hz).to_audio_segment(duration=1500).apply_gain(-10)
+                     for hz in (440, 550, 450, 495)), self.clip[:0])
+        vocals = self.folder/'vocals.wav'
+        audio.export(vocals, format='wav').close()
+        manifest['assets']['vocals.wav'] = review.digest(vocals)
+        manifest['revision'] += 1
+        self.store.save(manifest, expected_revision=1)
+        set_speaker(self.store, self.identifier, 2, 0, 'Perrine')
+        set_speaker(self.store, self.identifier, 3, 1, 'Marie')
+        with self.assertRaisesRegex(ValueError, 'Match the characters'):
+            self.operate('first_pass', None)
+        encode = Mock(side_effect=[np.array(vector) for vector in
+                                  ([1., 0.], [0., 1.], [.95, .1], [.7, .7])])
+        with patch('core.speaker_matching.load_encoder', return_value=encode):
+            self.operate('match_speakers', None)
+        saved = self.store.load(self.identifier)
+        self.assertEqual([cue.get('speaker') for cue in saved['cues']], ['Perrine', 'Marie', 'Perrine', None])
+        self.assertEqual(saved['cues'][3]['speaker_match'], 'ambiguous')
+        recognizer = Mock()
+        self.pipe._dub_segment.return_value = Sine(440).to_audio_segment(duration=1400).apply_gain(-12)
+        recognizer.transcribe_takes.return_value = [[{'start': 0, 'end': .9, 'text': 'नमस्ते'}]]
+        with patch.object(providers, 'resolve_stt', return_value=recognizer):
+            self.operate('first_pass', None)
+        calls = self.pipe._dub_segment.call_args_list
+        self.assertEqual([call.args[0] for call in calls], [0, 1, 2])
+        self.assertEqual(calls[0].args[6], calls[2].args[6])
+        self.assertNotEqual(calls[0].args[6], calls[1].args[6])
+        self.operate('generate', 1)
+        self.assertEqual(self.pipe._dub_segment.call_args.args[6], calls[1].args[6])
+        saved = self.store.load(self.identifier)
+        self.assertIsNone(saved['cues'][3]['accepted'])
+        initial_reference = saved['speaker_references']['Perrine']
+        initial_take = saved['cues'][0]['accepted']
+        set_speaker(self.store, self.identifier, saved['revision'], 2, 'Perrine')
+        encode = Mock(side_effect=[np.array(vector) for vector in
+                                  ([1., 0.], [0., 1.], [.95, .1], [.7, .7])])
+        with patch('core.speaker_matching.load_encoder', return_value=encode):
+            self.operate('match_speakers', None)
+        saved = self.store.load(self.identifier)
+        self.assertEqual(saved['speaker_references']['Perrine'], initial_reference)
+        self.assertEqual(saved['cues'][0]['accepted'], initial_take)
+        set_speaker(self.store, self.identifier, saved['revision'], 2, 'marie')
+        corrected = self.store.load(self.identifier)
+        self.assertEqual(corrected['cues'][2]['speaker'], 'Marie')
+        self.assertIsNone(corrected['cues'][2]['accepted'])
+        self.assertIsNotNone(corrected['cues'][0]['accepted'])
+
+    def test_character_match_flags_a_cue_with_a_speaker_change(self):
+        import numpy as np
+        from core.speaker_matching import match_excerpt
+
+        clip = Sine(440).to_audio_segment(duration=3000).apply_gain(-12)
+        refs = {'first': [np.array([1., 0.])], 'second': [np.array([0., 1.])]}
+        encode = Mock(side_effect=[np.array(x) for x in ([1., 0.], [1., 0.], [0., 1.])])
+        self.assertEqual(match_excerpt(clip, encode, refs), (None, 'mixed_speakers'))
 
     def test_legacy_identity_migration_does_not_rewrite_saved_record(self):
         path = self.folder / 'review.json'

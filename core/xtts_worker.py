@@ -60,7 +60,9 @@ def session(params):
                     if not isinstance(text,str) or not 0<len(text)<=4000:raise ValueError('Invalid XTTS speech text')
                     if not output.is_relative_to(folder.parent) or output.suffix.lower()!='.wav':raise ValueError('Unsafe XTTS output destination')
                     (folder/'token-boundary').unlink(missing_ok=True)
-                    with bind_job(job):model.generate_audio(text,str(output),call['language'],call['reference_audio'])
+                    with bind_job(job):
+                        model.generate_audio(text,str(output),call['language'],call['reference_audio'],
+                                             alternate_take=call.get('alternate_take', False) is True)
                     response.update(ok=True,output_path=str(output),model_identity=id(model.tts.synthesizer.tts_model))
                 except RenderCancelled:
                     response.update(error='XTTS candidate speech cancelled',cancelled=True)

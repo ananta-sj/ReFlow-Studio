@@ -11,6 +11,29 @@ from core.audio_utils import AudioEngineer
 
 
 class VoiceMasteringTests(unittest.TestCase):
+    def test_source_pause_is_flagged_even_when_take_has_the_same_length(self):
+        from core.speech_performance import measure, shape_take
+
+        phrase = Sine(550).to_audio_segment(duration=350).apply_gain(-16)
+        pause = AudioSegment.silent(300, frame_rate=44100)
+        source = measure(phrase + pause + phrase, source=True, pitch=True)
+        take = Sine(550).to_audio_segment(duration=1000).apply_gain(-16)
+        _, _, evidence, concern = shape_take(take, source, compare_pitch=True)
+        self.assertAlmostEqual(evidence['source_pitch_hz'], 550, delta=25)
+        self.assertAlmostEqual(evidence['end_delta_ms'], 0, delta=20)
+        self.assertEqual(concern, 'delivery_uncertain')
+
+    def test_background_ducking_ramps_at_speech_boundaries(self):
+        background = Sine(220).to_audio_segment(duration=1000).apply_gain(-14)
+        silence = AudioSegment.silent(300, frame_rate=44100)
+        voice = silence + Sine(440).to_audio_segment(duration=400).apply_gain(-12) + silence
+        mixed = AudioEngineer().dynamic_mix(voice, background, ducking_db=-8, active_ducking_db=-24)
+        self.assertEqual(len(mixed), len(background))
+        self.assertGreater(mixed[150:170].dBFS, mixed[255:270].dBFS)
+        self.assertGreater(mixed[255:270].dBFS, mixed[278:292].dBFS)
+        self.assertGreater(mixed[900:920].dBFS, mixed[745:765].dBFS)
+        self.assertGreater(mixed[745:765].dBFS, mixed[715:735].dBFS)
+
     def test_failed_loudness_pass_preserves_original_audio(self):
         with tempfile.TemporaryDirectory() as folder:
             output = Path(folder) / 'voice.wav'

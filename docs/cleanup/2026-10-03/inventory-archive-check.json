@@ -1,0 +1,9 @@
+{
+  "zip_test": "ok",
+  "members": [
+    "before-files.csv",
+    "after-files.csv",
+    "removed-files.csv",
+    "README.txt"
+  ]
+}

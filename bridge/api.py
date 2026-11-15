@@ -12,6 +12,8 @@ import shutil
 import threading
 import uuid
 import math
+import time
+from pathlib import Path
 from functools import wraps
 from contextlib import nullcontext
 from copy import deepcopy
@@ -268,6 +270,8 @@ class PythonBridge:
                   "m2m100_runtime_status": m2m100_readiness()['status'],
                   "separation_runtime_status": separation_readiness()['status'],
                   "enhancement_runtime_status": visual_readiness()['status']}
+        from core.cuda_runtime import readiness as cuda_readiness
+        result['cuda_runtime_status'] = cuda_readiness()['status']
         self._flush_persistence_warnings()
         return result
 
@@ -333,9 +337,11 @@ class PythonBridge:
         try:
             normalized = {**{'lang': 'en', 'voice': 'CLONED_USER'}, **(params or {})}
             arguments = (self.registry.snapshot(), template_id, self._template_kwargs(template_id, normalized))
-            return inspect(*arguments, verify_runtime=verify_runtime, xtts_runtime=self.settings.get('xtts_runtime'),
-                recognition_runtime=self.settings.get('recognition_runtime'), nllb_runtime=self.settings.get('nllb_runtime'),
-                m2m100_runtime=self.settings.get('m2m100_runtime'), separation_runtime=self.settings.get('separation_runtime'), enhancement_runtime=self.settings.get('enhancement_runtime'))
+            from core.cuda_runtime import settings_for_device
+            routes = settings_for_device(self.settings.all(), arguments[2].get('compute_device'))
+            return inspect(*arguments, verify_runtime=verify_runtime, xtts_runtime=routes.get('xtts_runtime'),
+                recognition_runtime=routes.get('recognition_runtime'), nllb_runtime=routes.get('nllb_runtime'),
+                m2m100_runtime=self.settings.get('m2m100_runtime'), separation_runtime=routes.get('separation_runtime'), enhancement_runtime=self.settings.get('enhancement_runtime'))
         finally:
             if verify_runtime:
                 with self._render_lock:
@@ -438,13 +444,93 @@ class PythonBridge:
         )
         self._maximized = True
 
+    def get_code_update(self):
+        from core.code_updates import backend_version, interface_version
+        try:
+            backend = backend_version(config.BASE_DIR)
+            frontend = interface_version(config.BASE_DIR)
+        except OSError:
+            return dict(interface_version='packaged', restart_required=False)
+        if not hasattr(self, '_loaded_backend_version'):
+            self._loaded_backend_version = backend
+        return dict(interface_version=frontend, restart_required=backend != self._loaded_backend_version)
+
+    def restart_window(self):
+        from core.python_runtime import worker_python
+        import psutil
+        import subprocess
+        import sys
+        import os
+        executable = Path(sys.executable).resolve()
+        helper_python = worker_python()
+        if not helper_python:
+            return {'ok': False, 'message': 'Close and reopen ReFlow to apply this update.'}
+        with self._render_lock:
+            if getattr(self, '_closing', False):
+                return {'ok': False, 'message': 'ReFlow is already closing.'}
+            process = psutil.Process()
+            self._restart_process = subprocess.Popen(
+                [helper_python, '-B', str(Path(config.BASE_DIR)/'core/restart_app.py'),
+                 str(process.pid), str(process.create_time()), str(executable)],
+                cwd=config.BASE_DIR, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        self.close_window()
+        return {'ok': True}
+
     def close_window(self):
-        if self._tray_stop_fn:
-            self._tray_stop_fn()
-        webview.windows[0].destroy()
+        with self._render_lock:
+            if getattr(self, '_closing', False):
+                return
+            self._closing = True
+            self._render_killed = True
+            self.queue_manager.set_paused(True)
+            job = getattr(self, '_active_job', None)
+            if job:
+                job.request_stop()
+                self._emit_render('render_stopping', {'message': 'Saving recovery state before closing…'})
+            for download in getattr(self, '_download_contexts', {}).values():
+                download.request_stop()
+
+        def finish_close():
+            worker = self._render_thread
+            if worker and worker is not threading.current_thread():
+                worker.join()
+            while getattr(self, '_active_downloads', set()) or getattr(self, '_runtime_check_busy', False):
+                time.sleep(.2)
+            stop_watcher = getattr(self, '_interface_watcher_stop_fn', None)
+            if callable(stop_watcher):
+                stop_watcher()
+            if self.settings.get('clear_temp_on_exit'):
+                try:
+                    from core.exit_cleanup import clear_temporary_files
+                    clear_temporary_files(config.BASE_DIR, config.TEMP_PATH)
+                except Exception as error:
+                    push.emit('log', dict(level='warning', message='Temporary cleanup could not finish: '+str(error)))
+            if self.settings.get('auto_cleanup_cache'):
+                try:
+                    from core.cache_maintenance import maintain
+                    maintain(config.BASE_DIR)
+                except Exception as error:
+                    push.emit('log',dict(level='warning',message='Disposable cleanup could not finish: '+str(error)))
+            self._shutdown_ready = True
+            if self._tray_stop_fn:
+                self._tray_stop_fn()
+            if webview.windows:
+                webview.windows[0].destroy()
+
+        threading.Thread(target=finish_close, daemon=True).start()
+
+    def get_logs(self):
+        return push.recent_logs()
 
     # --- hardware / devices ---
     def get_hardware_snapshot(self, device_id=None):
+        from core.cuda_runtime import readiness as cuda_readiness
+        if cuda_readiness()['status'] == 'ready':
+            from core.hardware_monitor import GPUDevice
+            nvidia = next((device for device in self.monitor.devices if 'nvidia' in device.name.lower()), None)
+            if nvidia is not None and not any(device.id == 'cuda:0' for device in self.monitor.devices):
+                self.monitor.devices = [device for device in self.monitor.devices if device is not nvidia]
+                self.monitor.devices.insert(0, GPUDevice('cuda:0', nvidia.name, 'dedicated', 'cuda_worker', nvidia.vram_total_mb))
         device_id = device_id or self.monitor.default_device_id()
         sample = self.monitor.sample(device_id)
         device = next((d for d in self.monitor.devices if d.id == device_id), None)
@@ -539,11 +625,17 @@ class PythonBridge:
         # These stages are CPU-bound or served externally regardless of the
         # chosen GPU. Their duration must not receive the GPU speed factor.
         routes = {'stt': 'cpu', 'translate': 'cpu', 'mix': 'cpu', 'profanity_filter': 'cpu'}
+        from core.cuda_runtime import readiness as cuda_readiness
+        cuda = str(device_id).startswith('cuda') and cuda_readiness()['status'] == 'ready'
         recognition = self.registry.get_active('stt')
         if recognition and recognition.get('request_preset') == 'whisper_turbo':
             routes['stt'] = 'cuda:0'
+        elif cuda and recognition and recognition.get('kind') == 'local_file':
+            routes['stt'] = 'cuda:0'
         translation = self.registry.get_active('translation')
         if translation and translation.get('request_preset') == 'indictrans2':
+            routes['translate'] = 'cuda:0'
+        elif cuda and translation and translation.get('kind') == 'local_file':
             routes['translate'] = 'cuda:0'
         for stage, registry_type in (('lipsync', 'lipsync'), ('enhance', 'enhancer'),
                                      ('content_filter', 'filter')):
@@ -1448,6 +1540,10 @@ class PythonBridge:
         push.emit(event, payload)
 
     def _start_rejection(self):
+        if getattr(self, '_closing', False):
+            return 'ReFlow is closing. Reopen the app to start a job.'
+        if hasattr(self, '_loaded_backend_version') and self.get_code_update()['restart_required']:
+            return 'A code update is ready. Restart ReFlow before starting or retrying a job.'
         if getattr(self, '_runtime_check_busy', False):
             return 'A runtime check is running. Wait for it to finish before starting a job.'
         previous = getattr(self, '_active_job', None)
@@ -1458,6 +1554,12 @@ class PythonBridge:
         return None
 
     def _start_worker(self, input_path, params, template_id, queue_item_id):
+        device = params.get('device_id', params.get('compute_device', 'cpu'))
+        if str(device).startswith('cuda') and any(
+                item.id == device and item.backend == 'cuda_worker' for item in getattr(getattr(self, 'monitor', None), 'devices', [])):
+            from core.cuda_runtime import readiness as cuda_readiness
+            if cuda_readiness()['status'] != 'ready':
+                return {'ok': False, 'message': 'The NVIDIA runtime needs validation. Select CPU or finish GPU setup before retrying.'}
         self._render_killed = False
         self._render_busy = True
         session = self._session_state()
@@ -1515,6 +1617,41 @@ class PythonBridge:
                 self._publish_session()
             return result
 
+    def retry_render(self, item_id=None):
+        with self._render_lock:
+            rejection = self._start_rejection()
+            if rejection:
+                return {'ok': False, 'message': rejection}
+            try:
+                if item_id is not None and not isinstance(item_id, str):
+                    raise ValueError('Invalid retry job')
+                failed = getattr(self, '_failed_render', None)
+                if item_id is None and failed:
+                    item_id = failed.get('queue_item_id')
+                item = next((row for row in self.queue_manager.get_items() if row['id'] == item_id), None)
+                if item is not None:
+                    if item['status'] not in ('failed', 'cancelled'):
+                        raise ValueError('Only failed or cancelled jobs can be retried.')
+                    path, params, template = item['input_path'], item['params'], item['template_id']
+                elif item_id is not None:
+                    raise ValueError('That failed job is no longer in the queue.')
+                elif failed:
+                    path, params, template = failed['input_path'], failed['params'], failed['template_id']
+                else:
+                    raise ValueError('Choose a failed job in Assets to retry.')
+                if not os.path.isfile(path):
+                    raise ValueError('The original input file is missing. Restore it before retrying.')
+                checkpoint = self.queue_manager.checkpoint()
+                if item:
+                    self.queue_manager.update_item(item_id, status='queued', error=None, status_text='Retrying')
+                result = self._start_worker(path, deepcopy(params), template, item_id)
+                if not result['ok']:
+                    self.queue_manager.restore(checkpoint)
+                    self._publish_session()
+                return result
+            except Exception as error:
+                return {'ok': False, 'message': str(error)}
+
     def stop_render(self):
         with self._render_lock:
             job = getattr(self, "_active_job", None)
@@ -1545,12 +1682,82 @@ class PythonBridge:
         except Exception as exc:
             return {'ok': False, 'message': str(exc)}
 
+    def get_failed_render_review(self):
+        try:
+            import json
+            from core.stage_checkpoints import safe_path
+            value = getattr(self,'_last_run_manifest_path',None)
+            if not value:
+                from core.failed_review_state import recall
+                value=recall()
+            if not value:
+                raise ValueError('No dialogue review is available for this job')
+            path = safe_path(value).resolve()
+            if not path.is_relative_to((Path(config.OUTPUT_PATH)/'run_records').resolve()) or path.stat().st_size > 32*1024*1024:
+                raise ValueError('Review must belong to an application run')
+            from core.batch_review import build
+            result = build(path)
+            if len(json.dumps(result)) > 2*1024*1024:
+                raise ValueError('Dialogue review is too large')
+            return {'ok':True,'review':result}
+        except (OSError,ValueError,TypeError,KeyError) as error:
+            return {'ok':False,'message':str(error)}
+
+    def get_failed_render_take(self,cue_id):
+        try:
+            import base64,io,wave
+            from core.failed_review_state import recall
+            from core.stage_checkpoints import safe_path
+            from core.batch_review import timing_candidate
+            if not isinstance(cue_id,str) or not 0<len(cue_id)<=160:raise ValueError('Invalid dialogue line')
+            value=getattr(self,'_last_run_manifest_path',None) or recall()
+            if not value:raise ValueError('No saved dialogue review is available')
+            path=safe_path(value)
+            if path.name!='manifest.json' or path.parent.parent.resolve()!=(Path(config.OUTPUT_PATH)/'run_records').resolve():
+                raise ValueError('Saved take must belong to an application run')
+            raw=timing_candidate(path,cue_id)
+            with wave.open(io.BytesIO(raw),'rb') as audio:
+                if not 0<audio.getnframes()/audio.getframerate()<=90:raise ValueError('Invalid saved speech duration')
+            return {'ok':True,'audio':'data:audio/wav;base64,'+base64.b64encode(raw).decode('ascii')}
+        except Exception as error:
+            return {'ok':False,'message':str(error)}
+
+    def get_render_review(self, output_path):
+        """Read only a bounded sidecar belonging to an app-owned output file."""
+        try:
+            import json
+            from core.stage_checkpoints import safe_path
+            if not isinstance(output_path, str) or not Path(output_path).is_absolute():
+                raise ValueError('Choose an application output file')
+            output = safe_path(output_path).resolve()
+            if not output.is_relative_to(Path(config.OUTPUT_PATH).resolve()) or not output.is_file():
+                raise ValueError('Review reports must belong to the output folder')
+            report = safe_path(str(output)+'.review.json')
+            if report.stat().st_size > 2*1024*1024:
+                raise ValueError('Dialogue review report is too large')
+            payload = json.loads(report.read_text(encoding='utf-8'))
+            if not isinstance(payload, dict) or not isinstance(payload.get('cues'), list):
+                raise ValueError('Invalid dialogue review report')
+            return {'ok': True, 'review': payload}
+        except (OSError, ValueError, TypeError) as error:
+            return {'ok': False, 'message': str(error)}
+
     def edit_review_cue(self, identifier, revision, index, source_text, text, start=None, end=None):
         with self._render_lock:
             if self._deletion_busy():
                 return {'ok': False, 'message': 'Wait for active work to finish before editing.'}
             try:
                 return {'ok': True, 'review': self._cue_store().edit(identifier, revision, index, source_text, text, start, end)}
+            except Exception as exc:
+                return {'ok': False, 'message': str(exc)}
+
+    def set_review_speaker(self, identifier, revision, index, name):
+        with self._render_lock:
+            if self._deletion_busy():
+                return {'ok': False, 'message': 'Wait for active work to finish before assigning a character.'}
+            try:
+                from core.character_review import set_speaker
+                return {'ok': True, 'review': set_speaker(self._cue_store(), identifier, revision, index, name)}
             except Exception as exc:
                 return {'ok': False, 'message': str(exc)}
 
@@ -1603,13 +1810,42 @@ class PythonBridge:
                     raise ValueError('Select an audio file and review settings')
                 frozen = deepcopy(params)
                 frozen['review_video'] = os.path.splitext(input_path)[1].lower() in ('.mp4','.mkv','.mov','.webm','.avi','.m4v')
-                frozen['cast_list'] = self._resolve_cast_list(frozen)
+                if frozen.get('review_speaker_matching') is True:
+                    frozen['cast_list'] = ['CLONED_USER']
+                    frozen['ref_audio'] = None
+                else:
+                    frozen['cast_list'] = self._resolve_cast_list(frozen)
                 if len(frozen['cast_list']) != 1:
                     raise ValueError('Cue review currently supports one voice. Remove extra voice nodes first.')
                 frozen['_review_action'] = 'prepare'
                 return self._start_worker(input_path, frozen, 'audio_dub', None)
             except Exception as exc:
                 return {'ok': False, 'message': str(exc)}
+
+    def recover_failed_review(self):
+        """Create an editable draft from the last local run, under the render lock."""
+        with self._render_lock:
+            rejection=self._start_rejection()
+            if rejection:return {'ok':False,'message':rejection}
+            try:
+                from core.failed_review_state import recall
+                from core.batch_review_recovery import payload
+                path=getattr(self,'_last_run_manifest_path',None) or recall()
+                if not path:raise ValueError('No saved failed dialogue is available')
+                from core.stage_checkpoints import safe_path
+                path=safe_path(path)
+                if path.parent.parent.resolve()!=(Path(config.OUTPUT_PATH)/'run_records').resolve():
+                    raise ValueError('Recovery must belong to an application run')
+                recovery=payload(path)
+                frozen=deepcopy(recovery['parameters'])
+                actors=frozen.get('cast_list') or ['CLONED_USER']
+                if len(actors)!=1:raise ValueError('Editable recovery currently requires one speech engine with character matching')
+                frozen.update(_review_action='recover_batch',_review_recovery_manifest=str(path),
+                    review_video=Path(recovery['source']['path']).suffix.lower() in ('.mp4','.mkv','.mov','.webm','.avi','.m4v'),
+                    review_speaker_matching=actors==['CLONED_USER'])
+                return self._start_worker(recovery['source']['path'],frozen,'audio_dub',None)
+            except Exception as exc:
+                return {'ok':False,'message':str(exc)}
 
     def get_review_source_audio(self, identifier, index):
         try:
@@ -1623,11 +1859,11 @@ class PythonBridge:
             if rejection:
                 return {'ok': False, 'message': rejection}
             try:
-                if action not in ('generate', 'translate', 'adapt', 'supervise', 'render'):
+                if action not in ('match_speakers', 'first_pass', 'generate', 'translate', 'adapt', 'supervise', 'render'):
                     raise ValueError('Unknown review action')
                 store = self._cue_store()
                 manifest = store.load(identifier, revision)
-                if action != 'render':
+                if action not in ('match_speakers', 'first_pass', 'render'):
                     store.cue(manifest, index)
                 params = {'_review_action': action, '_review_id': identifier,
                           '_review_revision': revision, '_review_index': index}
@@ -1670,13 +1906,15 @@ class PythonBridge:
             except (ValueError, OSError) as exc:
                 return {'ok': False, 'message': str(exc)}
 
-    def resume_interrupted_render(self, recovery_token):
+    def resume_interrupted_render(self, recovery_token, resume_batch=False):
         """Restart the offered job once; other restored batch jobs stay paused."""
         with self._render_lock:
             rejection = self._start_rejection()
             if rejection:
                 return {'ok': False, 'message': rejection}
             try:
+                if type(resume_batch) is not bool:
+                    raise ValueError('Invalid batch recovery selection')
                 record = render_state.get_interrupted(warning=self._queue_persistence_warning)
                 if not record or record['recovery_token'] != recovery_token:
                     return {'ok': False, 'message': 'Recovery record changed; refresh the offer.'}
@@ -1687,8 +1925,12 @@ class PythonBridge:
                         return {'ok': False, 'message': 'Recovered queue job changed or is unavailable. Review the queue.'}
                 checkpoint = self.queue_manager.checkpoint()
                 if item_id:
-                    self.queue_manager.prepare_recovery(item_id)
-                result = self._start_worker(record['input_path'], record['params'], record['template_id'], item_id)
+                    self.queue_manager.prepare_recovery(item_id, resume_batch=resume_batch)
+                params = record['params']
+                if params.get('_review_action') == 'first_pass':
+                    manifest = self._cue_store().load(params['_review_id'])
+                    params = {**params, '_review_revision': manifest['revision']}
+                result = self._start_worker(record['input_path'], params, record['template_id'], item_id)
                 if not result['ok']:
                     self.queue_manager.restore(checkpoint)
                     self._publish_session()
@@ -1716,7 +1958,7 @@ class PythonBridge:
                 marker_written = True
                 with bind_job(job):
                     output_path = self._run_render_inner(input_path, params, template_id)
-                if params.get('_review_action') in ('prepare', 'generate', 'translate'):
+                if params.get('_review_action') in ('prepare', 'recover_batch', 'match_speakers', 'first_pass', 'generate', 'translate'):
                     output_path = None  # A review draft/take is not a final media output.
                 with self._render_lock:
                     if not self._render_killed:
@@ -1728,13 +1970,27 @@ class PythonBridge:
             except Exception as e:
                 with self._render_lock:
                     if not self._render_killed:
+                        from core.dub_quality import DubReviewRequired
+                        needs_review = isinstance(e,DubReviewRequired)
+                        if needs_review:
+                            self.queue_manager.set_paused(True)
+                            try:
+                                from core.failed_review_state import remember
+                                remember(self._last_run_manifest_path)
+                            except Exception as review_error:
+                                push.emit('log',{'level':'warning','message':'Could not save the dialogue review link: '+str(review_error)})
+                        self._failed_render = dict(input_path=input_path, params=deepcopy(params),
+                            template_id=template_id, queue_item_id=queue_item_id)
                         if queue_item_id:
-                            self.queue_manager.update_item(queue_item_id, status="failed", error=str(e), status_text="Failed")
+                            self.queue_manager.update_item(queue_item_id, status="failed", error=str(e),
+                                status_text="Dialogue review required — batch paused" if needs_review else "Failed")
                         terminal_recorded = True
                         self._emit_render("render_error", {"message": str(e)})
             finally:
                 if queue_item_id and self._render_killed and not terminal_recorded:
-                    self.queue_manager.update_item(queue_item_id, status="cancelled", status_text="Cancelled")
+                    closing = getattr(self, '_closing', False)
+                    self.queue_manager.update_item(queue_item_id, status="queued" if closing else "cancelled",
+                                                   status_text="Paused on close" if closing else "Cancelled")
                 if job:
                     try:
                         if self._render_killed or self.settings.get("auto_cleanup_temp"):
@@ -1742,7 +1998,7 @@ class PythonBridge:
                     except Exception as e:
                         push.emit("log", {"level": "warning", "message": f"Temporary cleanup failed; retained {job.workspace}: {e}"})
                 try:
-                    if marker_written:
+                    if marker_written and not (getattr(self, '_closing', False) and self._render_killed and not terminal_recorded):
                         render_state.clear()
                 except Exception as e:
                     push.emit("log", {"level": "warning", "message": f"Could not clear render state: {e}"})
@@ -1863,7 +2119,15 @@ class PythonBridge:
         return self.monitor.run_benchmark(device_id)
 
     def _run_render_inner(self, input_path, params, template_id="video_dub"):
+        self._last_run_manifest_path = None
+        from core.failed_review_state import clear as clear_failed_review
+        try:
+            if params.get('_review_action')!='recover_batch':
+                clear_failed_review()
+        except Exception as review_error:
+            push.emit('log',{'level':'warning','message':'Could not clear the previous dialogue review link: '+str(review_error)})
         generator = None
+        telemetry = None
         try:
             self._emit_render("render_started", {"inputPath": input_path})
             push.emit("log", {"level": "info", "message": f"[QUEUE] Starting: {os.path.basename(input_path)}"})
@@ -1876,14 +2140,44 @@ class PythonBridge:
                 from core.cue_review import prepare, operate
                 progress = lambda percent, status: self._emit_render('progress', {'percent': percent, 'status': status})
                 store = self._cue_store()
+                if params['_review_action']=='recover_batch':
+                    from core.batch_review_recovery import payload
+                    recovery=payload(params['_review_recovery_manifest'])
+                    options=self._template_kwargs('audio_dub',params)
+                    options.update(review_video=params.get('review_video') is True,
+                        review_speaker_matching=params.get('review_speaker_matching') is True)
+                    return prepare(store,pipeline,input_path,options,self.settings,progress,recovery=recovery)
                 if params['_review_action'] == 'prepare':
-                    return prepare(store, pipeline, input_path, self._template_kwargs('audio_dub', params),
-                                   self.settings, progress)
+                    options = self._template_kwargs('audio_dub', params)
+                    options['review_video'] = params.get('review_video') is True
+                    if params.get('review_speaker_matching') is True:
+                        options['review_speaker_matching'] = True
+                        return prepare(store, pipeline, input_path, options, self.settings, progress)
+                    if params.get('review_first_pass') is True:
+                        path = prepare(store, pipeline, input_path, options, self.settings,
+                                       lambda percent, status: progress(int(percent * .4), status))
+                        identifier = os.path.basename(os.path.dirname(path))
+                        checkpoint = {'_review_action': 'first_pass', '_review_id': identifier, '_review_revision': 1}
+                        render_state.mark_started(input_path, checkpoint, 'audio_dub', warning=self._queue_persistence_warning)
+                        return operate(store, pipeline, identifier, 1, 'first_pass', None,
+                                       self.settings, lambda percent, status: progress(40 + int(percent * .6), status))
+                    return prepare(store, pipeline, input_path, options, self.settings, progress)
                 return operate(store, pipeline, params.get('_review_id'), params.get('_review_revision'),
                                params['_review_action'], params.get('_review_index'), self.settings, progress)
 
             kwargs = self._template_kwargs(template_id, params)
             generator = pipeline.run(template_id, input_path, kwargs)
+            job = current_job()
+            if job is not None:
+                from core.job_telemetry import SeparationProgress
+                def report_separation(percent):
+                    with self._render_lock:
+                        status = self._session_state().render['statusText']
+                        if not self._render_killed and status.upper().startswith('SEPARATING AUDIO'):
+                            self._emit_render('progress', dict(percent=10+min(9, int(percent*.09)),
+                                status=f'SEPARATING AUDIO · {percent}% of source audio'))
+                            push.emit('log', dict(level='info', message=f'[SEPARATE] {percent}% of source audio processed'))
+                telemetry = SeparationProgress(job, report_separation)
 
             final_result = None
             while True:
@@ -1910,13 +2204,31 @@ class PythonBridge:
                 raise RuntimeError("Process finished without output.")
             if not os.path.isfile(final_result) or os.path.getsize(final_result) == 0:
                 raise RuntimeError(f"Process returned a missing or empty output: {final_result}")
+            manifest_path = getattr(pipeline, 'last_manifest_path', None)
+            if isinstance(manifest_path,(str,os.PathLike)):
+                from core.batch_review import publish
+                try:
+                    review = publish(manifest_path, final_result)
+                except (OSError, ValueError, KeyError, TypeError) as error:
+                    from core.failure_diagnostics import summarize
+                    review = None
+                    message = 'Draft exported; the dialogue review report could not be saved. '+summarize(error)['message']
+                    self._emit_render('progress', dict(percent=100, status=message))
+                    push.emit('log', dict(level='warning', message=message))
+                if review and review['status'] == 'needs_review':
+                    message = f"Draft exported — {len(review['cues'])} dialogue lines need review. See {os.path.basename(final_result)}.review.json"
+                    self._emit_render('progress', dict(percent=100, status=message))
+                    push.emit('log', dict(level='warning', message=message))
             return final_result
         finally:
             # Close a cancelled generator so its own finally blocks can run.
+            if telemetry is not None:
+                telemetry.close()
             if generator is not None:
                 generator.close()
             manifest_path = getattr(locals().get('pipeline'), 'last_manifest_path', None)
             if isinstance(manifest_path, str):
+                self._last_run_manifest_path = manifest_path
                 push.emit('log', {'level': 'info', 'message': '[RUN RECORD] ' + manifest_path})
             if params.get('_review_action') and 'pipeline' in locals():
                 pipeline.clear_vram()

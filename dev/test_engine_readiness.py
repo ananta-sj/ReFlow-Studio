@@ -182,6 +182,7 @@ class EngineReadinessTests(unittest.TestCase):
         bridge = PythonBridge.__new__(PythonBridge)
         bridge.registry = Mock()
         bridge.settings = Mock()
+        bridge.settings.all.return_value = dict(xtts_runtime='legacy', nllb_runtime='legacy', recognition_runtime='legacy', separation_runtime='legacy')
         bridge.settings.get.return_value = 'legacy'
         bridge.get_cast_list = Mock(return_value=['one', 'two'])
         with patch('core.engine_readiness.inspect', return_value={'status': 'inspection_complete'}) as inspection:

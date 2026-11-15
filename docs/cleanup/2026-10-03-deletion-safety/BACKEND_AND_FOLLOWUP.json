@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-03",
+  "tests": 298,
+  "seconds": 26.72,
+  "new_tests": 30,
+  "python_ast": [
+    {
+      "path": "C:\\Projects\\Reflow Studio\\core\\deletion_plan.py",
+      "bytes": 6212,
+      "sha256": "f4b2c98c055d1b2df063e4a4f64aec0b1e6fab7673c70c8e7d11914e10b19b93"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\core\\credential_store.py",
+      "bytes": 1782,
+      "sha256": "d06b760bcab7fbe6fa6e38c3f953015faae048b0cc4dc80e3680bfc6d2bbd4c5"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\bridge\\api.py",
+      "bytes": 54233,
+      "sha256": "96c701cbc69346d39807c0da4842e7456638ad76eb40a84a1920aa5d8e37e2a8"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\test_deletion_safety.py",
+      "bytes": 17438,
+      "sha256": "18c1a1e74953296112dd23dc2d8583d3c351280f100a8123554fbfeee2c33e63"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\run_cleanup_checks.py",
+      "bytes": 1636,
+      "sha256": "da63fd2f82fad6baa371f4bce96638a71c17d8cdf8387d671512f9cbecc0943a"
+    },
+    {
+      "path": "C:\\Projects\\Reflow Studio\\dev\\test_model_download.py",
+      "bytes": 3510,
+      "sha256": "78becc4691b411849b84a9733c53c2e1f128c0b6f9c5bc8b2e86e591792b1fbb"
+    }
+  ],
+  "log_sha256": "d01d5de6c541ac96f844eb5e7e74dde8e3bd506b96d4d63f6b1ddeffa905b07c",
+  "user_data_operations": "No actual user reset, model removal, credential deletion or model download performed. Fixture deletion only; build dependencies/cache were cleared separately.",
+  "retained_test_job_workspaces": 0,
+  "followup": [
+    {
+      "id": "A03",
+      "status": "Bridge render/download guards and previews implemented; real-environment acceptance pending"
+    },
+    {
+      "id": "A28",
+      "status": "Bridge entry-owned deletion restrictions implemented; legacy shared files preserved; real-environment acceptance pending"
+    }
+  ],
+  "limits": [
+    "Windows fixture testing only; no interactive GUI, real OS store or live download/install testing",
+    "No atomic transaction across filesystem, registry and credentials",
+    "Legacy Janitor and external/direct callers remain outside the bridge guarantee",
+    "Preview uses file metadata, not content hashing; external changes are not atomically excluded"
+  ],
+  "other_findings": "Historical audit preserved. No other findings closed."
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-03",
+  "report": "../../CANCELLATION_CLEANUP_REPORT_2026-10-03.md",
+  "historical_audit_preserved": true,
+  "findings": [
+    {
+      "id": "A01",
+      "status": "implemented; regression verification passed; real-provider and cross-platform acceptance pending",
+      "evidence": "262 backend tests; 12 cancellation UI state checks; production build",
+      "limitations": "Native calls finish before acknowledgment. Descendant tracking uses polling. No real model, cloud or GUI phase-by-phase acceptance run."
+    },
+    {
+      "id": "A03",
+      "status": "partially addressed",
+      "change": "Reset and model removal rejected during active render; frontend displays rejection.",
+      "remaining": "Download concurrency, broader deletion ownership and affected-file preview remain unresolved."
+    }
+  ],
+  "other_findings": "No other full-audit findings closed by this iteration."
+}

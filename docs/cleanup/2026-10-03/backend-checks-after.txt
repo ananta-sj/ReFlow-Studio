@@ -1,0 +1,36 @@
+test_parse_srt_crlf_and_dots (dev.test_suite.TestSRTUtils) ... ok
+test_parse_srt_standard (dev.test_suite.TestSRTUtils) ... ok
+test_default_graph (dev.test_suite.TestGraphModel) ... ok
+test_node_muting (dev.test_suite.TestGraphModel) ... ok
+test_node_removal (dev.test_suite.TestGraphModel) ... ok
+test_hardware_detection (dev.test_suite.TestHardwareMonitor) ... ok
+test_system_stats (dev.test_suite.TestHardwareMonitor) ... ok
+test_registry_lifecycle (dev.test_suite.TestModelRegistry) ... ok
+test_language_mappings (dev.test_suite.TestLanguages) ... ok
+test_parallel_speedup_factor (dev.test_suite.TestBridgeAPIHelpers) ... ok
+test_safe_download_filename (dev.test_suite.TestBridgeAPIHelpers) ... ok
+test_queue_lifecycle (dev.test_suite.TestQueueManager) ... ok
+test_clean_output_path_generation (dev.test_suite.TestPathSafety) ... ok
+test_rvc_temp_16k_path_generation (dev.test_suite.TestPathSafety) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_atomic_success (dev.test_model_assets.ModelAssetsTests) ... ok
+test_existing_valid_model_does_not_contact_network (dev.test_model_assets.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_failed_transfer_preserves_old_file (dev.test_model_assets.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_html_error_page_is_not_installed (dev.test_model_assets.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_http_failure_is_not_installed (dev.test_model_assets.ModelAssetsTests) ... ok
+[MODELS] Downloading test: weights/model.bin
+test_incomplete_transfer_is_not_installed (dev.test_model_assets.ModelAssetsTests) ... ok
+test_offline_missing_model_has_recovery_instruction (dev.test_model_assets.ModelAssetsTests) ... ok
+test_startup_integrity_does_not_download_models (dev.test_model_assets.ModelAssetsTests) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 3.493s
+
+OK
+--- RUNNING INTEGRITY CHECKS ---
+--- CHECKS COMPLETE ---
+--- RUNNING INTEGRITY CHECKS ---
+--- CHECKS COMPLETE (with warnings) ---

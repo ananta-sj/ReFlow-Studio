@@ -4,6 +4,19 @@ import unittest
 from core.translation_completion import require_input_window, require_finished
 
 
+def nllb_fixture():
+    from unittest.mock import Mock
+    from core.providers.translation.nllb_local import NLLBLocalProvider
+
+    provider = NLLBLocalProvider('fixture')
+    provider._model, provider._tokenizer = Mock(), Mock()
+    completed_model(provider._model, provider._tokenizer)
+    provider._tokenizer.unk_token_id = 0
+    provider._tokenizer.convert_tokens_to_ids.return_value = 4
+    provider._tokenizer.return_value.to.return_value = {'input_ids': [[4, 2]]}
+    return provider
+
+
 def completed_model(model, tokenizer):
     model.config.max_position_embeddings = 1024
     model.generate.return_value = [[2, 1, 5, 2]]
@@ -11,6 +24,32 @@ def completed_model(model, tokenizer):
 
 
 class TranslationCompletionTests(unittest.TestCase):
+    def test_nllb_retries_with_repetition_controls_and_only_decodes_complete_take(self):
+        provider = nllb_fixture()
+        complete = [[2, 4, 8, 2]]
+        provider._model.generate.side_effect = [[[2, 4, 8]], complete]
+        provider._tokenizer.batch_decode.return_value = ['नमस्ते']
+        self.assertEqual(provider.translate('こんにちは', 'Hindi', source_language='ja'), 'नमस्ते')
+        retry = provider._model.generate.call_args.kwargs
+        self.assertEqual(retry['num_beams'], 1)
+        self.assertEqual(retry['no_repeat_ngram_size'], 3)
+        provider._tokenizer.batch_decode.assert_called_once_with(complete, skip_special_tokens=True)
+
+    def test_nllb_recovers_exact_japanese_reaction_without_accepting_capped_tokens(self):
+        provider = nllb_fixture()
+        provider._model.generate.return_value = [[2] + [4]*31 + [2]]
+        self.assertEqual(provider.translate('え？', 'Hindi', source_language='ja'), 'क्या?')
+        provider._model.generate.assert_called_once()
+        provider._tokenizer.batch_decode.assert_not_called()
+
+    def test_nllb_still_rejects_a_second_unfinished_result(self):
+        provider = nllb_fixture()
+        provider._model.generate.return_value = [[2, 4, 8]]
+        with self.assertRaisesRegex(RuntimeError, 'after an automatic retry'):
+            provider.translate('え? 何ですか', 'Hindi', source_language='ja')
+        self.assertEqual(provider._model.generate.call_count, 2)
+        provider._tokenizer.batch_decode.assert_not_called()
+
     def test_input_limit_boundary_and_no_silent_truncation(self):
         model = SimpleNamespace(config=SimpleNamespace(max_position_embeddings=4))
         require_input_window({'input_ids': [[1]*4]}, model, 'NLLB')

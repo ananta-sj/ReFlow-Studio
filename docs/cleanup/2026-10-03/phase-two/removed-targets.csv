@@ -1,0 +1,5 @@
+"Path","Bytes","Files","Reason"
+"temp","0","0","Disposable processing temporary directory."
+"build/windows-portable/Lib/site-packages/rvc_python/base_model/hubert_base.pt","189507909","1","Replaceable RVC HuBERT checkpoint; restored by RVC feature on first use."
+"build/windows-portable/Lib/site-packages/rvc_python/base_model/rmvpe.pt","181184272","1","Replaceable RVC pitch checkpoint; restored by RVC feature on first use."
+"build/windows-portable/Lib/site-packages/rvc_python/base_model/rmvpe.onnx","361688443","1","Replaceable RVC ONNX pitch checkpoint; restored by RVC feature on first use."

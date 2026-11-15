@@ -81,3 +81,24 @@ Thumbs.db
 
 # Explicitly installed optional feature runtimes; rebuild from profile manifests.
 /runtime_profiles/
+
+# Local recovery copies contain media, logs and machine-specific settings.
+/docs/diagnostics/
+/docs/validation/community-speaker-probe-*/
+# Local test receipts can contain original dialogue and machine paths. Existing
+# reviewed runtime lock manifests remain tracked; add new locks deliberately.
+/docs/validation/
+
+# Local application lock and personal audition media are never source code.
+/.reflow-instance.lock
+/Sample/
+
+# Generated lip-sync exports and optional vendor example recordings.
+/core/Wav2Lip/results/
+/dev/vendor/IndicF5/prompts/
+/dev/vendor/IndicF5/f5_tts/infer/examples/basic/*.wav
+
+# Local credentials are never source files.
+.env
+.env.*
+!.env.example

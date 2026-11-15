@@ -1,7 +1,7 @@
 import { bridge } from './api'
 
 const keys = ['reflow-theme', 'reflow-experience-level', 'reflow.accentColor',
-  'reflow.helpTooltipsEnabled', 'reflow.tourComplete', 'reflow.renderConfig']
+  'reflow.helpTooltipsEnabled', 'reflow.tourComplete', 'reflow.renderConfig', 'reflow.device']
 let values: Record<string, string> = {}
 let pending: Promise<unknown> = Promise.resolve()
 

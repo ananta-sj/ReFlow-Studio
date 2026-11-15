@@ -42,6 +42,7 @@ export function SettingsPage({ level }: SettingsPageProps) {
   const [values, setValues] = useState<AppSettings | null>(null)
   const [whisperSizes, setWhisperSizes] = useState<string[]>([])
   const [isolatedSpeechReady, setIsolatedSpeechReady] = useState(false)
+  const [cudaStatus, setCudaStatus] = useState('unavailable')
   const [isolatedRecognitionReady, setIsolatedRecognitionReady] = useState(false)
   const [isolatedTranslationReady, setIsolatedTranslationReady] = useState(false)
   const [isolatedFallbackReady, setIsolatedFallbackReady] = useState(false)
@@ -65,6 +66,7 @@ export function SettingsPage({ level }: SettingsPageProps) {
       setValues(res.values)
       setWhisperSizes(res.whisper_model_sizes)
       setIsolatedSpeechReady(res.xtts_runtime_status === 'ready-for-explicit-trial')
+      setCudaStatus(res.cuda_runtime_status ?? 'unavailable')
       setIsolatedRecognitionReady(res.recognition_runtime_status === 'ready-for-explicit-trial')
       setIsolatedTranslationReady(res.nllb_runtime_status === 'ready-for-explicit-trial')
       setIsolatedFallbackReady(res.m2m100_runtime_status === 'ready-for-explicit-trial')
@@ -301,6 +303,26 @@ export function SettingsPage({ level }: SettingsPageProps) {
               </div>
               <div className="flex items-center justify-between">
                 <div>
+                  <div className="text-sm">Clear temporary files on exit</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    Clears temporary working files after active work stops. Saved recovery audio is kept for Retry and Resume.
+                  </div>
+                </div>
+                <Switch checked={values.clear_temp_on_exit ?? false}
+                  onCheckedChange={value => patch({ clear_temp_on_exit: value })} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm">Automatically clear disposable caches</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    At startup and exit, removes source bytecode caches and abandoned job files older than 24 hours. Keeps active work, saved reviews, recovery checkpoints, models and installed runtimes.
+                  </div>
+                </div>
+                <Switch checked={values.auto_cleanup_cache ?? true}
+                  onCheckedChange={value => patch({ auto_cleanup_cache: value })} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm">Auto-detect model type in Marketplace</span>
                     <HelpTooltip text="Guess the stage (STT, TTS, Voice, etc.) from a pasted link instead of picking a tab first. Always shown as a suggestion to confirm, never applied automatically." />
@@ -470,6 +492,11 @@ export function SettingsPage({ level }: SettingsPageProps) {
               </div>
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs text-muted-foreground">XTTS speech runtime</span>
+                <p className="text-xs text-muted-foreground">
+                  {cudaStatus === 'ready' ? 'NVIDIA acceleration is ready. Select the RTX in Processing Device to use the isolated GPU engines.'
+                    : cudaStatus === 'prepared-awaiting-tests' ? 'NVIDIA packages are installed. GPU model tests are required before acceleration is enabled.'
+                    : 'NVIDIA runtime is unavailable. The selected CPU runtimes remain available.'}
+                </p>
                 <Select value={values.xtts_runtime ?? 'legacy'} onValueChange={(v) => patch({ xtts_runtime: v as AppSettings['xtts_runtime'] })}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>

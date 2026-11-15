@@ -16,6 +16,36 @@ from core.queue_manager import QueueManager
 
 
 class RenderQueueTests(unittest.TestCase):
+    def test_auxiliary_review_failure_does_not_fail_a_valid_completed_export(self):
+        self.pipeline.last_manifest_path=str(Path(self.temp)/'manifest.json')
+        with patch('core.batch_review.publish',side_effect=TypeError('Invalid optional report')):
+            self.run_item(self.add())
+        self.assertEqual(self.statuses(),['completed'])
+        self.assertEqual(self.terminal_events(),[('render_finished',{'outputPath':str(self.output)})])
+
+    def test_retry_uses_saved_job_parameters_and_restores_queue_when_start_fails(self):
+        source = Path(self.temp)/'input.mp4'
+        source.write_bytes(b'video')
+        item = self.bridge.add_queue_item(str(source), {'voice': 'CLONED_USER'}, 'video_dub')
+        self.bridge.queue_manager.update_item(item['id'], status='failed', error='speech failed')
+        with patch.object(self.bridge, '_start_rejection', return_value=None), patch.object(
+                self.bridge, '_start_worker', return_value={'ok': False, 'message': 'busy'}) as start:
+            result = self.bridge.retry_render(item['id'])
+        self.assertFalse(result['ok'])
+        self.assertEqual(self.bridge.queue_manager.get_items()[0]['status'], 'failed')
+        self.assertEqual(start.call_args.args, (str(source), {'voice': 'CLONED_USER'}, 'video_dub', item['id']))
+
+    def test_closing_retains_resume_marker_and_returns_active_queue_item_to_waiting(self):
+        item = self.add()
+        def interrupted(*args):
+            yield (10, 'Working', None)
+            self.bridge._closing = True
+            self.bridge._render_killed = True
+        self.pipeline.run.side_effect = interrupted
+        self.run_item(item)
+        self.assertEqual(self.bridge.queue_manager.get_items()[0]['status'], 'queued')
+        self.state.clear.assert_not_called()
+
     def setUp(self):
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)

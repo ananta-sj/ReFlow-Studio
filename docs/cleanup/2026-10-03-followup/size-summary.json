@@ -1,0 +1,11 @@
+{
+  "Date": "2026-10-03",
+  "BeforeThisPassBytes": 6460068238,
+  "AfterBytes": 6312602004,
+  "AfterGB": 6.313,
+  "AfterGiB": 5.879,
+  "RemovedArtifactBytes": 151037113,
+  "InitialProjectBytes": 31083341771,
+  "NetReductionFromInitialBytes": 24770739767,
+  "Scope": "Summed file lengths including both runtimes, Git, user media and audit files. Small report files written after measurement are excluded."
+}

@@ -153,6 +153,12 @@ class XTTSTests(SpeechFixture):
         self.assertEqual(options['language'], 'hi')
         self.assertEqual(options['speaker_wav'], str(self.reference))
 
+    def test_hindi_numbers_are_expanded_before_the_engine_call(self):
+        (self.model_dir / 'config.json').write_text('{"model":"xtts","languages":["en","hi"]}')
+        self.handler().generate_audio('मैं 13 साल का हूँ.', str(self.output),
+                                      language='hi', reference_audio=str(self.reference))
+        self.assertEqual(self.engine.tts_to_file.call_args.kwargs['text'], 'मैं तेरह साल का हूँ.')
+
     def test_english_keeps_engine_sampling_defaults(self):
         self.handler().generate_audio('Hello', str(self.output), reference_audio=str(self.reference))
         options = self.engine.tts_to_file.call_args.kwargs
@@ -360,11 +366,11 @@ class SegmentTests(SpeechFixture):
         self.assert_cleaned()
 
     def test_speech_uses_gap_without_unnecessary_acceleration(self):
-        self.tts.synthesize.side_effect = lambda text, path, **kw: self.write_audio(path, 1600)
+        self.tts.synthesize.side_effect = lambda text, path, **kw: self.write_audio(path, 1300)
         self.subject.speed_change = Mock(side_effect=lambda clip, speed: clip)
         clip = self.subject._dub_segment(0, self.segment, ['CLONED_USER'], 'en', self.tts,
             {}, None, str(self.reference), 'cpu', self.master, next_start=2)
-        self.assertEqual(len(clip), 1600)
+        self.assertEqual(len(clip), 1300)
         self.assertEqual(self.subject.speed_change.call_args.args[1], 1.0)
         self.assert_cleaned()
 
@@ -375,29 +381,35 @@ class SegmentTests(SpeechFixture):
         self.assertEqual(len(clip),600);self.assertEqual(self.subject.speed_change.call_args.args[1],1.0)
 
     def test_final_cue_can_use_media_tail_in_sequential_and_parallel_execution(self):
-        self.tts.synthesize.side_effect=lambda text,path,**kw:self.write_audio(path,1600)
+        self.tts.synthesize.side_effect=lambda text,path,**kw:self.write_audio(path,1300)
         for workers in [1,2]:
             with self.subTest(workers=workers):
                 track=self.collect_batch([self.segment],workers)
-                self.assertEqual(len(track),3000);self.assertGreater(track[1200:1500].rms,0)
-                self.assertEqual(track[1800:2500].max,0)
+                self.assertEqual(len(track),3000);self.assertGreater(track[1200:1290].rms,0)
+                self.assertEqual(track[1400:2500].max,0)
+
+    def test_long_scene_pause_cannot_hide_a_runaway_take(self):
+        self.tts.synthesize.side_effect=lambda text,path,**kw:self.write_audio(path,8000)
+        with self.assertRaisesRegex(RuntimeError, 'cannot fit without cutting words'):
+            self.subject._dub_segment(0, self.segment, ['CLONED_USER'], 'en', self.tts,
+                {}, None, str(self.reference), 'cpu', self.master, next_start=100)
 
     def test_hindi_short_speech_keeps_approved_pace_in_a_spacious_cue(self):
         self.tts.synthesize.side_effect = lambda text, path, **kw: self.write_audio(path, 1000)
         self.subject.speed_change = Mock(wraps=pipeline.ReflowPipeline.speed_change.__get__(self.subject))
         clip = self.run_segment(segment={'start': 0, 'end': 2, 'text': 'नमस्ते'}, language='hi')
-        self.assertAlmostEqual(len(clip), 1000 / 1.342, delta=70)
+        self.assertEqual(len(clip), 1000)
         self.assertGreater(clip.rms, 0)
-        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.342)
+        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.0)
         self.assert_cleaned()
 
     def test_hindi_uses_gap_without_exceeding_approved_pace(self):
-        self.tts.synthesize.side_effect = lambda text, path, **kw: self.write_audio(path, 1600)
+        self.tts.synthesize.side_effect = lambda text, path, **kw: self.write_audio(path, 1300)
         self.subject.speed_change = Mock(wraps=pipeline.ReflowPipeline.speed_change.__get__(self.subject))
         clip = self.subject._dub_segment(0, self.segment, ['CLONED_USER'], 'hi', self.tts,
             {}, None, str(self.reference), 'cpu', self.master, next_start=2)
-        self.assertLess(len(clip), 1300)
-        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.342)
+        self.assertEqual(len(clip), 1300)
+        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.0)
         self.assert_cleaned()
 
     def test_hindi_overlong_words_fail_at_the_approved_pace(self):
@@ -405,7 +417,7 @@ class SegmentTests(SpeechFixture):
         self.subject.speed_change = Mock(wraps=pipeline.ReflowPipeline.speed_change.__get__(self.subject))
         with self.assertRaisesRegex(RuntimeError, 'cannot fit without cutting words'):
             self.run_segment(language='hi')
-        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.342)
+        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.15)
         self.assert_cleaned()
 
     def test_review_can_audition_overlong_hindi_without_weakening_render_guard(self):
@@ -414,7 +426,7 @@ class SegmentTests(SpeechFixture):
         clip = self.subject._dub_segment(0, self.segment, ['CLONED_USER'], 'hi', self.tts,
             {}, None, str(self.reference), 'cpu', self.master, allow_overflow=True)
         self.assertGreater(len(clip), 1400)
-        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.342)
+        self.assertEqual(self.subject.speed_change.call_args.args[1], 1.15)
         with self.assertRaisesRegex(RuntimeError, 'cannot fit without cutting words'):
             self.run_segment(language='hi')
         self.assert_cleaned()

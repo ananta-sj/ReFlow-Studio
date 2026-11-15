@@ -13,6 +13,7 @@ import { HelpTooltip } from "@/components/shared/HelpTooltip"
 import { CueAudioPlayer } from "@/components/shared/CueAudioPlayer"
 import { useMarketplace } from "@/lib/use-marketplace"
 import { cn } from "@/lib/utils"
+import { safeExternalUrl } from "@/lib/external-url"
 import {
   bridge,
   type BestModelResult,
@@ -317,7 +318,7 @@ function AddModelDialog({
           <TabsContent value="cloud" className="flex flex-col gap-3 pt-2">
             <Input placeholder="Display name" value={cloudName} onChange={(e) => setCloudName(e.target.value)} />
             <Input placeholder="API base URL (e.g. https://api.openai.com)" value={cloudUrl} onChange={(e) => setCloudUrl(e.target.value)} />
-            <Input placeholder="API key" type="password" value={cloudKey} onChange={(e) => setCloudKey(e.target.value)} />
+            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" value={cloudKey} onChange={(e) => setCloudKey(e.target.value)} />
             <Select value={cloudPreset} onValueChange={setCloudPreset}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -505,7 +506,7 @@ function QuickAddDialog() {
                 {detecting ? "…" : "Detect"}
               </Button>
             </div>
-            <Input placeholder="API key" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
             <Select value={preset} onValueChange={setPreset}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -722,9 +723,9 @@ function RecommendedSection({ stageType, onPick }: { stageType: StageType; onPic
             <div className="mt-auto pt-1">
               {rec.kind === "reference" ? (
                 <a
-                  href={rec.source_url}
+                  href={safeExternalUrl(rec.source_url)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-[11px] text-primary underline underline-offset-2"
                 >
                   View project ↗

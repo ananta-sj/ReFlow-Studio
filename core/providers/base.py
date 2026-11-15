@@ -102,5 +102,5 @@ class ProfanityFilterProvider(ABC):
 
 def release_speech(provider):
     """Release stage-owned workers before another model family starts."""
-    if getattr(provider, 'engine_id', None) in ('indicf5', 'xtts_isolated'):
+    if getattr(provider, 'engine_id', None) in ('indicf5', 'xtts_isolated', 'xtts_cuda'):
         provider.release()

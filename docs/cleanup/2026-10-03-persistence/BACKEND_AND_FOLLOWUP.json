@@ -1,0 +1,133 @@
+{
+  "source": [
+    {
+      "path": "core/json_store.py",
+      "sha256": "4EFABFABA6E0D01BE1A64D535CFD26B344B3CB46FBF498B1AC858AF807ABEEEF"
+    },
+    {
+      "path": "core/model_registry.py",
+      "sha256": "8114701AF5488DB5C7B9931BA39F1AB28C089CA7B188EE0578FE3CE306B816C5"
+    },
+    {
+      "path": "core/settings.py",
+      "sha256": "4126658D3B38A2A5044B213ED4C952B30690B6AE632A30BE763ABDF45EEAD43C"
+    },
+    {
+      "path": "core/hardware_profile.py",
+      "sha256": "B24C630DF0121B0E1FAAE1B65D1C84374608FB3E6C370F6BCE79E372B13B145C"
+    },
+    {
+      "path": "core/render_state.py",
+      "sha256": "C45F8BA009AFB19640C59E53C79D842359AB02471C3DE9482D49D226D398FBB8"
+    },
+    {
+      "path": "bridge/api.py",
+      "sha256": "9C760D5A725B02A3515AB3815003C5B2430795CF2BAC07A5458F2948AE4B7234"
+    },
+    {
+      "path": "dev/test_suite.py",
+      "sha256": "3181060D79368BFE64079EDDE7D02AD44008F6DE0D824820905CD5BFA355C7C0"
+    },
+    {
+      "path": "dev/test_persistence_safety.py",
+      "sha256": "2A30013D4018CAAC6BBA851AF9129B5414AAABB79B6EE24BDE39FDD180DE2E14"
+    },
+    {
+      "path": "dev/run_cleanup_checks.py",
+      "sha256": "887212FC29EA92B0C201102B7DA34219F25FEACDC16F50628A4B6D89D7377ECD"
+    },
+    {
+      "path": "frontend/src/lib/settings-save.ts",
+      "sha256": "B7B0CB6410D20FAB0D14AADC0CD9ED263BB355114F17CA5BEF96531BD077D9CE"
+    },
+    {
+      "path": "frontend/src/pages/Settings.tsx",
+      "sha256": "958ED8070537B100E7399C06AA07579A348DF9451339B7B9D34B4867371ED987"
+    },
+    {
+      "path": "frontend/dev/verify-settings-save.mjs",
+      "sha256": "B8409978E870335588E72D48FF8D57C76D83EDE8C67979D1EDE8EDB7E5488576"
+    },
+    {
+      "path": "docs/PERSISTENCE_SAFETY_REPORT_2026-10-03.md",
+      "sha256": "0255B02B4547B54072BFB7A3DEDABAE90315454EDB9B62B0873DC319BE2050DD"
+    },
+    {
+      "path": "docs/PERSISTENCE_SAFETY_PLAN_2026-10-03.md",
+      "sha256": "1B0E252E5D9D5D6A47C3A79CC7647F1D9C45D47DC9386B4555662F66C83E6A82"
+    }
+  ],
+  "historicalAuditPreserved": true,
+  "nativeGuiTested": false,
+  "logs": [
+    {
+      "bytes": 1035,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-build.log",
+      "sha256": "3118D2B62E2F8421074D1D6E958E78103EB225B50D59954F8F0FB10541196529"
+    },
+    {
+      "bytes": 543,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-cancellation-ui.log",
+      "sha256": "A032E16E09E67D0246CB94ED908B3A7BBADEBCC8F45373881BE5A00AAAE43466"
+    },
+    {
+      "bytes": 36166,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-checks.log",
+      "sha256": "D905683A9F4EB4E764AF6A4158594324D9F5E844808E405E200F8EB658EEAE66"
+    },
+    {
+      "bytes": 391,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-deletion-ui.log",
+      "sha256": "0A2B8BDCD5BD6CAC87BABE4FCDC00572961E067DA871519D7FE2FFA1E5CD94D1"
+    },
+    {
+      "bytes": 583,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-diff-check.log",
+      "sha256": "4B4EE588E4EE5151BC8413C34C8EE272CF3C976059D9775A84F3CFEB26E79C0F"
+    },
+    {
+      "bytes": 256,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-final-check.log",
+      "sha256": "0782FDAD058EC12A2F4B051FA04733D61AAAC62EA21441C9CD3CCA68A663DEEA"
+    },
+    {
+      "bytes": 786,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-job-ui.log",
+      "sha256": "8E05606E420F5192FA514F51BDC02A879C1B2F3E5286F1195325077B5026CE4B"
+    },
+    {
+      "bytes": 0,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-lint.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "bytes": 29,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-npm.log",
+      "sha256": "A728BF887172140CBEF54E28A20FD754D2D5F7C13F767FF2ECCCF856B7925355"
+    },
+    {
+      "bytes": 338,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-settings-ui.log",
+      "sha256": "0FA7198BBFF7945E542EE7E2D84444B2B4DAD317046513AAFAFC1BC57D51A1E5"
+    },
+    {
+      "bytes": 1648,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-source-ui.log",
+      "sha256": "08C293B700E38E80F8613F8B00D725B987107587CBA1A9D53D28B47F2713232E"
+    },
+    {
+      "bytes": 3388,
+      "path": "C:\\Projects\\Reflow Studio\\docs\\validation\\2026-10-03-persistence-targeted.log",
+      "sha256": "DE9D15FC8DDE3FEC2C0A95529794342521CAC0300AC3BCCBCFEE0A272659DA7C"
+    }
+  ],
+  "aggregateBackendTests": 345,
+  "realModelsTested": false,
+  "otherOperatingSystemsTested": false,
+  "additionalBackendTests": 1,
+  "date": "2026-10-03",
+  "status": "saved-state foundation implemented",
+  "finding": "A07",
+  "frontendChecks": 65,
+  "newBackendTests": 27
+}

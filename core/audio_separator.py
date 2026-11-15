@@ -96,7 +96,9 @@ class AudioSeparator:
             log_path = Path(self.work_dir) / 'worker.log'
             try:
                 with log_path.open('wb') as log:
-                    run_process(cmd, check=True, env=environment, timeout=3600, stdout=log, stderr=subprocess.STDOUT)
+                    run_process(cmd, check=True, env=environment,
+                        timeout=24*3600 if current_job() else 3600, stdout=log, stderr=subprocess.STDOUT,
+                        **({'activity_path': log_path, 'idle_timeout': 1200} if current_job() else {}))
             except subprocess.CalledProcessError as exc:
                 with log_path.open('rb') as log:
                     log.seek(0, os.SEEK_END)

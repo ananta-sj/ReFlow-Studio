@@ -1,0 +1,142 @@
+[
+  {
+    "path": "base_model/hubert_base.pt",
+    "url": "https://huggingface.co/Daswer123/RVC_Base/resolve/main/hubert_base.pt",
+    "status": 200,
+    "remote_bytes": "189507909",
+    "expected_bytes": 189507909
+  },
+  {
+    "path": "base_model/rmvpe.pt",
+    "url": "https://huggingface.co/Daswer123/RVC_Base/resolve/main/rmvpe.pt",
+    "status": 200,
+    "remote_bytes": "181184272",
+    "expected_bytes": 181184272
+  },
+  {
+    "path": "base_model/rmvpe.onnx",
+    "url": "https://huggingface.co/Daswer123/RVC_Base/resolve/main/rmvpe.onnx",
+    "status": 200,
+    "remote_bytes": "361688443",
+    "expected_bytes": 361688443
+  },
+  {
+    "path": "models/xtts/default/model.pth",
+    "url": "https://huggingface.co/coqui/XTTS-v2/resolve/main/model.pth",
+    "status": 200,
+    "remote_bytes": "1867929118",
+    "expected_bytes": 1867929118
+  },
+  {
+    "path": "models/xtts/default/config.json",
+    "url": "https://huggingface.co/coqui/XTTS-v2/resolve/main/config.json",
+    "status": 200,
+    "remote_bytes": null,
+    "expected_bytes": null
+  },
+  {
+    "path": "models/xtts/default/vocab.json",
+    "url": "https://huggingface.co/coqui/XTTS-v2/resolve/main/vocab.json",
+    "status": 200,
+    "remote_bytes": null,
+    "expected_bytes": null
+  },
+  {
+    "path": "models/xtts/default/speakers_xtts.pth",
+    "url": "https://huggingface.co/coqui/XTTS-v2/resolve/main/speakers_xtts.pth",
+    "status": 200,
+    "remote_bytes": "7754818",
+    "expected_bytes": 7754818
+  },
+  {
+    "path": "core/Wav2Lip/checkpoints/Wav2Lip_GAN.pth",
+    "url": "https://huggingface.co/camenduru/Wav2Lip/resolve/main/checkpoints/wav2lip_gan.pth",
+    "status": 200,
+    "remote_bytes": "435801865",
+    "expected_bytes": 435801865
+  },
+  {
+    "path": "gfpgan/weights/GFPGANv1.4.pth",
+    "url": "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth",
+    "status": 200,
+    "remote_bytes": "348632874",
+    "expected_bytes": 348632874
+  },
+  {
+    "path": "gfpgan/weights/parsing_parsenet.pth",
+    "url": "https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth",
+    "status": 200,
+    "remote_bytes": "85331193",
+    "expected_bytes": 85331193
+  },
+  {
+    "path": "gfpgan/weights/detection_Resnet50_Final.pth",
+    "url": "https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth",
+    "status": 200,
+    "remote_bytes": "109497761",
+    "expected_bytes": 109497761
+  },
+  {
+    "path": "core/MuseTalk/models/musetalkV15/unet.pth",
+    "url": "https://huggingface.co/TMElyralab/MuseTalk/resolve/3ef28bc5cff08c90ad8178a25f1b570cd800170f/musetalkV15/unet.pth",
+    "status": 200,
+    "remote_bytes": "3400074924",
+    "expected_bytes": 3400074924
+  },
+  {
+    "path": "core/MuseTalk/models/musetalkV15/musetalk.json",
+    "url": "https://huggingface.co/TMElyralab/MuseTalk/resolve/3ef28bc5cff08c90ad8178a25f1b570cd800170f/musetalkV15/musetalk.json",
+    "status": 200,
+    "remote_bytes": "748",
+    "expected_bytes": null
+  },
+  {
+    "path": "core/MuseTalk/models/sd-vae/config.json",
+    "url": "https://huggingface.co/stabilityai/sd-vae-ft-mse/resolve/31f26fdeee1355a5c34592e401dd41e45d25a493/config.json",
+    "status": 200,
+    "remote_bytes": "547",
+    "expected_bytes": null
+  },
+  {
+    "path": "core/MuseTalk/models/sd-vae/diffusion_pytorch_model.bin",
+    "url": "https://huggingface.co/stabilityai/sd-vae-ft-mse/resolve/31f26fdeee1355a5c34592e401dd41e45d25a493/diffusion_pytorch_model.bin",
+    "status": 200,
+    "remote_bytes": "334707217",
+    "expected_bytes": 334707217
+  },
+  {
+    "path": "core/MuseTalk/models/whisper/config.json",
+    "url": "https://huggingface.co/openai/whisper-tiny/resolve/169d4a4341b33bc18d8881c4b69c2e104e1cc0af/config.json",
+    "status": 200,
+    "remote_bytes": null,
+    "expected_bytes": null
+  },
+  {
+    "path": "core/MuseTalk/models/whisper/preprocessor_config.json",
+    "url": "https://huggingface.co/openai/whisper-tiny/resolve/169d4a4341b33bc18d8881c4b69c2e104e1cc0af/preprocessor_config.json",
+    "status": 200,
+    "remote_bytes": null,
+    "expected_bytes": null
+  },
+  {
+    "path": "core/MuseTalk/models/whisper/pytorch_model.bin",
+    "url": "https://huggingface.co/openai/whisper-tiny/resolve/169d4a4341b33bc18d8881c4b69c2e104e1cc0af/pytorch_model.bin",
+    "status": 200,
+    "remote_bytes": "151095027",
+    "expected_bytes": 151095027
+  },
+  {
+    "path": "core/MuseTalk/models/face-parse-bisent/79999_iter.pth",
+    "url": "https://huggingface.co/ManyOtherFunctions/face-parse-bisent/resolve/0073b233a5a3c4b1377d4dbf49245017938a72b5/79999_iter.pth",
+    "status": 200,
+    "remote_bytes": "53289463",
+    "expected_bytes": 53289463
+  },
+  {
+    "path": "core/MuseTalk/models/face-parse-bisent/resnet18-5c106cde.pth",
+    "url": "https://huggingface.co/ManyOtherFunctions/face-parse-bisent/resolve/0073b233a5a3c4b1377d4dbf49245017938a72b5/resnet18-5c106cde.pth",
+    "status": 200,
+    "remote_bytes": "46827520",
+    "expected_bytes": 46827520
+  }
+]

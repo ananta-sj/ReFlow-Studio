@@ -1,0 +1,5519 @@
+{
+  "scope": "Project sources and vendored inference sources; excludes environments, weights and media",
+  "files": [
+    {
+      "path": "core/audio_separator.py",
+      "bytes": 3028,
+      "sha256": "985b6494377910edc5aa9e440563afcdbd475e57d4cc6b368929e7e7b9fe6219",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 7
+        },
+        {
+          "name": "separate",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "path": "core/audio_utils.py",
+      "bytes": 5594,
+      "sha256": "48a581ccc1c0c28a4b87bf35d152480e081af12099e3684c5e99d18161f36870",
+      "functions": [
+        {
+          "name": "load_playable_audio",
+          "line": 6
+        },
+        {
+          "name": "__init__",
+          "line": 20
+        },
+        {
+          "name": "clean_reference_audio",
+          "line": 23
+        },
+        {
+          "name": "master_voice_segment",
+          "line": 53
+        },
+        {
+          "name": "dynamic_mix",
+          "line": 74
+        }
+      ]
+    },
+    {
+      "path": "core/credential_store.py",
+      "bytes": 1426,
+      "sha256": "5922a81fc65507fb802a6f669f365053f712b3e92be08d829c72302a6890dbce",
+      "functions": [
+        {
+          "name": "set_credential",
+          "line": 23
+        },
+        {
+          "name": "get_credential",
+          "line": 33
+        },
+        {
+          "name": "delete_credential",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "path": "core/downloader.py",
+      "bytes": 8846,
+      "sha256": "439d4cd5849841eb70a6c67a5d6a801d752e8fddb0f4f11554560b25e825aa50",
+      "functions": [
+        {
+          "name": "resolve_download_url",
+          "line": 36
+        },
+        {
+          "name": "hf_repo_id_for_url",
+          "line": 44
+        },
+        {
+          "name": "_dir_size",
+          "line": 52
+        },
+        {
+          "name": "_download_hf_snapshot",
+          "line": 63
+        },
+        {
+          "name": "download_with_progress",
+          "line": 130
+        },
+        {
+          "name": "extract_archive",
+          "line": 203
+        },
+        {
+          "name": "_run",
+          "line": 86
+        }
+      ]
+    },
+    {
+      "path": "core/enhancer.py",
+      "bytes": 3872,
+      "sha256": "3aa705927100cd605ac8d6625a429dc0e7edacefdfeb2191404713ba0174522a",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 20
+        },
+        {
+          "name": "enhance",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "path": "core/graph_model.py",
+      "bytes": 3128,
+      "sha256": "df4a83ebd86c2dbedb1981f2f56c32dd905ec93450149d335f45ac7d91d8e48f",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 12
+        },
+        {
+          "name": "__init__",
+          "line": 23
+        },
+        {
+          "name": "__init__",
+          "line": 42
+        },
+        {
+          "name": "__init__",
+          "line": 56
+        },
+        {
+          "name": "__init__",
+          "line": 62
+        },
+        {
+          "name": "add_node",
+          "line": 66
+        },
+        {
+          "name": "remove_node",
+          "line": 71
+        },
+        {
+          "name": "connect",
+          "line": 79
+        },
+        {
+          "name": "edges_from",
+          "line": 82
+        },
+        {
+          "name": "edges_to",
+          "line": 85
+        }
+      ]
+    },
+    {
+      "path": "core/hardware_monitor.py",
+      "bytes": 16551,
+      "sha256": "7691619e4a4695e4ab6e2b53c1b7de70e63de4cf7edff0b3741b73312147ede1",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 23
+        },
+        {
+          "name": "label",
+          "line": 30
+        },
+        {
+          "name": "__init__",
+          "line": 69
+        },
+        {
+          "name": "_detect_cpu_name",
+          "line": 74
+        },
+        {
+          "name": "_guess_adapter_kind",
+          "line": 94
+        },
+        {
+          "name": "_detect_devices",
+          "line": 110
+        },
+        {
+          "name": "_detect_other_adapters",
+          "line": 146
+        },
+        {
+          "name": "_nvidia_smi_snapshot",
+          "line": 172
+        },
+        {
+          "name": "default_device_id",
+          "line": 199
+        },
+        {
+          "name": "device_kind",
+          "line": 212
+        },
+        {
+          "name": "sample",
+          "line": 218
+        },
+        {
+          "name": "base_stage_cost",
+          "line": 249
+        },
+        {
+          "name": "base_stage_vram_mb",
+          "line": 256
+        },
+        {
+          "name": "estimate_eta_seconds",
+          "line": 259
+        },
+        {
+          "name": "estimate_peak_vram_mb",
+          "line": 273
+        },
+        {
+          "name": "run_benchmark",
+          "line": 283
+        }
+      ]
+    },
+    {
+      "path": "core/hardware_profile.py",
+      "bytes": 2734,
+      "sha256": "321965b35e86af92771c3227cfab46433c89119b62dd91dec98dd7da51a6b267",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 23
+        },
+        {
+          "name": "_load",
+          "line": 26
+        },
+        {
+          "name": "get",
+          "line": 35
+        },
+        {
+          "name": "capture",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "path": "core/integrity.py",
+      "bytes": 5500,
+      "sha256": "a6ca05f52d185ce4834470394b86d818ca95b6887936aa6b6cec07979417ca5b",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 9
+        },
+        {
+          "name": "install_package",
+          "line": 46
+        },
+        {
+          "name": "download_file",
+          "line": 57
+        },
+        {
+          "name": "check_libraries",
+          "line": 81
+        },
+        {
+          "name": "check_models",
+          "line": 89
+        },
+        {
+          "name": "run_all_checks",
+          "line": 106
+        }
+      ]
+    },
+    {
+      "path": "core/janitor.py",
+      "bytes": 3254,
+      "sha256": "b036a3eb92328f42b8a4aa4dbadf1c4f6dc7ff7f651ffd3b0b75c8a32ca2278c",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 17
+        },
+        {
+          "name": "kill_rogue_processes",
+          "line": 22
+        },
+        {
+          "name": "sweep",
+          "line": 38
+        },
+        {
+          "name": "remove_pycache",
+          "line": 63
+        },
+        {
+          "name": "destroy_all_data",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "path": "core/languages.py",
+      "bytes": 3540,
+      "sha256": "b2f35f34b10906685120609a6c938e34364b0a7fdb42eea698c76cb759f1c471",
+      "functions": [
+        {
+          "name": "require_known_target",
+          "line": 71
+        },
+        {
+          "name": "require_fixed_translation",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "path": "core/lipsync_handler.py",
+      "bytes": 4529,
+      "sha256": "641b7683f2e9b5a371513d9fb4c1a7fb842ad43740b5789fd751b0c5c8fd5278",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 14
+        },
+        {
+          "name": "execute",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "path": "core/llm_translator.py",
+      "bytes": 7764,
+      "sha256": "05fd31d4e4ebcd68d7330106a6b6558c8cd2a3c79a7a8645f64b7670981b3c50",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 12
+        },
+        {
+          "name": "_fallback",
+          "line": 45
+        },
+        {
+          "name": "init_m2m100",
+          "line": 63
+        },
+        {
+          "name": "translate",
+          "line": 79
+        }
+      ]
+    },
+    {
+      "path": "core/marketplace.py",
+      "bytes": 2996,
+      "sha256": "588754216e6cc964adb53b426c80538c08ee068b1bf4ec0be95e3548ef541606",
+      "functions": [
+        {
+          "name": "install_downloaded_voice_model",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "path": "core/model_assets.py",
+      "bytes": 6181,
+      "sha256": "81b74a09b99e396e3aa9d6215a4e994491c822615f33744f2154a4593c26651d",
+      "functions": [
+        {
+          "name": "_valid",
+          "line": 48
+        },
+        {
+          "name": "ensure_assets",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "path": "core/model_detect.py",
+      "bytes": 6918,
+      "sha256": "1006651cccf183fa32d7e23a2ae4098392d89888f4a5e668a749059c6ed94691",
+      "functions": [
+        {
+          "name": "_kw",
+          "line": 38
+        },
+        {
+          "name": "_keyword_match",
+          "line": 69
+        },
+        {
+          "name": "detect_from_url",
+          "line": 76
+        },
+        {
+          "name": "detect_from_api_base_url",
+          "line": 98
+        },
+        {
+          "name": "find_best_hf_model",
+          "line": 126
+        }
+      ]
+    },
+    {
+      "path": "core/model_registry.py",
+      "bytes": 4786,
+      "sha256": "6599608cc15fc39a32adb7d0c3d9c47e1f0092c796027a35de4faeb5cf499e67",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 30
+        },
+        {
+          "name": "_load",
+          "line": 35
+        },
+        {
+          "name": "_save",
+          "line": 46
+        },
+        {
+          "name": "list",
+          "line": 50
+        },
+        {
+          "name": "get",
+          "line": 55
+        },
+        {
+          "name": "add",
+          "line": 58
+        },
+        {
+          "name": "update",
+          "line": 92
+        },
+        {
+          "name": "remove",
+          "line": 100
+        },
+        {
+          "name": "set_active",
+          "line": 107
+        },
+        {
+          "name": "get_active",
+          "line": 113
+        },
+        {
+          "name": "get_active_map",
+          "line": 117
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/data/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/data/audio.py",
+      "bytes": 5638,
+      "sha256": "2dd46e459063eb502174ada851e161f55184c00090e3e48fcf7bed0ecb8ed3f7",
+      "functions": [
+        {
+          "name": "load_wav",
+          "line": 36
+        },
+        {
+          "name": "save_wav",
+          "line": 44
+        },
+        {
+          "name": "save_wavenet_wav",
+          "line": 49
+        },
+        {
+          "name": "preemphasis",
+          "line": 52
+        },
+        {
+          "name": "inv_preemphasis",
+          "line": 57
+        },
+        {
+          "name": "get_hop_size",
+          "line": 62
+        },
+        {
+          "name": "linearspectrogram",
+          "line": 69
+        },
+        {
+          "name": "melspectrogram",
+          "line": 77
+        },
+        {
+          "name": "_lws_processor",
+          "line": 85
+        },
+        {
+          "name": "_stft",
+          "line": 89
+        },
+        {
+          "name": "num_frames",
+          "line": 97
+        },
+        {
+          "name": "pad_lr",
+          "line": 108
+        },
+        {
+          "name": "librosa_pad_lr",
+          "line": 118
+        },
+        {
+          "name": "_linear_to_mel",
+          "line": 124
+        },
+        {
+          "name": "_build_mel_basis",
+          "line": 130
+        },
+        {
+          "name": "_amp_to_db",
+          "line": 135
+        },
+        {
+          "name": "_db_to_amp",
+          "line": 139
+        },
+        {
+          "name": "_normalize",
+          "line": 142
+        },
+        {
+          "name": "_denormalize",
+          "line": 156
+        },
+        {
+          "name": "__init__",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/models/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/models/syncnet.py",
+      "bytes": 9227,
+      "sha256": "f633c3d6f8f9b4b6e110732e3b4c472c5caa5bcbafcf0d42ce9dd52265e3d9b5",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 19
+        },
+        {
+          "name": "forward",
+          "line": 39
+        },
+        {
+          "name": "get_image_embed",
+          "line": 52
+        },
+        {
+          "name": "get_audio_embed",
+          "line": 62
+        },
+        {
+          "name": "__init__",
+          "line": 72
+        },
+        {
+          "name": "forward",
+          "line": 117
+        },
+        {
+          "name": "__init__",
+          "line": 143
+        },
+        {
+          "name": "forward",
+          "line": 162
+        },
+        {
+          "name": "__init__",
+          "line": 184
+        },
+        {
+          "name": "forward",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/models/unet.py",
+      "bytes": 1737,
+      "sha256": "378e4aad398e097fc52b6f7158970a7c857a6d1ea75741195de3c4825935df64",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 13
+        },
+        {
+          "name": "forward",
+          "line": 23
+        },
+        {
+          "name": "__init__",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/models/vae.py",
+      "bytes": 5749,
+      "sha256": "cbacfc7ddac98205919781990ab3e83c61292c42488be37750704a2d992902f9",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 15
+        },
+        {
+          "name": "get_mask_tensor",
+          "line": 43
+        },
+        {
+          "name": "preprocess_img",
+          "line": 54
+        },
+        {
+          "name": "encode_latents",
+          "line": 87
+        },
+        {
+          "name": "decode_latents",
+          "line": 99
+        },
+        {
+          "name": "get_latents_for_unet",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/__init__.py",
+      "bytes": 165,
+      "sha256": "2ad6e9ae2c90ed7edc1e8bf98ae62bea0b2a96f87005ea7f9db1aa935d93754e",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/audio_processor.py",
+      "bytes": 4329,
+      "sha256": "90c076bae47ddee11f362bd31a8f2dacb2f09dd0a6911fbf15c885552b896ecb",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 12
+        },
+        {
+          "name": "get_audio_feature",
+          "line": 15
+        },
+        {
+          "name": "get_whisper_chunk",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/audio_utils.py",
+      "bytes": 734,
+      "sha256": "0b2f71bef6399ce130dbed4932a238706ee53f7fb727cc4ceacd2c0b055806a5",
+      "functions": [
+        {
+          "name": "ensure_wav",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/blending.py",
+      "bytes": 5473,
+      "sha256": "acc87ced360c424d07da14481f8c5d1de5688432cb477d82be195cf842ad8649",
+      "functions": [
+        {
+          "name": "get_crop_box",
+          "line": 7
+        },
+        {
+          "name": "face_seg",
+          "line": 16
+        },
+        {
+          "name": "get_image",
+          "line": 35
+        },
+        {
+          "name": "get_image_blending",
+          "line": 96
+        },
+        {
+          "name": "get_image_prepare_material",
+          "line": 112
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/__init__.py",
+      "bytes": 203,
+      "sha256": "41bf59d3861e538d9eb6a2eadf52f7acac39617832f1148eab4d1c8d274bf6e0",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/api.py",
+      "bytes": 10339,
+      "sha256": "527286f6ae0a25e5717022d9041fa1c01eaf1d8268198359ac28466a5844a81c",
+      "functions": [
+        {
+          "name": "__new__",
+          "line": 36
+        },
+        {
+          "name": "__int__",
+          "line": 41
+        },
+        {
+          "name": "__init__",
+          "line": 47
+        },
+        {
+          "name": "get_detections_for_batch",
+          "line": 71
+        },
+        {
+          "name": "__init__",
+          "line": 90
+        },
+        {
+          "name": "make_anchors",
+          "line": 106
+        },
+        {
+          "name": "softmax",
+          "line": 118
+        },
+        {
+          "name": "resize_image",
+          "line": 125
+        },
+        {
+          "name": "detect",
+          "line": 145
+        },
+        {
+          "name": "post_process",
+          "line": 161
+        },
+        {
+          "name": "distance2bbox",
+          "line": 217
+        },
+        {
+          "name": "draw_detections",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/__init__.py",
+      "bytes": 30,
+      "sha256": "1f3233930bfb7ac8b1726e4af8ed9b93925046d16edc640afd218f9d02b6d235",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/core.py",
+      "bytes": 4998,
+      "sha256": "17b1baabfe0dc39feff4834f0850d111ccbe72d61cb81c3d039c2f716a31a26e",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 18
+        },
+        {
+          "name": "detect_from_image",
+          "line": 32
+        },
+        {
+          "name": "detect_from_directory",
+          "line": 54
+        },
+        {
+          "name": "reference_scale",
+          "line": 104
+        },
+        {
+          "name": "reference_x_shift",
+          "line": 108
+        },
+        {
+          "name": "reference_y_shift",
+          "line": 112
+        },
+        {
+          "name": "tensor_or_path_to_ndarray",
+          "line": 116
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/sfd/__init__.py",
+      "bytes": 53,
+      "sha256": "6fbfb62eccc1a14de7c0a8cb1ca6f3c59af42479955ac08acbf548f28ec1feed",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/sfd/bbox.py",
+      "bytes": 4408,
+      "sha256": "5bd1db6be9975433506b6b4b83e9bfe854ba8d0727c3dd0e4d0095d127d02bd4",
+      "functions": [
+        {
+          "name": "bboxlog",
+          "line": 30
+        },
+        {
+          "name": "bboxloginv",
+          "line": 37
+        },
+        {
+          "name": "nms",
+          "line": 44
+        },
+        {
+          "name": "encode",
+          "line": 67
+        },
+        {
+          "name": "decode",
+          "line": 91
+        },
+        {
+          "name": "batch_decode",
+          "line": 111
+        },
+        {
+          "name": "IOU",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/sfd/detect.py",
+      "bytes": 3906,
+      "sha256": "3bc0f57b9e00467e9eb4b2ce135a7d1e62dffa679c61053d1284b023fcb830fe",
+      "functions": [
+        {
+          "name": "detect",
+          "line": 19
+        },
+        {
+          "name": "batch_detect",
+          "line": 58
+        },
+        {
+          "name": "flip_detect",
+          "line": 98
+        },
+        {
+          "name": "pts_to_bb",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/sfd/net_s3fd.py",
+      "bytes": 5420,
+      "sha256": "1b86272e48d33f49169a249ec2c3b88af0551a9287362ce7c5906b24e3324477",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 7
+        },
+        {
+          "name": "forward",
+          "line": 16
+        },
+        {
+          "name": "__init__",
+          "line": 23
+        },
+        {
+          "name": "forward",
+          "line": 70
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/detection/sfd/sfd_detector.py",
+      "bytes": 1868,
+      "sha256": "772da464e91525cb892c849496477088868486ef713a0f646f0a0bc78aa50b38",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 17
+        },
+        {
+          "name": "detect_from_image",
+          "line": 31
+        },
+        {
+          "name": "detect_from_batch",
+          "line": 41
+        },
+        {
+          "name": "reference_scale",
+          "line": 50
+        },
+        {
+          "name": "reference_x_shift",
+          "line": 54
+        },
+        {
+          "name": "reference_y_shift",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/models.py",
+      "bytes": 8880,
+      "sha256": "cfec2574ec90511e35eeb5596af00e54be599e6f6b178a20a561962ac9dfd180",
+      "functions": [
+        {
+          "name": "conv3x3",
+          "line": 7
+        },
+        {
+          "name": "__init__",
+          "line": 14
+        },
+        {
+          "name": "forward",
+          "line": 33
+        },
+        {
+          "name": "__init__",
+          "line": 62
+        },
+        {
+          "name": "forward",
+          "line": 75
+        },
+        {
+          "name": "__init__",
+          "line": 99
+        },
+        {
+          "name": "_generate_network",
+          "line": 107
+        },
+        {
+          "name": "_forward",
+          "line": 119
+        },
+        {
+          "name": "forward",
+          "line": 141
+        },
+        {
+          "name": "__init__",
+          "line": 147
+        },
+        {
+          "name": "forward",
+          "line": 174
+        },
+        {
+          "name": "__init__",
+          "line": 206
+        },
+        {
+          "name": "_make_layer",
+          "line": 229
+        },
+        {
+          "name": "forward",
+          "line": 246
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_detection/utils.py",
+      "bytes": 12121,
+      "sha256": "0665c12697b14fee3bfb49f9eff4c2d86d1c99a12bf6f27d7a3429da6fb34bb8",
+      "functions": [
+        {
+          "name": "_gaussian",
+          "line": 11
+        },
+        {
+          "name": "draw_gaussian",
+          "line": 37
+        },
+        {
+          "name": "transform",
+          "line": 56
+        },
+        {
+          "name": "crop",
+          "line": 92
+        },
+        {
+          "name": "get_preds_fromhm",
+          "line": 132
+        },
+        {
+          "name": "get_preds_fromhm_batch",
+          "line": 172
+        },
+        {
+          "name": "shuffle_lr",
+          "line": 212
+        },
+        {
+          "name": "flip",
+          "line": 237
+        },
+        {
+          "name": "appdata_dir",
+          "line": 259
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_parsing/__init__.py",
+      "bytes": 5377,
+      "sha256": "21726d68731fae5c2ebe39ed029cb29f739e79368d4c65fdcf4b73a53108ed8e",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 11
+        },
+        {
+          "name": "_create_cheek_mask",
+          "line": 51
+        },
+        {
+          "name": "model_init",
+          "line": 59
+        },
+        {
+          "name": "image_preprocess",
+          "line": 79
+        },
+        {
+          "name": "__call__",
+          "line": 85
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_parsing/model.py",
+      "bytes": 10959,
+      "sha256": "84beb8e9ff4f87f0a66a7e91b25e13b04882d46ed0a963604e01bd728b29e31f",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 15
+        },
+        {
+          "name": "forward",
+          "line": 26
+        },
+        {
+          "name": "init_weight",
+          "line": 31
+        },
+        {
+          "name": "__init__",
+          "line": 38
+        },
+        {
+          "name": "forward",
+          "line": 44
+        },
+        {
+          "name": "init_weight",
+          "line": 49
+        },
+        {
+          "name": "get_params",
+          "line": 55
+        },
+        {
+          "name": "__init__",
+          "line": 68
+        },
+        {
+          "name": "forward",
+          "line": 76
+        },
+        {
+          "name": "init_weight",
+          "line": 85
+        },
+        {
+          "name": "__init__",
+          "line": 93
+        },
+        {
+          "name": "forward",
+          "line": 104
+        },
+        {
+          "name": "init_weight",
+          "line": 127
+        },
+        {
+          "name": "get_params",
+          "line": 133
+        },
+        {
+          "name": "__init__",
+          "line": 147
+        },
+        {
+          "name": "forward",
+          "line": 155
+        },
+        {
+          "name": "init_weight",
+          "line": 162
+        },
+        {
+          "name": "get_params",
+          "line": 168
+        },
+        {
+          "name": "__init__",
+          "line": 181
+        },
+        {
+          "name": "forward",
+          "line": 200
+        },
+        {
+          "name": "init_weight",
+          "line": 212
+        },
+        {
+          "name": "get_params",
+          "line": 218
+        },
+        {
+          "name": "__init__",
+          "line": 231
+        },
+        {
+          "name": "forward",
+          "line": 241
+        },
+        {
+          "name": "init_weight",
+          "line": 256
+        },
+        {
+          "name": "get_params",
+          "line": 262
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/face_parsing/resnet.py",
+      "bytes": 4799,
+      "sha256": "9587984c97d6b239115a8c8ebc6652e82767ddc94b101e8548a005a77e8117bc",
+      "functions": [
+        {
+          "name": "conv3x3",
+          "line": 14
+        },
+        {
+          "name": "create_layer_basic",
+          "line": 51
+        },
+        {
+          "name": "__init__",
+          "line": 21
+        },
+        {
+          "name": "forward",
+          "line": 36
+        },
+        {
+          "name": "__init__",
+          "line": 59
+        },
+        {
+          "name": "forward",
+          "line": 71
+        },
+        {
+          "name": "init_weight",
+          "line": 82
+        },
+        {
+          "name": "get_params",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/preprocessing.py",
+      "bytes": 8162,
+      "sha256": "5dc5801cd7fd7c580bac6702495407f08555405d58a39c4849a948573f50533d",
+      "functions": [
+        {
+          "name": "resize_landmark",
+          "line": 47
+        },
+        {
+          "name": "read_imgs",
+          "line": 54
+        },
+        {
+          "name": "get_landmark_and_bbox",
+          "line": 69
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/utils/utils.py",
+      "bytes": 12055,
+      "sha256": "b3c743493fa996dab9cd2d6f006f4c698fac20f58939968f0dee4fdc4bb96734",
+      "functions": [
+        {
+          "name": "load_all_model",
+          "line": 15
+        },
+        {
+          "name": "get_file_type",
+          "line": 33
+        },
+        {
+          "name": "get_video_fps",
+          "line": 43
+        },
+        {
+          "name": "datagen",
+          "line": 49
+        },
+        {
+          "name": "cast_training_params",
+          "line": 76
+        },
+        {
+          "name": "rand_log_normal",
+          "line": 88
+        },
+        {
+          "name": "get_mouth_region",
+          "line": 102
+        },
+        {
+          "name": "get_image_pred",
+          "line": 140
+        },
+        {
+          "name": "process_audio_features",
+          "line": 177
+        },
+        {
+          "name": "save_checkpoint",
+          "line": 206
+        },
+        {
+          "name": "save_models",
+          "line": 234
+        },
+        {
+          "name": "delete_additional_ckpt",
+          "line": 245
+        },
+        {
+          "name": "seed_everything",
+          "line": 260
+        },
+        {
+          "name": "process_and_save_images",
+          "line": 270
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/audio2feature.py",
+      "bytes": 4987,
+      "sha256": "1b8cdb71308d3d4b71f268397b517cfbdb21f661210cdc7782a9f5d03c9ef2d9",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 10
+        },
+        {
+          "name": "get_sliced_feature",
+          "line": 16
+        },
+        {
+          "name": "get_sliced_feature_sparse",
+          "line": 47
+        },
+        {
+          "name": "feature2chunks",
+          "line": 81
+        },
+        {
+          "name": "audio2feat",
+          "line": 97
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/__init__.py",
+      "bytes": 5558,
+      "sha256": "654871014921f9dc21f7efac9167e3a5545c7719b19c2f241f86240d8647f587",
+      "functions": [
+        {
+          "name": "_download",
+          "line": 33
+        },
+        {
+          "name": "available_models",
+          "line": 66
+        },
+        {
+          "name": "load_model",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/__main__.py",
+      "bytes": 40,
+      "sha256": "b87a72b8e9d4332bf971061878d507ce22f0d4a2f18b7c7a0bfa91895ff057ca",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/gpt2/special_tokens_map.json",
+      "bytes": 90,
+      "sha256": "c0b3c279b6ecdb71996a86ffb4d4ab94dfdb5df95f00bac9515688faef2ff5dd"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/gpt2/tokenizer_config.json",
+      "bytes": 236,
+      "sha256": "1e664fe1a5bc404dcb204a76c76bc4100c91bd12c66098d8a8090b11b6ee6f0d"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/gpt2/vocab.json",
+      "bytes": 798156,
+      "sha256": "3ba3c3109ff33976c4bd966589c11ee14fcaa1f4c9e5e154c2ed7f99d80709e7"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/multilingual/added_tokens.json",
+      "bytes": 26,
+      "sha256": "6fb149565e20295be82cffa4e89e3f5c1dd03d42ec72c7d3f06732a4d2c115bf"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/multilingual/special_tokens_map.json",
+      "bytes": 90,
+      "sha256": "c0b3c279b6ecdb71996a86ffb4d4ab94dfdb5df95f00bac9515688faef2ff5dd"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/multilingual/tokenizer_config.json",
+      "bytes": 604,
+      "sha256": "b4594fd40712d072d4d637a42a8fb92abdb65c094dd5cb8d1da8d5cebb7b3473"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/assets/multilingual/vocab.json",
+      "bytes": 936041,
+      "sha256": "4e8036c8f80442384c12c2eaceb2f1c25d3ee38b8b07584bae6e74fe75ba4de4"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/audio.py",
+      "bytes": 4196,
+      "sha256": "66b17aa7219011510497716fe90716909413b7582ec5081d553ac472c97a4927",
+      "functions": [
+        {
+          "name": "load_audio",
+          "line": 22
+        },
+        {
+          "name": "pad_or_trim",
+          "line": 52
+        },
+        {
+          "name": "mel_filters",
+          "line": 77
+        },
+        {
+          "name": "log_mel_spectrogram",
+          "line": 92
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/decoding.py",
+      "bytes": 31659,
+      "sha256": "3bead4cddea9c73a611dba5643d17b4b8f416ccf56814e47e3d29aa9fa1a8a7b",
+      "functions": [
+        {
+          "name": "detect_language",
+          "line": 19
+        },
+        {
+          "name": "decode",
+          "line": 700
+        },
+        {
+          "name": "logits",
+          "line": 119
+        },
+        {
+          "name": "rearrange_kv_cache",
+          "line": 123
+        },
+        {
+          "name": "cleanup_caching",
+          "line": 127
+        },
+        {
+          "name": "__init__",
+          "line": 133
+        },
+        {
+          "name": "logits",
+          "line": 139
+        },
+        {
+          "name": "cleanup_caching",
+          "line": 151
+        },
+        {
+          "name": "rearrange_kv_cache",
+          "line": 158
+        },
+        {
+          "name": "rank",
+          "line": 165
+        },
+        {
+          "name": "__init__",
+          "line": 179
+        },
+        {
+          "name": "rank",
+          "line": 182
+        },
+        {
+          "name": "reset",
+          "line": 200
+        },
+        {
+          "name": "update",
+          "line": 203
+        },
+        {
+          "name": "finalize",
+          "line": 228
+        },
+        {
+          "name": "__init__",
+          "line": 254
+        },
+        {
+          "name": "update",
+          "line": 258
+        },
+        {
+          "name": "finalize",
+          "line": 275
+        },
+        {
+          "name": "__init__",
+          "line": 282
+        },
+        {
+          "name": "reset",
+          "line": 292
+        },
+        {
+          "name": "update",
+          "line": 295
+        },
+        {
+          "name": "finalize",
+          "line": 351
+        },
+        {
+          "name": "apply",
+          "line": 372
+        },
+        {
+          "name": "__init__",
+          "line": 388
+        },
+        {
+          "name": "apply",
+          "line": 392
+        },
+        {
+          "name": "__init__",
+          "line": 398
+        },
+        {
+          "name": "apply",
+          "line": 401
+        },
+        {
+          "name": "__init__",
+          "line": 406
+        },
+        {
+          "name": "apply",
+          "line": 413
+        },
+        {
+          "name": "__init__",
+          "line": 450
+        },
+        {
+          "name": "_verify_options",
+          "line": 499
+        },
+        {
+          "name": "_get_initial_tokens",
+          "line": 512
+        },
+        {
+          "name": "_get_suppress_tokens",
+          "line": 534
+        },
+        {
+          "name": "_get_audio_features",
+          "line": 557
+        },
+        {
+          "name": "_detect_language",
+          "line": 579
+        },
+        {
+          "name": "_main_loop",
+          "line": 591
+        },
+        {
+          "name": "run",
+          "line": 631
+        },
+        {
+          "name": "scores",
+          "line": 183
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/model.py",
+      "bytes": 10881,
+      "sha256": "639645dbd27dc5b35241689c9801aa55c81a5a18c7b125a457628e5f7060814a",
+      "functions": [
+        {
+          "name": "sinusoids",
+          "line": 48
+        },
+        {
+          "name": "forward",
+          "line": 30
+        },
+        {
+          "name": "forward",
+          "line": 35
+        },
+        {
+          "name": "_conv_forward",
+          "line": 42
+        },
+        {
+          "name": "__init__",
+          "line": 58
+        },
+        {
+          "name": "forward",
+          "line": 66
+        },
+        {
+          "name": "qkv_attention",
+          "line": 88
+        },
+        {
+          "name": "__init__",
+          "line": 104
+        },
+        {
+          "name": "forward",
+          "line": 117
+        },
+        {
+          "name": "__init__",
+          "line": 132
+        },
+        {
+          "name": "forward",
+          "line": 143
+        },
+        {
+          "name": "__init__",
+          "line": 175
+        },
+        {
+          "name": "forward",
+          "line": 189
+        },
+        {
+          "name": "__init__",
+          "line": 221
+        },
+        {
+          "name": "embed_audio",
+          "line": 239
+        },
+        {
+          "name": "logits",
+          "line": 242
+        },
+        {
+          "name": "forward",
+          "line": 245
+        },
+        {
+          "name": "device",
+          "line": 249
+        },
+        {
+          "name": "is_multilingual",
+          "line": 253
+        },
+        {
+          "name": "install_kv_cache_hooks",
+          "line": 256
+        },
+        {
+          "name": "save_to_cache",
+          "line": 273
+        },
+        {
+          "name": "install_hooks",
+          "line": 280
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/normalizers/__init__.py",
+      "bytes": 84,
+      "sha256": "4bcaad9592f7f7309022e9ae832862c271a23305d3996b34ec0a752fe2f34ae6",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/normalizers/basic.py",
+      "bytes": 1953,
+      "sha256": "c10d93c1a14c66ae36375720f028fe8f900f3e58374fe79c8d24e2e5e4a7ec6d",
+      "functions": [
+        {
+          "name": "remove_symbols_and_diacritics",
+          "line": 27
+        },
+        {
+          "name": "remove_symbols",
+          "line": 46
+        },
+        {
+          "name": "__init__",
+          "line": 56
+        },
+        {
+          "name": "__call__",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/normalizers/english.json",
+      "bytes": 57886,
+      "sha256": "352d0e5c8049154505fe28066283126b531fbdf4736883cf9e5ca0659c48e2cf"
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/normalizers/english.py",
+      "bytes": 21336,
+      "sha256": "ea87f4bf963266e3c5244214adcd73f476a5ee94b78d0d0935e47b1a9d608269",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 23
+        },
+        {
+          "name": "process_words",
+          "line": 160
+        },
+        {
+          "name": "preprocess",
+          "line": 381
+        },
+        {
+          "name": "postprocess",
+          "line": 410
+        },
+        {
+          "name": "__call__",
+          "line": 435
+        },
+        {
+          "name": "__init__",
+          "line": 450
+        },
+        {
+          "name": "__call__",
+          "line": 454
+        },
+        {
+          "name": "__init__",
+          "line": 459
+        },
+        {
+          "name": "__call__",
+          "line": 519
+        },
+        {
+          "name": "to_fraction",
+          "line": 165
+        },
+        {
+          "name": "output",
+          "line": 171
+        },
+        {
+          "name": "combine_cents",
+          "line": 411
+        },
+        {
+          "name": "extract_cents",
+          "line": 420
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/tokenizer.py",
+      "bytes": 10168,
+      "sha256": "cb7d45abdee67d309629268618a7bb1b11093a8b4101913dcd9c45ce832e7720",
+      "functions": [
+        {
+          "name": "build_tokenizer",
+          "line": 274
+        },
+        {
+          "name": "get_tokenizer",
+          "line": 295
+        },
+        {
+          "name": "encode",
+          "line": 137
+        },
+        {
+          "name": "decode",
+          "line": 140
+        },
+        {
+          "name": "decode_with_timestamps",
+          "line": 143
+        },
+        {
+          "name": "eot",
+          "line": 161
+        },
+        {
+          "name": "sot",
+          "line": 166
+        },
+        {
+          "name": "sot_lm",
+          "line": 171
+        },
+        {
+          "name": "sot_prev",
+          "line": 176
+        },
+        {
+          "name": "no_speech",
+          "line": 181
+        },
+        {
+          "name": "no_timestamps",
+          "line": 186
+        },
+        {
+          "name": "timestamp_begin",
+          "line": 191
+        },
+        {
+          "name": "language_token",
+          "line": 196
+        },
+        {
+          "name": "all_language_tokens",
+          "line": 215
+        },
+        {
+          "name": "all_language_codes",
+          "line": 227
+        },
+        {
+          "name": "sot_sequence_including_notimestamps",
+          "line": 232
+        },
+        {
+          "name": "non_speech_tokens",
+          "line": 237
+        },
+        {
+          "name": "_get_single_token_id",
+          "line": 267
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/transcribe.py",
+      "bytes": 10787,
+      "sha256": "20206969d16b183f2aac401540d6ba04528a8c01dd674a17482ab89a0febe355",
+      "functions": [
+        {
+          "name": "transcribe",
+          "line": 19
+        },
+        {
+          "name": "cli",
+          "line": 131
+        },
+        {
+          "name": "add_segment",
+          "line": 88
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/musetalk/whisper/whisper/utils.py",
+      "bytes": 2747,
+      "sha256": "292ba9d51a7f819ea17658855145e577aa3b5cdb1e9d5be634fab8383cc228a1",
+      "functions": [
+        {
+          "name": "exact_div",
+          "line": 5
+        },
+        {
+          "name": "str2bool",
+          "line": 10
+        },
+        {
+          "name": "optional_int",
+          "line": 18
+        },
+        {
+          "name": "optional_float",
+          "line": 22
+        },
+        {
+          "name": "compression_ratio",
+          "line": 26
+        },
+        {
+          "name": "format_timestamp",
+          "line": 30
+        },
+        {
+          "name": "write_txt",
+          "line": 47
+        },
+        {
+          "name": "write_vtt",
+          "line": 52
+        },
+        {
+          "name": "write_srt",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "path": "core/MuseTalk/scripts/__init__.py",
+      "bytes": 2,
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "functions": []
+    },
+    {
+      "path": "core/MuseTalk/scripts/inference.py",
+      "bytes": 17315,
+      "sha256": "62d7d285c3ab1dccda50f7ba4249cfdd926d2f2fe18ab5f658aa997a3df2df87",
+      "functions": [
+        {
+          "name": "fast_check_ffmpeg",
+          "line": 23
+        },
+        {
+          "name": "main",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "path": "core/node_registry.py",
+      "bytes": 4213,
+      "sha256": "667c134820f387eaef10caf577323818ae7d831ca32aff3931003769d0c1b64f",
+      "functions": [
+        {
+          "name": "build_default_graph",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "path": "core/pipeline.py",
+      "bytes": 47456,
+      "sha256": "cdd033e2de047d1cad192564fdbdd99bdb775f8bb6f696ee0957a51a1a752132",
+      "functions": [
+        {
+          "name": "_run_media_command",
+          "line": 59
+        },
+        {
+          "name": "_run_ffmpeg",
+          "line": 84
+        },
+        {
+          "name": "_staged_output",
+          "line": 89
+        },
+        {
+          "name": "_validate_media",
+          "line": 108
+        },
+        {
+          "name": "__init__",
+          "line": 127
+        },
+        {
+          "name": "clear_vram",
+          "line": 143
+        },
+        {
+          "name": "format_timestamp",
+          "line": 151
+        },
+        {
+          "name": "format_time",
+          "line": 160
+        },
+        {
+          "name": "generate_srt",
+          "line": 165
+        },
+        {
+          "name": "get_duration",
+          "line": 184
+        },
+        {
+          "name": "speed_change",
+          "line": 195
+        },
+        {
+          "name": "merge_av",
+          "line": 208
+        },
+        {
+          "name": "_dub_segment",
+          "line": 261
+        },
+        {
+          "name": "_require_dialogue",
+          "line": 332
+        },
+        {
+          "name": "_maybe_locked",
+          "line": 337
+        },
+        {
+          "name": "_merge_short_segments",
+          "line": 344
+        },
+        {
+          "name": "_dub_all_segments",
+          "line": 377
+        },
+        {
+          "name": "_resolve_translation_and_filter",
+          "line": 451
+        },
+        {
+          "name": "_translation_target",
+          "line": 474
+        },
+        {
+          "name": "_translate_line",
+          "line": 480
+        },
+        {
+          "name": "_transcribe_source",
+          "line": 496
+        },
+        {
+          "name": "_report_source_language",
+          "line": 501
+        },
+        {
+          "name": "_transcribe_and_translate",
+          "line": 517
+        },
+        {
+          "name": "_check_speech_routes",
+          "line": 544
+        },
+        {
+          "name": "_early_speech_check",
+          "line": 550
+        },
+        {
+          "name": "process_video_gen",
+          "line": 562
+        },
+        {
+          "name": "process_audio_dub_gen",
+          "line": 731
+        },
+        {
+          "name": "process_subtitle_translate_gen",
+          "line": 817
+        },
+        {
+          "name": "run",
+          "line": 881
+        },
+        {
+          "name": "ensure_actor",
+          "line": 289
+        }
+      ]
+    },
+    {
+      "path": "core/providers/base.py",
+      "bytes": 4487,
+      "sha256": "4d5a1302c0aceaeba85f110e6b79af81e265c0bc8b9e222fa154ef6e58dd97fe",
+      "functions": [
+        {
+          "name": "require_translation_text",
+          "line": 14
+        },
+        {
+          "name": "transcribe",
+          "line": 23
+        },
+        {
+          "name": "translate",
+          "line": 34
+        },
+        {
+          "name": "synthesize",
+          "line": 48
+        },
+        {
+          "name": "convert",
+          "line": 54
+        },
+        {
+          "name": "enhance",
+          "line": 71
+        },
+        {
+          "name": "scan_and_blur",
+          "line": 78
+        },
+        {
+          "name": "execute",
+          "line": 85
+        },
+        {
+          "name": "filter_text",
+          "line": 92
+        }
+      ]
+    },
+    {
+      "path": "core/providers/cloud_rest_common.py",
+      "bytes": 2552,
+      "sha256": "b84477b7eed8987954450726dc57010337bced9048a0c07cb9d1970a09a4b466",
+      "functions": [
+        {
+          "name": "resolve_credential",
+          "line": 21
+        },
+        {
+          "name": "request",
+          "line": 37
+        },
+        {
+          "name": "poll_until_done",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "path": "core/providers/enhancer/cloud_rest.py",
+      "bytes": 2474,
+      "sha256": "0437a5fc8a4b809a214bc87a68019ba2e04aa57a297ffde45e13996924e47c96",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 18
+        },
+        {
+          "name": "enhance",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "path": "core/providers/enhancer/gfpgan_local.py",
+      "bytes": 691,
+      "sha256": "16a22e7da80229a085ab7fbb9fb3754f6bc04d69e11224e7df771c389f776b10",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 11
+        },
+        {
+          "name": "enhance",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "path": "core/providers/filter/cloud_rest.py",
+      "bytes": 2031,
+      "sha256": "2d8e2a8e74b6c467e96185eee134c3fd9876442adfa1c1afb95a690796bf9860",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 12
+        },
+        {
+          "name": "scan_and_blur",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "path": "core/providers/filter/nudenet_local.py",
+      "bytes": 1423,
+      "sha256": "b5ac29400257944eed7208d036c7516eb0fb891caa89c657397a500aeb6ff057",
+      "functions": [
+        {
+          "name": "scan_and_blur",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "path": "core/providers/filter/vision_classifier_local.py",
+      "bytes": 4234,
+      "sha256": "a4e4067b3b436cba8d8bc4f23b2d2dd8b689ff9bfa9b8c514675bdf5741789df",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 25
+        },
+        {
+          "name": "_ensure_loaded",
+          "line": 33
+        },
+        {
+          "name": "_is_unsafe",
+          "line": 67
+        },
+        {
+          "name": "scan_and_blur",
+          "line": 78
+        }
+      ]
+    },
+    {
+      "path": "core/providers/lipsync/cloud_rest.py",
+      "bytes": 2217,
+      "sha256": "79a32fb9f3f23fc7cd92b41d2a394893659938541e2e88af98886bd47f09df57",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 14
+        },
+        {
+          "name": "execute",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "path": "core/providers/lipsync/musetalk_local.py",
+      "bytes": 5621,
+      "sha256": "b8ea6d6d7511dd37698bb507ef4bc9f09278d36185335516168d7cfb5944aab2",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 29
+        },
+        {
+          "name": "execute",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "path": "core/providers/lipsync/wav2lip_local.py",
+      "bytes": 614,
+      "sha256": "1f46a7ef210240587d2a589e83796c005dbb52bfac90b6c230de828d562fa54e",
+      "functions": [
+        {
+          "name": "execute",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "path": "core/providers/profanity_filter/classifier_local.py",
+      "bytes": 4981,
+      "sha256": "351d92751eb615427080a88f4d022976dcaa061dc0bdd36b88cdeda8807c5c7f",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 38
+        },
+        {
+          "name": "_ensure_loaded",
+          "line": 47
+        },
+        {
+          "name": "filter_text",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "path": "core/providers/profanity_filter/cloud_rest.py",
+      "bytes": 3149,
+      "sha256": "7ce2cc9a6d79aebd0dbc5cd9c30c4ce7a88c84dd85ecd68d713902b914a29fce",
+      "functions": [
+        {
+          "name": "_openai_chat_request",
+          "line": 19
+        },
+        {
+          "name": "_custom_request",
+          "line": 38
+        },
+        {
+          "name": "__init__",
+          "line": 62
+        },
+        {
+          "name": "filter_text",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "path": "core/providers/profanity_filter/ollama_local.py",
+      "bytes": 2198,
+      "sha256": "fe26abc123997d797048f06b3364db9b4bf6dfc56ae5eb80d46a9ecc04278a80",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 25
+        },
+        {
+          "name": "filter_text",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "path": "core/providers/resolve.py",
+      "bytes": 9836,
+      "sha256": "5a312ba37394a698ab4a0ff153012e2c151964e70596559b945fc34180105a1a",
+      "functions": [
+        {
+          "name": "resolve_stt",
+          "line": 15
+        },
+        {
+          "name": "resolve_translation",
+          "line": 35
+        },
+        {
+          "name": "resolve_tts",
+          "line": 63
+        },
+        {
+          "name": "resolve_voice_for_actor",
+          "line": 79
+        },
+        {
+          "name": "resolve_enhancer",
+          "line": 104
+        },
+        {
+          "name": "resolve_filter",
+          "line": 113
+        },
+        {
+          "name": "resolve_lipsync",
+          "line": 132
+        },
+        {
+          "name": "resolve_profanity_filter",
+          "line": 144
+        }
+      ]
+    },
+    {
+      "path": "core/providers/stt/cloud_rest.py",
+      "bytes": 2512,
+      "sha256": "6b87b3455836ac19fb785a59d196a545145ae2989a4805862bdba51e5bc1e5c5",
+      "functions": [
+        {
+          "name": "_openai_whisper_request",
+          "line": 12
+        },
+        {
+          "name": "_custom_request",
+          "line": 23
+        },
+        {
+          "name": "__init__",
+          "line": 46
+        },
+        {
+          "name": "transcribe",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "path": "core/providers/stt/whisper_local.py",
+      "bytes": 1700,
+      "sha256": "6ea95523360573c6e9a296ef16b94ab43f0babf7fd19f511cfbc26383d5cfd7d",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 22
+        },
+        {
+          "name": "transcribe",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/airllm_local.py",
+      "bytes": 3288,
+      "sha256": "ac16dd3fc7097763d74d81ea5393d5efde3ff40b4c29047032acf6e26b6ec899",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 22
+        },
+        {
+          "name": "_load",
+          "line": 32
+        },
+        {
+          "name": "translate",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/cloud_rest.py",
+      "bytes": 7311,
+      "sha256": "8bad8afe7d35e6b1018659eda7889573d100b6e8ea8792e67d22804f62207af5",
+      "functions": [
+        {
+          "name": "_openai_chat_request",
+          "line": 21
+        },
+        {
+          "name": "_custom_request",
+          "line": 46
+        },
+        {
+          "name": "__init__",
+          "line": 114
+        },
+        {
+          "name": "translate",
+          "line": 122
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/nllb_local.py",
+      "bytes": 4211,
+      "sha256": "d8402ff7803432f64e5498650dc208f53f15f4a84f1da384aaf8b84b0b607ef8",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 17
+        },
+        {
+          "name": "_ensure_loaded",
+          "line": 27
+        },
+        {
+          "name": "translate",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "path": "core/providers/translation/ollama_m2m100_local.py",
+      "bytes": 1605,
+      "sha256": "39a9c30ce801f11b24a8233a95a5639f551b8d9ef977f29cc22aff1f470c9c26",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 11
+        },
+        {
+          "name": "translate",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "path": "core/providers/tts/cloud_rest.py",
+      "bytes": 3658,
+      "sha256": "95ba20fdf33e81dbc6d44ebd29af604b3051ff6ac071d84d85957d1d4fcee97c",
+      "functions": [
+        {
+          "name": "_openai_tts_request",
+          "line": 14
+        },
+        {
+          "name": "_elevenlabs_tts_request",
+          "line": 25
+        },
+        {
+          "name": "_custom_request",
+          "line": 35
+        },
+        {
+          "name": "_fill_template",
+          "line": 48
+        },
+        {
+          "name": "__init__",
+          "line": 66
+        },
+        {
+          "name": "synthesize",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "path": "core/providers/tts/xtts_local.py",
+      "bytes": 1468,
+      "sha256": "ba879e5e8f879b6b6347544e052132db2b782ed92106bd419585232672a89663",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 9
+        },
+        {
+          "name": "synthesize",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "path": "core/providers/voice/cloud_rest.py",
+      "bytes": 2497,
+      "sha256": "af99eceb68cc2cd5d015ae6db16b8dc7113b4017f376896cdc973f59f70e4f8d",
+      "functions": [
+        {
+          "name": "_elevenlabs_sts_request",
+          "line": 10
+        },
+        {
+          "name": "_custom_request",
+          "line": 22
+        },
+        {
+          "name": "__init__",
+          "line": 41
+        },
+        {
+          "name": "convert",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "path": "core/providers/voice/f5tts_local.py",
+      "bytes": 2752,
+      "sha256": "f744fe5d55a751d91a12fa6f194a2675fdb0306963b8e270a8c6655dd864ad58",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 22
+        },
+        {
+          "name": "_ensure_loaded",
+          "line": 28
+        },
+        {
+          "name": "convert",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "path": "core/providers/voice/rvc_local.py",
+      "bytes": 791,
+      "sha256": "679a6b2c5b36cc8d732b32a5fcdce5426710e34427add51a43601dcbbde9d9bc",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 9
+        },
+        {
+          "name": "convert",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "path": "core/queue_manager.py",
+      "bytes": 2508,
+      "sha256": "2e7a3fd73a200fbd6ba72574c0e0da84cedc18cb51bba47e45752ac19bfcabcd",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 9
+        },
+        {
+          "name": "to_dict",
+          "line": 21
+        },
+        {
+          "name": "__init__",
+          "line": 36
+        },
+        {
+          "name": "add_item",
+          "line": 40
+        },
+        {
+          "name": "remove_item",
+          "line": 45
+        },
+        {
+          "name": "clear_completed",
+          "line": 50
+        },
+        {
+          "name": "get_items",
+          "line": 53
+        },
+        {
+          "name": "get_next_queued",
+          "line": 56
+        },
+        {
+          "name": "update_item",
+          "line": 64
+        },
+        {
+          "name": "set_paused",
+          "line": 73
+        },
+        {
+          "name": "is_paused",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "path": "core/recommended_models.py",
+      "bytes": 29244,
+      "sha256": "5f64f9a91db69fe0d4b75782e96fa1951b18023b11023b587e1603f149528483",
+      "functions": []
+    },
+    {
+      "path": "core/render_state.py",
+      "bytes": 1944,
+      "sha256": "13eb7e4077053ef83ee8515e196661efbbc493fb2dd9a47398a74405c9882a35",
+      "functions": [
+        {
+          "name": "mark_started",
+          "line": 26
+        },
+        {
+          "name": "clear",
+          "line": 36
+        },
+        {
+          "name": "get_interrupted",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "path": "core/run_stt.py",
+      "bytes": 1589,
+      "sha256": "ee8c2ac184f77f5964dbace410ee0d612687cfc330de3dc521b3e4aff03a4256",
+      "functions": []
+    },
+    {
+      "path": "core/rvc/rvc_handler.py",
+      "bytes": 6212,
+      "sha256": "c499e6898b6ab8884dcd87081e245c0cf16303de05c521c32a949ece5e504b59",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 15
+        },
+        {
+          "name": "create_v2_config",
+          "line": 30
+        },
+        {
+          "name": "preprocess_audio",
+          "line": 41
+        },
+        {
+          "name": "infer",
+          "line": 70
+        }
+      ]
+    },
+    {
+      "path": "core/settings.py",
+      "bytes": 2230,
+      "sha256": "3b34a854c36e41eb873ba7322903b8de40a56d84c948195e992f20fba3c6fd7a",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 38
+        },
+        {
+          "name": "_load",
+          "line": 42
+        },
+        {
+          "name": "_save",
+          "line": 54
+        },
+        {
+          "name": "all",
+          "line": 58
+        },
+        {
+          "name": "get",
+          "line": 61
+        },
+        {
+          "name": "update",
+          "line": 64
+        },
+        {
+          "name": "reset",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "path": "core/source_language.py",
+      "bytes": 5036,
+      "sha256": "a44cce83c7157ea18a1141a68bbfeff7881b367dbb40f35b2f5ddbd52f2e7ebd",
+      "functions": [
+        {
+          "name": "_valid_probability",
+          "line": 30
+        },
+        {
+          "name": "normalize_source_selection",
+          "line": 61
+        },
+        {
+          "name": "resolve_source_language",
+          "line": 75
+        },
+        {
+          "name": "coerce_source_language",
+          "line": 85
+        },
+        {
+          "name": "require_fixed_source",
+          "line": 90
+        },
+        {
+          "name": "source_prompt",
+          "line": 104
+        },
+        {
+          "name": "__post_init__",
+          "line": 42
+        },
+        {
+          "name": "resolved",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "path": "core/speech_language.py",
+      "bytes": 3205,
+      "sha256": "5f615a4474bafe49fd9439696ead30604c89ac60371debeb77c44aab879648dd",
+      "functions": [
+        {
+          "name": "resolve_speech_language",
+          "line": 12
+        },
+        {
+          "name": "require_xtts_language",
+          "line": 24
+        },
+        {
+          "name": "actor_uses_f5",
+          "line": 49
+        },
+        {
+          "name": "preflight_speech",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "path": "core/srt_utils.py",
+      "bytes": 1363,
+      "sha256": "371d6872ad0f5e8ee2069ee577c8901e023c90b7aedd8de96242f979e81149d8",
+      "functions": [
+        {
+          "name": "_parse_timestamp",
+          "line": 16
+        },
+        {
+          "name": "parse_srt",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "path": "core/stt/stt_handler.py",
+      "bytes": 2421,
+      "sha256": "dc01ed6c55076467377e141dbe240137bb5f9ec3a2c1c3a154f2ad9136c7ec8a",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 8
+        },
+        {
+          "name": "transcribe",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "path": "core/transcription.py",
+      "bytes": 2588,
+      "sha256": "7b525488886a0885ec613acdca1678f26e8e2966804b27c71972b0992917bb55",
+      "functions": [
+        {
+          "name": "normalize_transcription",
+          "line": 43
+        },
+        {
+          "name": "__init__",
+          "line": 12
+        },
+        {
+          "name": "to_payload",
+          "line": 34
+        },
+        {
+          "name": "with_segments",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "path": "core/tray.py",
+      "bytes": 2580,
+      "sha256": "2d9f3bf02aa727c37e1e785254fd7507b4a9f23918138cabf21d896299727ad1",
+      "functions": [
+        {
+          "name": "_build_icon_image",
+          "line": 26
+        },
+        {
+          "name": "__init__",
+          "line": 35
+        },
+        {
+          "name": "_restore",
+          "line": 40
+        },
+        {
+          "name": "_quit",
+          "line": 43
+        },
+        {
+          "name": "_build",
+          "line": 48
+        },
+        {
+          "name": "start",
+          "line": 55
+        },
+        {
+          "name": "minimize_to_tray",
+          "line": 63
+        },
+        {
+          "name": "stop",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "path": "core/tts/tts_handler.py",
+      "bytes": 4882,
+      "sha256": "117bc6f6166fc80015a8848d14a4e8cf05df493baf9294152ff7d227aeaf59c0",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 26
+        },
+        {
+          "name": "generate_audio",
+          "line": 69
+        }
+      ]
+    },
+    {
+      "path": "core/vision/vision_handler.py",
+      "bytes": 2694,
+      "sha256": "cbf8b430d1621342030485c7ed985d0613565501a15d6f798391b5d4c9a05e86",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 5
+        },
+        {
+          "name": "scan_frame",
+          "line": 21
+        },
+        {
+          "name": "blur_zone",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "path": "core/Wav2Lip/audio.py",
+      "bytes": 4655,
+      "sha256": "0f18f5e854c93a5e09d99d721937bddfba9790a3833014bf29f8bab0619c0a8d",
+      "functions": [
+        {
+          "name": "load_wav",
+          "line": 9
+        },
+        {
+          "name": "save_wav",
+          "line": 12
+        },
+        {
+          "name": "save_wavenet_wav",
+          "line": 17
+        },
+        {
+          "name": "preemphasis",
+          "line": 20
+        },
+        {
+          "name": "inv_preemphasis",
+          "line": 25
+        },
+        {
+          "name": "get_hop_size",
+          "line": 30
+        },
+        {
+          "name": "linearspectrogram",
+          "line": 37
+        },
+        {
+          "name": "melspectrogram",
+          "line": 45
+        },
+        {
+          "name": "_lws_processor",
+          "line": 53
+        },
+        {
+          "name": "_stft",
+          "line": 57
+        },
+        {
+          "name": "num_frames",
+          "line": 65
+        },
+        {
+          "name": "pad_lr",
+          "line": 76
+        },
+        {
+          "name": "librosa_pad_lr",
+          "line": 86
+        },
+        {
+          "name": "_linear_to_mel",
+          "line": 92
+        },
+        {
+          "name": "_build_mel_basis",
+          "line": 98
+        },
+        {
+          "name": "_amp_to_db",
+          "line": 103
+        },
+        {
+          "name": "_db_to_amp",
+          "line": 107
+        },
+        {
+          "name": "_normalize",
+          "line": 110
+        },
+        {
+          "name": "_denormalize",
+          "line": 124
+        }
+      ]
+    },
+    {
+      "path": "core/Wav2Lip/hparams.py",
+      "bytes": 3657,
+      "sha256": "c519e29147a5642e1f572e3e474da0ac2ebf8925dc00b04234a31aeac6fd43ed",
+      "functions": [
+        {
+          "name": "get_image_list",
+          "line": 4
+        },
+        {
+          "name": "hparams_debug_string",
+          "line": 98
+        },
+        {
+          "name": "__init__",
+          "line": 16
+        },
+        {
+          "name": "__getattr__",
+          "line": 22
+        },
+        {
+          "name": "set_hparam",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "path": "core/Wav2Lip/inference.py",
+      "bytes": 9620,
+      "sha256": "f9f0ea318d40034bc4e49d979887789667a4ebc5ee9525c683c2a3f447f4517f",
+      "functions": [
+        {
+          "name": "get_smoothened_boxes",
+          "line": 27
+        },
+        {
+          "name": "face_detect",
+          "line": 36
+        },
+        {
+          "name": "datagen",
+          "line": 73
+        },
+        {
+          "name": "load_model",
+          "line": 124
+        },
+        {
+          "name": "main",
+          "line": 143
+        }
+      ]
+    },
+    {
+      "path": "core/Wav2Lip/models/__init__.py",
+      "bytes": 28,
+      "sha256": "271740a5fa9a3775c156126767908c2eab7471ff5c03d60c0d2a4531e7e08419",
+      "functions": []
+    },
+    {
+      "path": "core/Wav2Lip/models/conv.py",
+      "bytes": 1664,
+      "sha256": "f8334b9dba02d0aab2ff372da24aca4488f9fc6e60ebcab09052418432d6a9a9",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 6
+        },
+        {
+          "name": "forward",
+          "line": 15
+        },
+        {
+          "name": "__init__",
+          "line": 22
+        },
+        {
+          "name": "forward",
+          "line": 29
+        },
+        {
+          "name": "__init__",
+          "line": 34
+        },
+        {
+          "name": "forward",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "path": "core/Wav2Lip/models/wav2lip.py",
+      "bytes": 8763,
+      "sha256": "d206e19aa7aee962939da064091c6671888922387b839172abf880210a6d459a",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 9
+        },
+        {
+          "name": "forward",
+          "line": 87
+        },
+        {
+          "name": "__init__",
+          "line": 128
+        },
+        {
+          "name": "get_lower_half",
+          "line": 155
+        },
+        {
+          "name": "to_2d",
+          "line": 158
+        },
+        {
+          "name": "perceptual_forward",
+          "line": 163
+        },
+        {
+          "name": "forward",
+          "line": 176
+        }
+      ]
+    },
+    {
+      "path": "core/web_search.py",
+      "bytes": 2389,
+      "sha256": "a225cef5273ba9da5a488413afa8b13819727ce7e0cfce4b8b10d9ae43d7fff0",
+      "functions": [
+        {
+          "name": "_google_cse_search",
+          "line": 23
+        },
+        {
+          "name": "is_configured",
+          "line": 39
+        },
+        {
+          "name": "search",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "path": "bridge/api.py",
+      "bytes": 47158,
+      "sha256": "190c24e62b0b67c97279647ae5c4d95e227c63860b1bcc4888a12e5151d35a8a",
+      "functions": [
+        {
+          "name": "_safe_download_filename",
+          "line": 33
+        },
+        {
+          "name": "status_to_stage_id",
+          "line": 90
+        },
+        {
+          "name": "_probe_duration",
+          "line": 98
+        },
+        {
+          "name": "_active_stages",
+          "line": 114
+        },
+        {
+          "name": "_parallel_speedup_factor",
+          "line": 133
+        },
+        {
+          "name": "_fits_device",
+          "line": 150
+        },
+        {
+          "name": "__init__",
+          "line": 174
+        },
+        {
+          "name": "get_settings",
+          "line": 201
+        },
+        {
+          "name": "list_languages",
+          "line": 204
+        },
+        {
+          "name": "update_settings",
+          "line": 213
+        },
+        {
+          "name": "list_source_languages",
+          "line": 216
+        },
+        {
+          "name": "reset_settings",
+          "line": 220
+        },
+        {
+          "name": "minimize_window",
+          "line": 224
+        },
+        {
+          "name": "set_tray_handlers",
+          "line": 227
+        },
+        {
+          "name": "minimize_to_tray",
+          "line": 235
+        },
+        {
+          "name": "toggle_maximize_window",
+          "line": 245
+        },
+        {
+          "name": "close_window",
+          "line": 313
+        },
+        {
+          "name": "get_hardware_snapshot",
+          "line": 319
+        },
+        {
+          "name": "_model_resource_override",
+          "line": 339
+        },
+        {
+          "name": "_estimate_overrides",
+          "line": 360
+        },
+        {
+          "name": "estimate_job",
+          "line": 393
+        },
+        {
+          "name": "estimate_job_all_devices",
+          "line": 402
+        },
+        {
+          "name": "list_models",
+          "line": 423
+        },
+        {
+          "name": "get_active_models",
+          "line": 426
+        },
+        {
+          "name": "capture_hardware_profile",
+          "line": 429
+        },
+        {
+          "name": "list_recommended_models",
+          "line": 437
+        },
+        {
+          "name": "set_active_model",
+          "line": 463
+        },
+        {
+          "name": "set_model_instructions",
+          "line": 470
+        },
+        {
+          "name": "remove_model",
+          "line": 481
+        },
+        {
+          "name": "detect_model_type",
+          "line": 504
+        },
+        {
+          "name": "get_search_config",
+          "line": 514
+        },
+        {
+          "name": "set_search_credentials",
+          "line": 520
+        },
+        {
+          "name": "find_best_model",
+          "line": 529
+        },
+        {
+          "name": "add_cloud_model",
+          "line": 550
+        },
+        {
+          "name": "add_local_api_model",
+          "line": 567
+        },
+        {
+          "name": "add_airllm_model",
+          "line": 575
+        },
+        {
+          "name": "add_local_model",
+          "line": 591
+        },
+        {
+          "name": "_run_local_download",
+          "line": 610
+        },
+        {
+          "name": "browse_video",
+          "line": 664
+        },
+        {
+          "name": "browse_audio",
+          "line": 672
+        },
+        {
+          "name": "browse_subtitle",
+          "line": 680
+        },
+        {
+          "name": "get_graph_definition",
+          "line": 689
+        },
+        {
+          "name": "set_node_enabled",
+          "line": 724
+        },
+        {
+          "name": "set_node_param",
+          "line": 730
+        },
+        {
+          "name": "add_node_instance",
+          "line": 737
+        },
+        {
+          "name": "remove_node_instance",
+          "line": 764
+        },
+        {
+          "name": "get_cast_list",
+          "line": 767
+        },
+        {
+          "name": "run_integrity_check",
+          "line": 781
+        },
+        {
+          "name": "factory_reset",
+          "line": 789
+        },
+        {
+          "name": "list_pipeline_templates",
+          "line": 795
+        },
+        {
+          "name": "start_render",
+          "line": 799
+        },
+        {
+          "name": "stop_render",
+          "line": 810
+        },
+        {
+          "name": "get_interrupted_render",
+          "line": 820
+        },
+        {
+          "name": "_run_render",
+          "line": 828
+        },
+        {
+          "name": "_resolve_cast_list",
+          "line": 875
+        },
+        {
+          "name": "_template_kwargs",
+          "line": 885
+        },
+        {
+          "name": "add_queue_item",
+          "line": 924
+        },
+        {
+          "name": "remove_queue_item",
+          "line": 927
+        },
+        {
+          "name": "clear_completed_queue",
+          "line": 930
+        },
+        {
+          "name": "get_queue_items",
+          "line": 934
+        },
+        {
+          "name": "set_queue_paused",
+          "line": 937
+        },
+        {
+          "name": "run_hardware_benchmark",
+          "line": 942
+        },
+        {
+          "name": "_run_render_inner",
+          "line": 945
+        },
+        {
+          "name": "annotate",
+          "line": 453
+        }
+      ]
+    },
+    {
+      "path": "bridge/push.py",
+      "bytes": 810,
+      "sha256": "a501e150e57786bcc4596df5928efd794d376b5bb517a770d18440d4e8360846",
+      "functions": [
+        {
+          "name": "emit",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "path": "dev/cleanup_smoke.py",
+      "bytes": 1034,
+      "sha256": "0e2df7586e01741adea75d1827d4fd1283d7e1cc15fe1732c4b4e18c435c9774",
+      "functions": []
+    },
+    {
+      "path": "dev/DEV_TEST_TOOL.bat",
+      "bytes": 1983,
+      "sha256": "86036071a8f639cb119dc19af73d69e7d5f9863cdd4ed5b2269d3872725e986a"
+    },
+    {
+      "path": "dev/GENERATE_DEBUG_LOG.bat",
+      "bytes": 2422,
+      "sha256": "54c56252b6b0f9c9faee283d4633fe522b524b0157d9ec46c3eb24b91eb89700"
+    },
+    {
+      "path": "dev/restore_models.py",
+      "bytes": 1563,
+      "sha256": "736443c5426ad9650adcbc9e13ebf6453802228b819d3ee5daaeb17dd3565c7a",
+      "functions": [
+        {
+          "name": "record_restored",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "path": "dev/run_cleanup_checks.py",
+      "bytes": 1372,
+      "sha256": "5d20ecb4b1a6d206412e9a594d74075f5eaeaa5df762f852d19e7381c99b0845",
+      "functions": []
+    },
+    {
+      "path": "dev/test_model_assets.py",
+      "bytes": 3981,
+      "sha256": "1705c8b3c1fcd6372fa9abbb32f79a25a89421e24fdb1fb4449664204f298fd0",
+      "functions": [
+        {
+          "name": "setUp",
+          "line": 15
+        },
+        {
+          "name": "test_atomic_success",
+          "line": 29
+        },
+        {
+          "name": "test_existing_valid_model_does_not_contact_network",
+          "line": 34
+        },
+        {
+          "name": "test_incomplete_transfer_is_not_installed",
+          "line": 41
+        },
+        {
+          "name": "test_failed_transfer_preserves_old_file",
+          "line": 48
+        },
+        {
+          "name": "test_offline_missing_model_has_recovery_instruction",
+          "line": 58
+        },
+        {
+          "name": "test_html_error_page_is_not_installed",
+          "line": 64
+        },
+        {
+          "name": "test_http_failure_is_not_installed",
+          "line": 70
+        },
+        {
+          "name": "test_startup_integrity_does_not_download_models",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "path": "dev/test_model_download.py",
+      "bytes": 4050,
+      "sha256": "6ab76b9ee05ecf811fb66c233a4dd14408f00e14c464d48ea82b0e72fdd03623",
+      "functions": [
+        {
+          "name": "test_downloader_and_removal",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "path": "dev/test_output_integrity.py",
+      "bytes": 13051,
+      "sha256": "8e458b5a15e9abc2d123aacc441f3e48d6ca24735ac9b9cfd347347b9c36f3f4",
+      "functions": [
+        {
+          "name": "setUp",
+          "line": 21
+        },
+        {
+          "name": "assert_preserved",
+          "line": 34
+        },
+        {
+          "name": "inputs",
+          "line": 38
+        },
+        {
+          "name": "test_nonzero_exit_retains_bounded_diagnostics",
+          "line": 49
+        },
+        {
+          "name": "test_timeout_has_useful_error",
+          "line": 61
+        },
+        {
+          "name": "test_missing_executable_has_useful_error",
+          "line": 66
+        },
+        {
+          "name": "test_duration_probe_is_bounded_and_positive",
+          "line": 71
+        },
+        {
+          "name": "test_invalid_durations_fail",
+          "line": 77
+        },
+        {
+          "name": "test_staged_exception_preserves_old_output",
+          "line": 83
+        },
+        {
+          "name": "test_empty_staged_output_preserves_old_output",
+          "line": 90
+        },
+        {
+          "name": "test_publish_failure_preserves_old_output",
+          "line": 96
+        },
+        {
+          "name": "test_invalid_media_is_not_published",
+          "line": 103
+        },
+        {
+          "name": "test_malformed_probe_json_is_rejected",
+          "line": 116
+        },
+        {
+          "name": "test_subtitle_write_error_preserves_existing_file",
+          "line": 121
+        },
+        {
+          "name": "test_invalid_subtitle_timing_preserves_existing_file",
+          "line": 127
+        },
+        {
+          "name": "test_blank_subtitles_preserve_existing_file",
+          "line": 132
+        },
+        {
+          "name": "test_valid_subtitles_replace_existing_file",
+          "line": 137
+        },
+        {
+          "name": "test_failed_initial_mux_preserves_old_output",
+          "line": 145
+        },
+        {
+          "name": "test_failed_subtitle_pass_preserves_old_output",
+          "line": 152
+        },
+        {
+          "name": "test_missing_merge_input_fails",
+          "line": 166
+        },
+        {
+          "name": "test_requested_burn_without_subtitles_fails",
+          "line": 171
+        },
+        {
+          "name": "setUp",
+          "line": 181
+        },
+        {
+          "name": "actual_inputs",
+          "line": 188
+        },
+        {
+          "name": "test_real_mux_without_subtitles",
+          "line": 197
+        },
+        {
+          "name": "test_real_mux_with_embedded_subtitles",
+          "line": 203
+        },
+        {
+          "name": "test_real_mux_with_burned_subtitles",
+          "line": 208
+        },
+        {
+          "name": "test_real_ffmpeg_failure_preserves_old_output",
+          "line": 213
+        },
+        {
+          "name": "test_real_speed_change_has_unique_files_and_valid_audio",
+          "line": 221
+        },
+        {
+          "name": "test_audio_template_preserves_old_output_on_validation_failure",
+          "line": 228
+        },
+        {
+          "name": "failure",
+          "line": 50
+        },
+        {
+          "name": "encode",
+          "line": 154
+        },
+        {
+          "name": "segments",
+          "line": 232
+        }
+      ]
+    },
+    {
+      "path": "dev/test_pipeline_dryrun.py",
+      "bytes": 2082,
+      "sha256": "9edf4107f827be27011f7a716de73b0d34d54a568e06a1e3da8e6cc398781205",
+      "functions": [
+        {
+          "name": "test_dryrun",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "path": "dev/test_render_queue.py",
+      "bytes": 10509,
+      "sha256": "140a20f1f0d0eaf2c58ae05f82ca6e5895623e5dec93edad49f50dbc83a00f4e",
+      "functions": [
+        {
+          "name": "iter_render",
+          "line": 228
+        },
+        {
+          "name": "setUp",
+          "line": 19
+        },
+        {
+          "name": "add",
+          "line": 42
+        },
+        {
+          "name": "run_item",
+          "line": 45
+        },
+        {
+          "name": "statuses",
+          "line": 48
+        },
+        {
+          "name": "terminal_events",
+          "line": 51
+        },
+        {
+          "name": "test_success_records_output_and_finishes_once",
+          "line": 55
+        },
+        {
+          "name": "test_each_queued_job_emits_started_to_reset_source_feedback",
+          "line": 64
+        },
+        {
+          "name": "test_source_feedback_is_forwarded_and_suppressed_after_stop",
+          "line": 71
+        },
+        {
+          "name": "test_failure_is_failed_and_next_job_completes",
+          "line": 81
+        },
+        {
+          "name": "test_no_output_is_failed",
+          "line": 94
+        },
+        {
+          "name": "test_missing_output_is_failed",
+          "line": 101
+        },
+        {
+          "name": "test_empty_output_is_failed",
+          "line": 107
+        },
+        {
+          "name": "test_batch_runs_in_order_on_one_actual_worker",
+          "line": 112
+        },
+        {
+          "name": "test_pause_allows_current_job_but_leaves_next_queued",
+          "line": 131
+        },
+        {
+          "name": "test_stop_cancels_current_and_does_not_advance_or_finish",
+          "line": 138
+        },
+        {
+          "name": "test_stop_at_generator_exhaustion_does_not_finish",
+          "line": 163
+        },
+        {
+          "name": "test_cleanup_failure_does_not_change_result_or_block_next",
+          "line": 172
+        },
+        {
+          "name": "test_state_cleanup_failure_does_not_block_next",
+          "line": 183
+        },
+        {
+          "name": "test_stop_during_cleanup_preserves_already_completed_result",
+          "line": 190
+        },
+        {
+          "name": "test_direct_render_preserves_finished_event",
+          "line": 200
+        },
+        {
+          "name": "test_active_worker_rejects_overlapping_start",
+          "line": 205
+        },
+        {
+          "name": "run",
+          "line": 84
+        },
+        {
+          "name": "run",
+          "line": 116
+        },
+        {
+          "name": "cancelled",
+          "line": 143
+        },
+        {
+          "name": "cancelled",
+          "line": 164
+        },
+        {
+          "name": "blocking",
+          "line": 207
+        }
+      ]
+    },
+    {
+      "path": "dev/test_source_language.py",
+      "bytes": 25420,
+      "sha256": "50dece83380249d0bbcceb0a9faafccd4aa8f38e3be3c5e98f5396e8e31205fa",
+      "functions": [
+        {
+          "name": "response",
+          "line": 25
+        },
+        {
+          "name": "test_maps_match_bundled_tokenizer_vocabulary_without_model_load",
+          "line": 32
+        },
+        {
+          "name": "test_auto_defaults_and_missing_metadata_are_unresolved",
+          "line": 51
+        },
+        {
+          "name": "test_manual_overrides_detection_and_does_not_invent_confidence",
+          "line": 57
+        },
+        {
+          "name": "test_known_codes_names_and_script_tokens_normalize",
+          "line": 64
+        },
+        {
+          "name": "test_auto_threshold_boundaries",
+          "line": 68
+        },
+        {
+          "name": "test_malformed_confidence_cannot_enable_fixed_translation",
+          "line": 72
+        },
+        {
+          "name": "test_unknown_detected_label_is_not_english",
+          "line": 76
+        },
+        {
+          "name": "test_invalid_manual_selection_is_an_error",
+          "line": 83
+        },
+        {
+          "name": "test_fixed_source_rejects_low_or_absent_confidence",
+          "line": 88
+        },
+        {
+          "name": "test_manual_selection_bypasses_confidence_but_not_exact_map",
+          "line": 94
+        },
+        {
+          "name": "test_explicit_chinese_and_punjabi_scripts_have_separate_tokens",
+          "line": 100
+        },
+        {
+          "name": "test_prompt_sources_infer_when_unknown_or_low_confidence",
+          "line": 110
+        },
+        {
+          "name": "test_source_context_is_immutable_and_validated",
+          "line": 115
+        },
+        {
+          "name": "m2m",
+          "line": 126
+        },
+        {
+          "name": "nllb",
+          "line": 135
+        },
+        {
+          "name": "test_m2m_sets_each_source_before_tokenization",
+          "line": 144
+        },
+        {
+          "name": "test_m2m_unknown_source_rejects_before_tokenization",
+          "line": 152
+        },
+        {
+          "name": "test_m2m_loaded_tokenizer_missing_source_is_error",
+          "line": 159
+        },
+        {
+          "name": "test_m2m_invalid_source_token_ids_do_not_generate",
+          "line": 166
+        },
+        {
+          "name": "test_nllb_checks_source_before_loading",
+          "line": 175
+        },
+        {
+          "name": "test_nllb_absent_target_tokens_reject_before_loading",
+          "line": 182
+        },
+        {
+          "name": "test_nllb_sets_each_source_before_tokenization",
+          "line": 189
+        },
+        {
+          "name": "test_nllb_missing_source_token_does_not_generate",
+          "line": 197
+        },
+        {
+          "name": "pending",
+          "line": 204
+        },
+        {
+          "name": "test_startup_fallback_rejects_unresolved_source_before_loading",
+          "line": 210
+        },
+        {
+          "name": "test_runtime_fallback_rejects_missing_source_without_switching",
+          "line": 218
+        },
+        {
+          "name": "test_runtime_fallback_accepts_high_confidence_source",
+          "line": 226
+        },
+        {
+          "name": "test_ollama_prompt_receives_manual_source",
+          "line": 236
+        },
+        {
+          "name": "test_wrapper_forwards_context_and_rejects_invalid_override_before_discovery",
+          "line": 243
+        },
+        {
+          "name": "test_airllm_prompt_receives_source",
+          "line": 252
+        },
+        {
+          "name": "test_cloud_chat_manual_and_unresolved_source_prompts",
+          "line": 261
+        },
+        {
+          "name": "test_custom_cloud_requires_real_source_placeholder",
+          "line": 267
+        },
+        {
+          "name": "test_custom_cloud_forwards_source_code_or_name",
+          "line": 273
+        },
+        {
+          "name": "test_custom_cloud_rejects_modified_source_placeholders",
+          "line": 280
+        },
+        {
+          "name": "test_resolver_forwards_registry_request_configuration",
+          "line": 286
+        },
+        {
+          "name": "setUp",
+          "line": 295
+        },
+        {
+          "name": "test_audio_helper_passes_detected_source_and_manual_override",
+          "line": 310
+        },
+        {
+          "name": "test_feedback_keeps_detection_separate_from_manual_selection",
+          "line": 316
+        },
+        {
+          "name": "test_feedback_reports_low_confidence_without_marking_source_resolved",
+          "line": 326
+        },
+        {
+          "name": "test_feedback_callback_failure_does_not_abort_translation",
+          "line": 335
+        },
+        {
+          "name": "test_subtitle_feedback_has_no_fabricated_detection",
+          "line": 341
+        },
+        {
+          "name": "test_legacy_stt_source_stays_unknown_for_prompt_provider",
+          "line": 349
+        },
+        {
+          "name": "test_invalid_manual_override_stops_before_stt",
+          "line": 354
+        },
+        {
+          "name": "test_pipeline_run_rejects_invalid_source_before_template",
+          "line": 359
+        },
+        {
+          "name": "test_subtitle_manual_selection_passes_source_and_publishes",
+          "line": 364
+        },
+        {
+          "name": "test_subtitle_auto_nllb_rejects_without_publishing_output",
+          "line": 372
+        },
+        {
+          "name": "media_to_translation",
+          "line": 381
+        },
+        {
+          "name": "test_actual_video_generator_forwards_detected_source",
+          "line": 396
+        },
+        {
+          "name": "test_actual_audio_generator_forwards_manual_source",
+          "line": 400
+        },
+        {
+          "name": "test_source_bypass_skips_translation",
+          "line": 404
+        },
+        {
+          "name": "test_bridge_all_templates_forward_manual_and_default_auto",
+          "line": 408
+        },
+        {
+          "name": "test_bridge_exposes_script_specific_source_catalog",
+          "line": 415
+        },
+        {
+          "name": "test_interrupted_job_parameters_preserve_manual_selection",
+          "line": 420
+        },
+        {
+          "name": "load",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "path": "dev/test_speech_integrity.py",
+      "bytes": 19755,
+      "sha256": "60f83603993458b5ba8cd735e5c617931a4f271a69934286f6d443ddbcfa4839",
+      "functions": [
+        {
+          "name": "setUp",
+          "line": 30
+        },
+        {
+          "name": "write_audio",
+          "line": 39
+        },
+        {
+          "name": "test_missing_and_empty_audio_fail",
+          "line": 44
+        },
+        {
+          "name": "test_corrupt_audio_fails_decode",
+          "line": 51
+        },
+        {
+          "name": "test_zero_sample_wav_fails",
+          "line": 56
+        },
+        {
+          "name": "test_real_short_audio_is_playable",
+          "line": 61
+        },
+        {
+          "name": "setUp",
+          "line": 67
+        },
+        {
+          "name": "handler",
+          "line": 77
+        },
+        {
+          "name": "test_missing_config_fails_initialization",
+          "line": 80
+        },
+        {
+          "name": "test_cpu_initialization_failure_propagates",
+          "line": 86
+        },
+        {
+          "name": "test_gpu_recovery_warns_and_updates_actual_device",
+          "line": 91
+        },
+        {
+          "name": "test_gpu_and_cpu_failure_propagate_both_causes",
+          "line": 100
+        },
+        {
+          "name": "test_generation_failure_propagates",
+          "line": 105
+        },
+        {
+          "name": "test_missing_engine_output_is_failure",
+          "line": 110
+        },
+        {
+          "name": "test_stale_audio_is_not_success",
+          "line": 115
+        },
+        {
+          "name": "test_bad_explicit_reference_is_not_substituted",
+          "line": 121
+        },
+        {
+          "name": "test_no_reference_fails_without_emergency_silence",
+          "line": 126
+        },
+        {
+          "name": "test_success_returns_actual_generated_path",
+          "line": 132
+        },
+        {
+          "name": "test_source_language_rejected_before_provider_loading",
+          "line": 137
+        },
+        {
+          "name": "test_wrapper_does_not_invent_success_path",
+          "line": 143
+        },
+        {
+          "name": "test_wrapper_delivers_recovery_warning_to_ui_log",
+          "line": 150
+        },
+        {
+          "name": "setUp",
+          "line": 159
+        },
+        {
+          "name": "run_segment",
+          "line": 175
+        },
+        {
+          "name": "assert_cleaned",
+          "line": 179
+        },
+        {
+          "name": "test_synthesis_failure_has_segment_context_and_cleans_files",
+          "line": 182
+        },
+        {
+          "name": "test_missing_audio_cannot_be_skipped",
+          "line": 191
+        },
+        {
+          "name": "test_corrupt_generated_audio_has_stage_context",
+          "line": 197
+        },
+        {
+          "name": "test_repeated_segment_index_uses_fresh_output_folder",
+          "line": 203
+        },
+        {
+          "name": "test_selected_voice_failure_does_not_fall_back",
+          "line": 214
+        },
+        {
+          "name": "test_missing_selected_voice_output_does_not_fall_back",
+          "line": 220
+        },
+        {
+          "name": "test_f5_failure_propagates_without_xtts",
+          "line": 225
+        },
+        {
+          "name": "test_mastering_failure_is_not_skipped",
+          "line": 233
+        },
+        {
+          "name": "test_valid_300ms_line_is_kept",
+          "line": 238
+        },
+        {
+          "name": "test_blank_gap_is_skipped",
+          "line": 245
+        },
+        {
+          "name": "test_bad_timing_is_explicit",
+          "line": 249
+        },
+        {
+          "name": "collect_batch",
+          "line": 253
+        },
+        {
+          "name": "test_empty_or_blank_transcript_fails_clearly",
+          "line": 263
+        },
+        {
+          "name": "test_empty_transcription_stops_before_translation",
+          "line": 268
+        },
+        {
+          "name": "test_failures_propagate_in_sequential_and_segment_workers",
+          "line": 276
+        },
+        {
+          "name": "test_successful_assembly_has_dialogue_and_keeps_blank_gaps",
+          "line": 284
+        },
+        {
+          "name": "setUp",
+          "line": 296
+        },
+        {
+          "name": "test_unready_rvc_fails",
+          "line": 312
+        },
+        {
+          "name": "test_missing_checkpoint_is_explicit",
+          "line": 317
+        },
+        {
+          "name": "test_real_preprocessing_and_mocked_inference_success",
+          "line": 321
+        },
+        {
+          "name": "test_internal_typeerror_is_not_retried",
+          "line": 328
+        },
+        {
+          "name": "test_keyword_pitch_api_is_selected_without_retry",
+          "line": 340
+        },
+        {
+          "name": "test_missing_inference_output_fails",
+          "line": 350
+        },
+        {
+          "name": "test_preprocessing_failure_has_no_input_fallback",
+          "line": 355
+        },
+        {
+          "name": "test_engine_initialization_failure_propagates_without_download",
+          "line": 361
+        },
+        {
+          "name": "test_wrapper_propagates_failure",
+          "line": 368
+        },
+        {
+          "name": "test_missing_engine_output_fails",
+          "line": 377
+        },
+        {
+          "name": "test_valid_mocked_engine_output_succeeds",
+          "line": 385
+        },
+        {
+          "name": "failed",
+          "line": 183
+        },
+        {
+          "name": "generate",
+          "line": 205
+        },
+        {
+          "name": "infer",
+          "line": 307
+        },
+        {
+          "name": "infer",
+          "line": 329
+        },
+        {
+          "name": "infer",
+          "line": 342
+        },
+        {
+          "name": "infer",
+          "line": 388
+        }
+      ]
+    },
+    {
+      "path": "dev/test_speech_language.py",
+      "bytes": 8626,
+      "sha256": "094e9e36fca2a871b07a8f323ec446dd7d737b198bfc278048e574827d2dc0ba",
+      "functions": [
+        {
+          "name": "setUp",
+          "line": 15
+        },
+        {
+          "name": "registry",
+          "line": 22
+        },
+        {
+          "name": "test_chinese_aliases_and_native_engine_code",
+          "line": 25
+        },
+        {
+          "name": "test_custom_config_is_authoritative",
+          "line": 29
+        },
+        {
+          "name": "test_bad_configs_and_missing_custom_config_fail",
+          "line": 33
+        },
+        {
+          "name": "test_default_contract_without_downloaded_config",
+          "line": 44
+        },
+        {
+          "name": "test_source_manual_and_confident_detection",
+          "line": 50
+        },
+        {
+          "name": "test_unresolved_source_and_unknown_target_fail",
+          "line": 55
+        },
+        {
+          "name": "test_provider_rejects_before_handler_construction",
+          "line": 63
+        },
+        {
+          "name": "test_handler_rejects_before_asset_download",
+          "line": 70
+        },
+        {
+          "name": "test_f5_only_and_cloud_base_skip_xtts",
+          "line": 76
+        },
+        {
+          "name": "test_cloud_voice_marker_does_not_bypass_base_tts",
+          "line": 85
+        },
+        {
+          "name": "test_actual_nonblank_cast_assignments_only",
+          "line": 91
+        },
+        {
+          "name": "test_audio_preflight_precedes_translation",
+          "line": 98
+        },
+        {
+          "name": "test_early_generator_check_before_cleanup",
+          "line": 109
+        },
+        {
+          "name": "test_source_language_reaches_both_dubbing_loops",
+          "line": 118
+        },
+        {
+          "name": "test_mixed_cast_defers_early_check",
+          "line": 145
+        }
+      ]
+    },
+    {
+      "path": "dev/test_suite.py",
+      "bytes": 8679,
+      "sha256": "1a03e89bbfde8c5474c5b577e41d8dd8d156b639ddf23038a319d9a78569e100",
+      "functions": [
+        {
+          "name": "test_parse_srt_standard",
+          "line": 43
+        },
+        {
+          "name": "test_parse_srt_crlf_and_dots",
+          "line": 65
+        },
+        {
+          "name": "test_default_graph",
+          "line": 85
+        },
+        {
+          "name": "test_node_muting",
+          "line": 95
+        },
+        {
+          "name": "test_node_removal",
+          "line": 102
+        },
+        {
+          "name": "test_hardware_detection",
+          "line": 111
+        },
+        {
+          "name": "test_system_stats",
+          "line": 121
+        },
+        {
+          "name": "test_registry_lifecycle",
+          "line": 130
+        },
+        {
+          "name": "test_credential_roundtrip",
+          "line": 143
+        },
+        {
+          "name": "test_language_mappings",
+          "line": 159
+        },
+        {
+          "name": "test_safe_download_filename",
+          "line": 167
+        },
+        {
+          "name": "test_parallel_speedup_factor",
+          "line": 173
+        },
+        {
+          "name": "test_queue_lifecycle",
+          "line": 181
+        },
+        {
+          "name": "test_run_benchmark",
+          "line": 205
+        },
+        {
+          "name": "test_janitor_sweep",
+          "line": 215
+        },
+        {
+          "name": "test_clean_output_path_generation",
+          "line": 221
+        },
+        {
+          "name": "test_rvc_temp_16k_path_generation",
+          "line": 227
+        }
+      ]
+    },
+    {
+      "path": "dev/test_transcription_metadata.py",
+      "bytes": 13499,
+      "sha256": "3c56dcada7e57bed17a3c6ac3bcc7bc187713e594d118b962f4ef9b226729f37",
+      "functions": [
+        {
+          "name": "envelope",
+          "line": 26
+        },
+        {
+          "name": "response",
+          "line": 30
+        },
+        {
+          "name": "test_list_compatibility_and_payload_round_trip",
+          "line": 37
+        },
+        {
+          "name": "test_legacy_list_is_unknown_not_english",
+          "line": 48
+        },
+        {
+          "name": "test_envelope_without_metadata_is_compatible",
+          "line": 53
+        },
+        {
+          "name": "test_raw_language_labels_are_retained_without_guessing_aliases",
+          "line": 58
+        },
+        {
+          "name": "test_probability_endpoints_and_unknown_are_preserved",
+          "line": 62
+        },
+        {
+          "name": "test_invalid_probabilities_become_unknown_with_warning",
+          "line": 66
+        },
+        {
+          "name": "test_invalid_language_becomes_unknown",
+          "line": 74
+        },
+        {
+          "name": "test_probability_without_language_is_not_invented",
+          "line": 81
+        },
+        {
+          "name": "test_malformed_segment_shapes_are_explicit_errors",
+          "line": 84
+        },
+        {
+          "name": "test_result_copies_segment_dicts_and_preserves_extra_fields",
+          "line": 89
+        },
+        {
+          "name": "test_with_segments_keeps_metadata",
+          "line": 96
+        },
+        {
+          "name": "setUp",
+          "line": 106
+        },
+        {
+          "name": "worker_payload",
+          "line": 113
+        },
+        {
+          "name": "test_local_worker_envelope_is_preserved",
+          "line": 118
+        },
+        {
+          "name": "test_local_legacy_worker_list_remains_compatible",
+          "line": 127
+        },
+        {
+          "name": "test_local_worker_failure_propagates",
+          "line": 133
+        },
+        {
+          "name": "test_local_malformed_worker_response_fails",
+          "line": 137
+        },
+        {
+          "name": "test_cloud_presets_preserve_metadata",
+          "line": 141
+        },
+        {
+          "name": "test_cloud_custom_legacy_list_remains_compatible",
+          "line": 149
+        },
+        {
+          "name": "test_cloud_metadata_free_envelope_remains_compatible",
+          "line": 155
+        },
+        {
+          "name": "test_cloud_malformed_response_is_explicit_error",
+          "line": 160
+        },
+        {
+          "name": "test_actual_handler_collects_generator_metadata_without_loading_model",
+          "line": 165
+        },
+        {
+          "name": "test_actual_handler_missing_metadata_is_unknown",
+          "line": 175
+        },
+        {
+          "name": "test_worker_script_writes_metadata_envelope",
+          "line": 183
+        },
+        {
+          "name": "test_worker_script_accepts_legacy_handler_list",
+          "line": 192
+        },
+        {
+          "name": "setUp",
+          "line": 204
+        },
+        {
+          "name": "test_source_metadata_survives_real_short_segment_merge",
+          "line": 209
+        },
+        {
+          "name": "test_legacy_provider_remains_unknown",
+          "line": 217
+        },
+        {
+          "name": "test_metadata_survives_translation_text_replacement",
+          "line": 223
+        },
+        {
+          "name": "test_source_bypass_preserves_metadata_without_translating",
+          "line": 236
+        },
+        {
+          "name": "test_sequential_results_do_not_share_metadata",
+          "line": 243
+        },
+        {
+          "name": "test_empty_dialogue_still_fails",
+          "line": 250
+        },
+        {
+          "name": "run",
+          "line": 114
+        }
+      ]
+    },
+    {
+      "path": "dev/test_translation_integrity.py",
+      "bytes": 21760,
+      "sha256": "ea14cf5f66f52a92634ca1dc93cc1b06bd7e9082a1067cc004cb00bf1b1acf60",
+      "functions": [
+        {
+          "name": "response",
+          "line": 20
+        },
+        {
+          "name": "setUp",
+          "line": 27
+        },
+        {
+          "name": "translator",
+          "line": 36
+        },
+        {
+          "name": "test_exact_default_tag_is_selected",
+          "line": 39
+        },
+        {
+          "name": "test_missing_requested_model_does_not_pick_first_or_fallback",
+          "line": 44
+        },
+        {
+          "name": "test_malformed_inventory_is_error",
+          "line": 50
+        },
+        {
+          "name": "test_discovery_http_failure_is_explicit",
+          "line": 56
+        },
+        {
+          "name": "test_unreachable_discovery_warns_before_fallback",
+          "line": 62
+        },
+        {
+          "name": "test_fallback_initialization_failure_propagates_both_causes",
+          "line": 75
+        },
+        {
+          "name": "test_success_has_generation_timeout_and_status_check",
+          "line": 81
+        },
+        {
+          "name": "test_colons_survive_prefix_removal",
+          "line": 86
+        },
+        {
+          "name": "test_prefix_is_removed_only_at_start",
+          "line": 90
+        },
+        {
+          "name": "test_unchanged_translation_is_valid",
+          "line": 95
+        },
+        {
+          "name": "test_invalid_response_values_are_not_source_text_fallback",
+          "line": 99
+        },
+        {
+          "name": "test_invalid_json_and_error_payload_raise",
+          "line": 107
+        },
+        {
+          "name": "test_http_failure_falls_back_visibly_instead_of_returning_input",
+          "line": 116
+        },
+        {
+          "name": "test_unknown_target_is_not_defaulted_to_english",
+          "line": 131
+        },
+        {
+          "name": "test_blank_input_does_not_make_generation_request",
+          "line": 136
+        },
+        {
+          "name": "test_broken_engine_raises_instead_of_returning_source",
+          "line": 140
+        },
+        {
+          "name": "test_m2m_generation_failure_propagates",
+          "line": 146
+        },
+        {
+          "name": "test_real_initializer_logic_propagates_mocked_loader_failure",
+          "line": 156
+        },
+        {
+          "name": "test_common_validator_rejects_nontext_and_accepts_same_text",
+          "line": 167
+        },
+        {
+          "name": "test_chat_schema_and_content_are_checked",
+          "line": 173
+        },
+        {
+          "name": "test_chat_success_has_explicit_timeout",
+          "line": 178
+        },
+        {
+          "name": "test_custom_json_list_or_number_is_not_stringified",
+          "line": 184
+        },
+        {
+          "name": "test_custom_response_field_and_json_string_are_supported",
+          "line": 189
+        },
+        {
+          "name": "test_pipeline_has_segment_and_cue_context",
+          "line": 194
+        },
+        {
+          "name": "test_pipeline_rejects_invalid_provider_output",
+          "line": 201
+        },
+        {
+          "name": "test_pipeline_preserves_blank_and_unchanged_text",
+          "line": 208
+        },
+        {
+          "name": "test_pipeline_rejects_unknown_code",
+          "line": 216
+        },
+        {
+          "name": "test_unknown_code_stops_before_running_template",
+          "line": 220
+        },
+        {
+          "name": "test_wrapper_emits_fallback_warning",
+          "line": 227
+        },
+        {
+          "name": "test_empty_nllb_output_is_rejected",
+          "line": 233
+        },
+        {
+          "name": "test_empty_airllm_output_is_rejected",
+          "line": 243
+        },
+        {
+          "name": "test_fixed_maps_have_no_approximate_targets",
+          "line": 254
+        },
+        {
+          "name": "pending",
+          "line": 262
+        },
+        {
+          "name": "test_startup_fallback_rejects_incompatible_requests_before_loading",
+          "line": 269
+        },
+        {
+          "name": "test_runtime_fallback_rejects_incompatible_requests_before_loading",
+          "line": 278
+        },
+        {
+          "name": "test_loaded_m2m_rechecks_each_request_before_tokenization",
+          "line": 287
+        },
+        {
+          "name": "test_compatible_startup_fallback_loads_and_translates",
+          "line": 295
+        },
+        {
+          "name": "test_ollama_accepts_product_targets_and_sends_instructions",
+          "line": 309
+        },
+        {
+          "name": "test_blank_pending_fallback_does_not_load_or_validate",
+          "line": 318
+        },
+        {
+          "name": "test_nllb_rejects_before_loading",
+          "line": 324
+        },
+        {
+          "name": "test_nllb_exact_languages_use_dedicated_tokens",
+          "line": 331
+        },
+        {
+          "name": "test_custom_template_missing_or_escaped_placeholder_rejects_before_http",
+          "line": 342
+        },
+        {
+          "name": "test_custom_template_transmits_full_instructions",
+          "line": 348
+        },
+        {
+          "name": "test_custom_template_truncation_rejects_before_http",
+          "line": 354
+        },
+        {
+          "name": "test_chat_sends_custom_instructions",
+          "line": 360
+        },
+        {
+          "name": "test_unknown_targets_reject_before_provider_side_effects",
+          "line": 365
+        },
+        {
+          "name": "recovered",
+          "line": 119
+        },
+        {
+          "name": "load",
+          "line": 297
+        }
+      ]
+    },
+    {
+      "path": "dev/verify_cleanup_runtime.py",
+      "bytes": 1570,
+      "sha256": "1a782d0389583c291f205abb17ccdddd13184d306aff8bb43cf80123ab153e7a",
+      "functions": []
+    },
+    {
+      "path": "dev/verify_model_sources.py",
+      "bytes": 791,
+      "sha256": "4e3b122c38f32708a4439e18d40a3b85f627e4a44d736fc1bd1cca7dbe66e7e7",
+      "functions": [
+        {
+          "name": "check",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "path": "packaging/build_dist.py",
+      "bytes": 2440,
+      "sha256": "7869da07e0729f92ec28bf4e6e08eeda91c7e749f3872bce812ad88a18918805",
+      "functions": [
+        {
+          "name": "run_pyinstaller",
+          "line": 30
+        },
+        {
+          "name": "copy_asset_folders",
+          "line": 38
+        },
+        {
+          "name": "main",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "path": "packaging/reflow.spec",
+      "bytes": 3906,
+      "sha256": "ab16840cac44f12f138c79e2a400bd2a89a9d896c5621a5dc5e5af1e2b5a1116"
+    },
+    {
+      "path": "frontend/src/App.css",
+      "bytes": 2891,
+      "sha256": "6e25a776d3e8102da5bacb3cb99f4a5fc662a2e01e6143140671a556d28c3d5c"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "bytes": 6546,
+      "sha256": "fc2b919daeded741e9d38199d0b3058de2780cc35fc26c2a53ffa05eb2ce62e9"
+    },
+    {
+      "path": "frontend/src/components/charts/animation.ts",
+      "bytes": 1059,
+      "sha256": "bd91d889c06e719f74069ee7141cf69a51e4f238e6b37f762399d239f1ea4521"
+    },
+    {
+      "path": "frontend/src/components/charts/area-chart-loading.tsx",
+      "bytes": 3626,
+      "sha256": "f5338b2034e5972d7504817b9cfd10dc2ecbbdeb272ae057a186d4d258de808a"
+    },
+    {
+      "path": "frontend/src/components/charts/area-chart.tsx",
+      "bytes": 7901,
+      "sha256": "41e71f6389b6cd1bc68ce0b59c1d5ab4c152215a1b65d06fe51ef5899c12fd0a"
+    },
+    {
+      "path": "frontend/src/components/charts/area-gradient-defs.tsx",
+      "bytes": 3093,
+      "sha256": "4dd07b0a7fa5822f20a5287722c075aff0b9aa39411ad048f7a03b7dec4c7c42"
+    },
+    {
+      "path": "frontend/src/components/charts/area.tsx",
+      "bytes": 12174,
+      "sha256": "78d2a981a0638ebacd4a8eb212d016ef1a33a8994ec68738bc8fbd52e6b85d10"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-chart-loading.tsx",
+      "bytes": 940,
+      "sha256": "865783afebeb72fb930b9635144818b550af95fa6080470325b6b2dc66f299d8"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-chart.tsx",
+      "bytes": 22243,
+      "sha256": "252a46d22fcff1c1396f164abe6264b434f9392baa4294fdb4c2fb2b2af7d37f"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-depth-geometry.ts",
+      "bytes": 1445,
+      "sha256": "58ca277cb85b18e28984166486583c02608318281286b9ac792f9f00e1753fb8"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-squares-layout.ts",
+      "bytes": 2541,
+      "sha256": "eaea7f00696b5d1c600e00b4e47f7a7d4082315e1da8bce15485627282fc5274"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-squares.tsx",
+      "bytes": 16027,
+      "sha256": "91d7940f5ee6a2278157aa8a9d2b305a393cb68398b4ba0226557642d61ff539"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-x-axis.tsx",
+      "bytes": 3816,
+      "sha256": "bfcec1d7ac3aac85b300e6dcf6980feb8dd08db14e8e738f29bd67db70e75663"
+    },
+    {
+      "path": "frontend/src/components/charts/bar-y-axis.tsx",
+      "bytes": 3440,
+      "sha256": "7737bc7da56b3cfd6372010e61ea1877ba21d24d04a63bc99241d2a66662be45"
+    },
+    {
+      "path": "frontend/src/components/charts/bar.tsx",
+      "bytes": 14822,
+      "sha256": "07f28d1e4efb081e7ae3c776d2a717ed04ab4041e44ba6449fc235acb69310d2"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-child-passthrough.ts",
+      "bytes": 3445,
+      "sha256": "7ed588788dd6b8d009928b0f6f2af64838ba9291f4690f2801d77586b7269790"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-config-context.tsx",
+      "bytes": 2401,
+      "sha256": "65c9fae029556283adf951203679147f9708187df6ec62cbe961b4e250c0b210"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-context.tsx",
+      "bytes": 14630,
+      "sha256": "890e9f473dd105ed3bea286b6a668eadd8540641972acb902885e3f973264f65"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-defs.ts",
+      "bytes": 1997,
+      "sha256": "3450fd3a5b52169b6cbfb10ea87dc4ef8feafeefc5ace88ef45366051926d5d0"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-formatters.ts",
+      "bytes": 514,
+      "sha256": "5044fb8e7e6cfaba51d4d3a1d961ecb53e95d3fdd733cb4b1666cb285bd96821"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-legend-hover.tsx",
+      "bytes": 1052,
+      "sha256": "fb31f3648fed0aba2d92792ee943a6317b5051532d5738855bae24a496403882"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-loading-label.tsx",
+      "bytes": 1388,
+      "sha256": "1464dffa84248d23562289f9a1b05e819b2e13df6303dec80cab3bbefe71f248"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-phase.ts",
+      "bytes": 1678,
+      "sha256": "4c6e1c20675218eb932c99743f58b8153e34eb6ec160000362c66ec8aef136a3"
+    },
+    {
+      "path": "frontend/src/components/charts/chart-reveal-clip.tsx",
+      "bytes": 2530,
+      "sha256": "e63aa2b186ba797f1737f0a88d717bd0f07da10b2476598b7522924cac9f9d01"
+    },
+    {
+      "path": "frontend/src/components/charts/dash-tail-stroke.tsx",
+      "bytes": 1901,
+      "sha256": "42e25bc552b9eab95f6960ae75a633c6c5dd515d38654ce954f2fcb1df6cee89"
+    },
+    {
+      "path": "frontend/src/components/charts/decimate-time-series.ts",
+      "bytes": 3562,
+      "sha256": "759d7bd0011d78c77cf70e2abe51b48d52c27aae5df96d4bc6790b19a528030a"
+    },
+    {
+      "path": "frontend/src/components/charts/fade-edges.ts",
+      "bytes": 1438,
+      "sha256": "01418a81e3f482195f984b82ff320e78df87fdeafdda7604a16433d746ca737c"
+    },
+    {
+      "path": "frontend/src/components/charts/filter-data-by-x-domain.ts",
+      "bytes": 1532,
+      "sha256": "cd4262b0f5bb84c54d49efa4565ec6f3a64870b7d7c1349dfe685ec6e198fdf4"
+    },
+    {
+      "path": "frontend/src/components/charts/generate-chart-skeleton-data.ts",
+      "bytes": 1452,
+      "sha256": "7673a08792a7623133660473663da5e94bf519ddc54689bb024b7a2b78f58393"
+    },
+    {
+      "path": "frontend/src/components/charts/grid.tsx",
+      "bytes": 11312,
+      "sha256": "f2ad9cd94ba3b2df6cd4b15d6a7ea7bff4b2e577a5a18e820e3eb1684956717c"
+    },
+    {
+      "path": "frontend/src/components/charts/highlight-segment-bounds.ts",
+      "bytes": 2461,
+      "sha256": "b5a304c3b9907823f7c0762443304dc6fc16c5ec76c9c927742f7250465e97b3"
+    },
+    {
+      "path": "frontend/src/components/charts/highlight-segment.tsx",
+      "bytes": 1917,
+      "sha256": "112a80a08a9d35b1babe66be7b03dfe0be8638cc2860982d6c7c049839769872"
+    },
+    {
+      "path": "frontend/src/components/charts/indicator-fade.ts",
+      "bytes": 1579,
+      "sha256": "8868837536cf01e03db6d2b23ebf84755cba0d2262b63b55d8bd2f2a164f1c30"
+    },
+    {
+      "path": "frontend/src/components/charts/line-loading-pulse.tsx",
+      "bytes": 5475,
+      "sha256": "04ed94b7d657b8293ab8d56ce241b4cb73894d61fa5e9ca907d4a5fa80bedc4e"
+    },
+    {
+      "path": "frontend/src/components/charts/line-loading-timing.ts",
+      "bytes": 439,
+      "sha256": "4f6ce47c02bace175e3d633afe1be508cbcdf5c78e7397b2243e73b24b4b1995"
+    },
+    {
+      "path": "frontend/src/components/charts/loading-sweep.tsx",
+      "bytes": 14169,
+      "sha256": "9e42ef6a860c770cd5bdef3cfee65843ad713155e27c3158f71c194fa1195b01"
+    },
+    {
+      "path": "frontend/src/components/charts/motion-utils.ts",
+      "bytes": 1701,
+      "sha256": "42bee04facfc758f9a4b89607040a9e8bb40a5cfafe4bb4e363f1fcd1cb1f858"
+    },
+    {
+      "path": "frontend/src/components/charts/path-stroke-utils.ts",
+      "bytes": 2303,
+      "sha256": "ebfe8724a87c0d503ebfddec282c1fe7639c31e7d10a492b81ad4b0c142bf686"
+    },
+    {
+      "path": "frontend/src/components/charts/pattern-area.tsx",
+      "bytes": 1302,
+      "sha256": "22f3b23edc02d8c63c38abec49a10427bb161e5e7b46748ff9ebf357f65fc7f2"
+    },
+    {
+      "path": "frontend/src/components/charts/pattern-preset.tsx",
+      "bytes": 4574,
+      "sha256": "b877d4479a805dd72d7daee5be4cc6b82243b9f4026f84e0085d0639dcb6e2d0"
+    },
+    {
+      "path": "frontend/src/components/charts/projection-config.ts",
+      "bytes": 3379,
+      "sha256": "fb7e04bbaac83119bcbe5fcfea4c2c713d80ec3cf65dc8a427d506edeca4bf59"
+    },
+    {
+      "path": "frontend/src/components/charts/projection-utils.ts",
+      "bytes": 10400,
+      "sha256": "a7d6c269220dcce466e2eaf620081d488fbef1a372ed3d9cff4fd76298232e0f"
+    },
+    {
+      "path": "frontend/src/components/charts/reference-area-config.ts",
+      "bytes": 1698,
+      "sha256": "6d5a08ea977f9181f78ebf7e32d5d1dd4f70fb4c645fa11006b9f62b45f223e5"
+    },
+    {
+      "path": "frontend/src/components/charts/reference-area-registration-context.tsx",
+      "bytes": 590,
+      "sha256": "1bdf081f8d454f6e9b678d4b470aabbade8fb7b47d9bcf8a44e05887e11aa347"
+    },
+    {
+      "path": "frontend/src/components/charts/series-bar-layout.ts",
+      "bytes": 1622,
+      "sha256": "3e834065bf086275b263b2f5a0737a544dc4dfbfc7aa533191fcd0365feefb2c"
+    },
+    {
+      "path": "frontend/src/components/charts/series-dash-tail-overlay.tsx",
+      "bytes": 2715,
+      "sha256": "62425aae177b81d3ee730d3d379ed2e43e6ec998bd2d17851f01de265b434582"
+    },
+    {
+      "path": "frontend/src/components/charts/series-highlight-layer.tsx",
+      "bytes": 1441,
+      "sha256": "c9d5d19fe7fb3e1cf6dd3d054ef89538920b523f4899ea78a37f63b976fa00ac"
+    },
+    {
+      "path": "frontend/src/components/charts/series-hover-dim.tsx",
+      "bytes": 2001,
+      "sha256": "3eb2c82aa794c2b263bef2dba8bfe81ef9fb63b78891225d3cf951b0c89483ba"
+    },
+    {
+      "path": "frontend/src/components/charts/series-markers.tsx",
+      "bytes": 7305,
+      "sha256": "c8c37a80c3760bbac0c0872830ca77fb51b49daaa644409e2f0855581b816dc6"
+    },
+    {
+      "path": "frontend/src/components/charts/series-path-utils.ts",
+      "bytes": 2822,
+      "sha256": "cdc21b513a9789f33fa85335a791b49e389a6866b8397abe9eaaff59ef385fe4"
+    },
+    {
+      "path": "frontend/src/components/charts/series-point-marker.tsx",
+      "bytes": 5264,
+      "sha256": "9775cb40e04639fafa29c675619e6ebbaf20984d353cf41fdc5d10fe1034ea04"
+    },
+    {
+      "path": "frontend/src/components/charts/static-chart-preview-context.tsx",
+      "bytes": 523,
+      "sha256": "231d750e55824c86c3f79fd18870bb43633cf47fae4c33f8c218fea7eab8f551"
+    },
+    {
+      "path": "frontend/src/components/charts/time-series-chart-shell.tsx",
+      "bytes": 19324,
+      "sha256": "0ee4403be5142e24645e57b7f17471171f1f584ed260bd31fd7d1e416b9703a6"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/chart-tooltip.tsx",
+      "bytes": 13197,
+      "sha256": "85f47eb4fd599979d9fe917b606c2658632d65eb210d0a1882d2f1f169ff576e"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/date-ticker.tsx",
+      "bytes": 4795,
+      "sha256": "562553385a76c1c919efd729ed46e1bad142a1783a87c26d792adb22a4d95454"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/index.ts",
+      "bytes": 484,
+      "sha256": "53b24a2f5cb83018efaf5320040a448a468a3962b000a25e5bf1e6b04b3e23df"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/tooltip-box.tsx",
+      "bytes": 6773,
+      "sha256": "7f486a34b6b8e6098a01806a6260784c760f5539ee95c716444b48b4cba63646"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/tooltip-content.tsx",
+      "bytes": 1762,
+      "sha256": "52a61f5bb477d8c439f8b2003846f8b47800bf23de47389c19a256efbd1efd8f"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/tooltip-dot.tsx",
+      "bytes": 4013,
+      "sha256": "00d4dcadb37a1eaf005707e770b6ab0a0cfa410c7c327e86c8c35bde7043208e"
+    },
+    {
+      "path": "frontend/src/components/charts/tooltip/tooltip-indicator.tsx",
+      "bytes": 5377,
+      "sha256": "66f49f2ba8ed7674a52b60e3de58066cb2afbf19d780e53f5b4f98ed57969df7"
+    },
+    {
+      "path": "frontend/src/components/charts/use-animated-series-path.ts",
+      "bytes": 4210,
+      "sha256": "54bad56d9d3cdc02ca0433719059b1b1e595fc8169a16530798c320a76b8f0a6"
+    },
+    {
+      "path": "frontend/src/components/charts/use-animated-y-domains.ts",
+      "bytes": 6422,
+      "sha256": "f928c539e664b3688aa232904f35f51f0f3d34e51c938c47403cc08fa84404e0"
+    },
+    {
+      "path": "frontend/src/components/charts/use-chart-interaction.ts",
+      "bytes": 9515,
+      "sha256": "e84a3a4fd66b150e89b05e919189e5fcad0d63ca8b804120bf574a7491a0283e"
+    },
+    {
+      "path": "frontend/src/components/charts/use-chart-phase-orchestrator.ts",
+      "bytes": 4973,
+      "sha256": "e50da33ef9f6183fc63b074b718f92f3b0da4a72bf4bae142d9e38e58c81cc73"
+    },
+    {
+      "path": "frontend/src/components/charts/use-enter-complete.ts",
+      "bytes": 745,
+      "sha256": "267e864d7568b51a7df97bed28d34060918b38bacb1c7c6fb5488f33bbf786dd"
+    },
+    {
+      "path": "frontend/src/components/charts/use-grid-shimmer.ts",
+      "bytes": 2698,
+      "sha256": "cc3f402c8b6215fcaa7707a3181085b9e77e936a610575b08a0df4bea35141fb"
+    },
+    {
+      "path": "frontend/src/components/charts/use-highlight-segment.ts",
+      "bytes": 2046,
+      "sha256": "f34fd027d2197976aa9ebab9b80727c2cd11e48242289901834d69a26ca01cb3"
+    },
+    {
+      "path": "frontend/src/components/charts/use-mount-progress.ts",
+      "bytes": 981,
+      "sha256": "744cacfe71fba55e287bae655c7f51a2e8384268d0887ad81ed95967dd70fd94"
+    },
+    {
+      "path": "frontend/src/components/charts/use-scheduled-tooltip.ts",
+      "bytes": 2596,
+      "sha256": "197430cabf1f017a47f6f2262341b8355d55436876e19affcc8b46f2f35752d3"
+    },
+    {
+      "path": "frontend/src/components/charts/visx-pattern.tsx",
+      "bytes": 948,
+      "sha256": "987831a15796d47edc1e0a7783f239a78914f3e2e038ed082d66e8fcad12e016"
+    },
+    {
+      "path": "frontend/src/components/charts/x-axis.tsx",
+      "bytes": 16354,
+      "sha256": "1ffbac7e1c381305c07c0022e148a9fccee98a67a9c46d569671e0e574f06d5f"
+    },
+    {
+      "path": "frontend/src/components/charts/y-axis-scales.ts",
+      "bytes": 2987,
+      "sha256": "4bd7bfee4e0ef50e185ed96ed910af6236793663b5947f14778513b6e70a8fe1"
+    },
+    {
+      "path": "frontend/src/components/charts/y-axis-ticks.ts",
+      "bytes": 819,
+      "sha256": "dbbe50e831bc33cc37b5fcc51c6c27094ad79bbc031060356153577a9cf33668"
+    },
+    {
+      "path": "frontend/src/components/charts/y-domain-utils.ts",
+      "bytes": 3958,
+      "sha256": "d3f67c8760a7ada2b6bdc05fe470900a49ab86ee70a13ec6686f2c64a64eeebb"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/anthropic-dark.tsx",
+      "bytes": 579,
+      "sha256": "403462b284c92a0abef01c6954972314d535317c1d52543dc1f8e541dbc8a501"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/anthropic.tsx",
+      "bytes": 536,
+      "sha256": "7995d87a1f2e5b71c74b7027e3d161b3ba40267bc785c655e185677161e0fd8f"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/apple-activity-card.tsx",
+      "bytes": 5515,
+      "sha256": "a5d8992a4668b9c848d354046246f2b4b444bf8d830f3c58b69338a7fad83dad"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/bento-grid.tsx",
+      "bytes": 27067,
+      "sha256": "8243fb0c5c548f138cf08e337c7aa07dc6f8555d6379ddbd0b35ab8c9e49d169"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/deepseek.tsx",
+      "bytes": 2359,
+      "sha256": "5676240396cb6ba1097e2ca0384e109ad29843a2b71f0fe9398ca2b14edef55e"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/gemini.tsx",
+      "bytes": 845,
+      "sha256": "177b60c1f1e1022970f14bf09a3c75e01fe33def1ed314e1ae0a122e20cd335e"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/liquid-glass-card.tsx",
+      "bytes": 14411,
+      "sha256": "8877395b4741a0061050817e731c831ccf02206bc20094422e72d52b56ed8e28"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/mistral.tsx",
+      "bytes": 1967,
+      "sha256": "2928c7d889adccec34399c608721cc436d6bfbfebc6bf5cfa0c2bebd8fd9dbf6"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/open-ai-dark.tsx",
+      "bytes": 1921,
+      "sha256": "8f728b0d0a5b0f5011cd654121913989f799d407b7bec6c5aa426e35e180d4a1"
+    },
+    {
+      "path": "frontend/src/components/kokonutui/open-ai.tsx",
+      "bytes": 1852,
+      "sha256": "3633d159ec885541a122d00a5956c67dcd0b77964a7f3d79e039b3537db3a015"
+    },
+    {
+      "path": "frontend/src/components/onboarding/ProductTour.tsx",
+      "bytes": 4706,
+      "sha256": "d00b3722f876f217226e516570274c01349166d4bf112e56b5c873fd002ce479"
+    },
+    {
+      "path": "frontend/src/components/onboarding/SetupWizard.tsx",
+      "bytes": 16014,
+      "sha256": "b060f22f57064c12369f8ec9ad7c52a17e72c2f1bee87dfa34354b6279217b7f"
+    },
+    {
+      "path": "frontend/src/components/panels/CornerFrame.tsx",
+      "bytes": 770,
+      "sha256": "ce982f5116ba6b7cab7ffd077194300ec014bc6fa6301695d29142400d951ac1"
+    },
+    {
+      "path": "frontend/src/components/panels/HardwareIntelligence.tsx",
+      "bytes": 4474,
+      "sha256": "797bb3948224c0431f4f9011d4abc2c32639ffbea6c106028e8b2de1daedace3"
+    },
+    {
+      "path": "frontend/src/components/panels/LogConsole.tsx",
+      "bytes": 2529,
+      "sha256": "e9d28fea11f535ad97899dd22da3b626c1c22964040670c877c3b385c36200e3"
+    },
+    {
+      "path": "frontend/src/components/panels/RadialGauge.tsx",
+      "bytes": 1613,
+      "sha256": "0b93950ff6856ed41287edebbc113c3d21aa9bcf9d393f389ec6e872eec44587"
+    },
+    {
+      "path": "frontend/src/components/panels/StageNode.tsx",
+      "bytes": 3888,
+      "sha256": "d1702519c72457b1e7ea97d97796cf03d5bde742392078e54ef1900928451a5b"
+    },
+    {
+      "path": "frontend/src/components/shared/ColorPicker.tsx",
+      "bytes": 5713,
+      "sha256": "b8f23457f9dd8b71768ead834b241c1a6d4a165fb118122da96073a7f72f9d52"
+    },
+    {
+      "path": "frontend/src/components/shared/HelpTooltip.tsx",
+      "bytes": 1400,
+      "sha256": "01900ab0693d65f5c7366b76387a215b009820a78049b684b44cd37f3a0f00b0"
+    },
+    {
+      "path": "frontend/src/components/shared/SourceLanguageReport.tsx",
+      "bytes": 1045,
+      "sha256": "6a44460b5bb73225859e2442030e7f38ebc8403911b4df57d9f511ec210b82e1"
+    },
+    {
+      "path": "frontend/src/components/shell/BootScreen.tsx",
+      "bytes": 1814,
+      "sha256": "899736113692cbe9e35649ee0f7b8011cf4cbb15634d244e9d1bb18cea03826d"
+    },
+    {
+      "path": "frontend/src/components/shell/IconRail.tsx",
+      "bytes": 1561,
+      "sha256": "cd60fdce446c7d9a7079b3b7880cb090a0123feefdaca9e8538d2197a2e5379c"
+    },
+    {
+      "path": "frontend/src/components/shell/PrimaryNav.tsx",
+      "bytes": 3207,
+      "sha256": "e15735682347d3864a71380ac20345a3ab79da3d23de17607860ae6225a92e27"
+    },
+    {
+      "path": "frontend/src/components/shell/TitleBar.tsx",
+      "bytes": 3748,
+      "sha256": "30ffed3a085241bc8aa7a66b4d8895f12bcc0e2e34d53dd9ee1a56e0e4fa571e"
+    },
+    {
+      "path": "frontend/src/components/shimmering-text.tsx",
+      "bytes": 2332,
+      "sha256": "4e0b24ed003072e763b657c27bc0e183dc8bcb07e532cc3586d7112a9c2b1eaf"
+    },
+    {
+      "path": "frontend/src/components/ui/badge.tsx",
+      "bytes": 1776,
+      "sha256": "46a0de5224f6a5d5d63d45246534288518dce888f031064bff925bbc7fe6ad97"
+    },
+    {
+      "path": "frontend/src/components/ui/button.tsx",
+      "bytes": 2392,
+      "sha256": "cc36af0f8b5019c33cc039fbf03bb952a513072b15b55b53c592b78af3e5f4c4"
+    },
+    {
+      "path": "frontend/src/components/ui/card.tsx",
+      "bytes": 1987,
+      "sha256": "c48dd3b96be90a7066f1aebf294f0af9d00ebcdc367d5d4aca55429ade570c1c"
+    },
+    {
+      "path": "frontend/src/components/ui/dialog.tsx",
+      "bytes": 4289,
+      "sha256": "1eef94a2bb44fb1a1f132c9538eacca61cb9555e085ee285e5f23d108a931fb0"
+    },
+    {
+      "path": "frontend/src/components/ui/input.tsx",
+      "bytes": 962,
+      "sha256": "8c4612a7c41319ac5049daa3b34b080f9784b6245c17780eb87c127e58e473db"
+    },
+    {
+      "path": "frontend/src/components/ui/progress.tsx",
+      "bytes": 721,
+      "sha256": "3b6024d4df68a7a5818d366f2da015767cb0b6da11658caed721c52e12c9e95d"
+    },
+    {
+      "path": "frontend/src/components/ui/scroll-area.tsx",
+      "bytes": 1639,
+      "sha256": "8bd9d986b2844c9a87de825c6de4787b6739b36c3dc9a05ccf3eb107160e4043"
+    },
+    {
+      "path": "frontend/src/components/ui/select.tsx",
+      "bytes": 6353,
+      "sha256": "0b796a108a4eb5ba52d9ad938b7aea36dc56ae66c703a6d0a23dbc24f96daff3"
+    },
+    {
+      "path": "frontend/src/components/ui/separator.tsx",
+      "bytes": 694,
+      "sha256": "6da346505c8629a4668420d2a5ca48891383bbe0b0ceb14163537c671879427e"
+    },
+    {
+      "path": "frontend/src/components/ui/slider.tsx",
+      "bytes": 1977,
+      "sha256": "4f4019262b92381acbe7ffac17d4b0493ddd1a4da7d3d9dd8f5d12b350378813"
+    },
+    {
+      "path": "frontend/src/components/ui/switch.tsx",
+      "bytes": 1394,
+      "sha256": "bbab76afa61681c85d39e0323a85d893383bbc0a0e14a72169b6b3ea420a54a7"
+    },
+    {
+      "path": "frontend/src/components/ui/tabs.tsx",
+      "bytes": 3782,
+      "sha256": "865d0194331b9b2be36723fa79d3575dc83078b4cb941cafee87cb72fc2cff46"
+    },
+    {
+      "path": "frontend/src/components/ui/textarea.tsx",
+      "bytes": 784,
+      "sha256": "af3d341fbccc044f5ab13489c6c428d0938391135215c06837ba8bae63cc840d"
+    },
+    {
+      "path": "frontend/src/components/ui/tooltip.tsx",
+      "bytes": 1820,
+      "sha256": "e729bbc8d08bd8d1fe132ebb6a00dc59475729047fb11d46ea92ff8806d68d42"
+    },
+    {
+      "path": "frontend/src/index.css",
+      "bytes": 7041,
+      "sha256": "b2123ad8515e61dcb470af3545737ad311805a2f9bd8cdc9fc1b9f78a2a76b0d"
+    },
+    {
+      "path": "frontend/src/lib/api.ts",
+      "bytes": 13333,
+      "sha256": "51905a57460d9091bae39c2a92d3b0e4f830955be98fd75410afc1be02fdecb9"
+    },
+    {
+      "path": "frontend/src/lib/eta.ts",
+      "bytes": 1883,
+      "sha256": "69eb5cd9693fbc03f159bc59a4b9e36e98b9eca8639f0aedf9d1d727288691ed"
+    },
+    {
+      "path": "frontend/src/lib/events.ts",
+      "bytes": 838,
+      "sha256": "0b3a191e8b952f3756e9f8b678f9de31e7fefcf91d40389e3b26e9dba2024571"
+    },
+    {
+      "path": "frontend/src/lib/gauge-color.ts",
+      "bytes": 590,
+      "sha256": "253406a916d1a003fc04cdcb457f3d4a73d836ca38f95f3e8566641b8f898b2d"
+    },
+    {
+      "path": "frontend/src/lib/render-params.ts",
+      "bytes": 803,
+      "sha256": "ab09bdd7cab55bca031f221451a8fcd68accecb4c8cc710f912e2324eae9b607"
+    },
+    {
+      "path": "frontend/src/lib/use-accent-color.ts",
+      "bytes": 4035,
+      "sha256": "e0953df4b236e028cb5a90d1bcb9334ec91c0d2aa297485329b4da046d4a5b5d"
+    },
+    {
+      "path": "frontend/src/lib/use-confirm.tsx",
+      "bytes": 3100,
+      "sha256": "38ad6374f95e5dfb086dea2cede5f3ddb45c1e00445cb57ca0dfe7ec6c094c6f"
+    },
+    {
+      "path": "frontend/src/lib/use-experience.ts",
+      "bytes": 988,
+      "sha256": "629346e5159fe6cfed409cc99ea6762c12970df71218574042b839ba311b29f9"
+    },
+    {
+      "path": "frontend/src/lib/use-hardware.ts",
+      "bytes": 1163,
+      "sha256": "78c4242f25b2bfac51a58c2f8a68f23cd637b2148edd62ce3c5682c80c419be6"
+    },
+    {
+      "path": "frontend/src/lib/use-help-tooltips.ts",
+      "bytes": 1467,
+      "sha256": "3061318599fbab304964ccf1b5750f89160455ebf58cd652c1e2d83dd81718ed"
+    },
+    {
+      "path": "frontend/src/lib/use-marketplace.ts",
+      "bytes": 2738,
+      "sha256": "ca46c7869de10caa09654875562bb5ea7254dece9ecdda595155738167cadf05"
+    },
+    {
+      "path": "frontend/src/lib/use-queue.ts",
+      "bytes": 1023,
+      "sha256": "18946c92878636c148299d745de1b23be770dd6b6176e0fe9627a106a8098d46"
+    },
+    {
+      "path": "frontend/src/lib/use-render-config.ts",
+      "bytes": 4561,
+      "sha256": "6fa72da21c7a3ccbfdc5db122a3a9d43b31fbc64d23a978f9f00fafd0e271dc1"
+    },
+    {
+      "path": "frontend/src/lib/use-render.ts",
+      "bytes": 4140,
+      "sha256": "e90acc3a13a59870652541ba8711a927b74803df4274522b754929be0cd3f3f7"
+    },
+    {
+      "path": "frontend/src/lib/use-theme.ts",
+      "bytes": 713,
+      "sha256": "9583a83043f37b5ce00a73e85c711ae5307d6ebf9b7bc72fc94c9ab87e86bf2c"
+    },
+    {
+      "path": "frontend/src/lib/use-tour.ts",
+      "bytes": 3999,
+      "sha256": "bdfa6171811dd07f8cce6015c5f04cbe25a3ba6ef6fdab578c021289fefd7d11"
+    },
+    {
+      "path": "frontend/src/lib/utils.ts",
+      "bytes": 169,
+      "sha256": "4acbc7165a8d54738ff62b51414e772c08fe78434e524e6d8770180d3ba2925f"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "bytes": 230,
+      "sha256": "6e9e5807fcbd48b75a96db5cbef36c996262196be42e6d4760dc86babbe61ad2"
+    },
+    {
+      "path": "frontend/src/pages/Assets.tsx",
+      "bytes": 3349,
+      "sha256": "aededac0e2566f7800809ecb824062b04839eb877c7d9d1f672506b38775cfbd"
+    },
+    {
+      "path": "frontend/src/pages/Dashboard.tsx",
+      "bytes": 24633,
+      "sha256": "55f848247e060300ff2c99342ba892fb18343683aa017a5b318fd9ac3339b3ab"
+    },
+    {
+      "path": "frontend/src/pages/Logs.tsx",
+      "bytes": 321,
+      "sha256": "f4c4308d64473086f6031a21d753a856058ef524d6a328fc3f7f574fecec6994"
+    },
+    {
+      "path": "frontend/src/pages/Marketplace.tsx",
+      "bytes": 32097,
+      "sha256": "4496a4903cf137b49d148d2a79ccbaad85c2b3b38328954ff401ccba6463bd30"
+    },
+    {
+      "path": "frontend/src/pages/Nodes.tsx",
+      "bytes": 15566,
+      "sha256": "f04fdc4d1c3ea311ffc1aff92821dc02804c6617bdf3affc963f8da1b98b2cf1"
+    },
+    {
+      "path": "frontend/src/pages/Settings.tsx",
+      "bytes": 20562,
+      "sha256": "1c40a643384d94096767fbbfb67ca89d17e9209b6ee998e0f33f4132a492a345"
+    },
+    {
+      "path": ".github/workflows/build.yml",
+      "bytes": 1781,
+      "sha256": "bb794e2eccccb7707e4852cc347ce6b085d4e3ecc2ca8ec4539d5ea57f5b4055"
+    },
+    {
+      "path": "main.py",
+      "bytes": 6866,
+      "sha256": "8354e857d4ce27fd341514daa57589c8956f6f26e933fffe4b21b64d636b9c45"
+    },
+    {
+      "path": "config.py",
+      "bytes": 2415,
+      "sha256": "d1a86d6eca97ed8be40b0a99b50fbe23aa481e10eb8c2b2fb111a6f66e50bce5"
+    },
+    {
+      "path": "Launch_Reflow.bat",
+      "bytes": 3109,
+      "sha256": "c35e11cd79b547282896d989d40b9eb7276db85bea657d6e554f9d7439e8d302"
+    },
+    {
+      "path": "LAUNCH_REFLOW.sh",
+      "bytes": 3709,
+      "sha256": "433eedb1a1e9b19b058709f6125be5ae33ecdb79071bf0726cf9dc09dafc1e44"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 4316,
+      "sha256": "bc8f6cc07eba9109a11ffa572d5c982e2ac04a178e9df7b54d9ef6c4d9760b98"
+    },
+    {
+      "path": "portable_requirements.txt",
+      "bytes": 997,
+      "sha256": "c5d7bf2d78da82549c18cd956b863ed0204355797bc3a46f69a9a326c81c31c6"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 5807,
+      "sha256": "e00b4b4468a36fc75e7a301725c67675b3bee7caaae3cdad17f0a8e93c1ccd57"
+    },
+    {
+      "path": "LICENSE.txt",
+      "bytes": 32768,
+      "sha256": "f2fd8edb3271310fc2af0ffa72886b26094d3e3b5c3bb709269d2ec4b31285a4"
+    },
+    {
+      "path": "frontend/package.json",
+      "bytes": 1255,
+      "sha256": "59f8e6a506ca4ad9485a1a0c2967925b95cda2975c3e6b2b8f3b2f26b4d88132"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "bytes": 163841,
+      "sha256": "91954c16ced391d5f3ca5fe32d14222e4ca87276a4c4abafb2116bcd92c8df41"
+    }
+  ],
+  "syntax_errors": []
+}

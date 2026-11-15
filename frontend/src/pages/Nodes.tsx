@@ -27,11 +27,15 @@ import { confirmAction } from "@/lib/use-confirm"
 import { loadGaugeColor } from "@/lib/gauge-color"
 import { formatDuration, relativeSpeedPercent, projectedLoadPercent, jobMemoryBudget } from "@/lib/eta"
 import { cn } from "@/lib/utils"
+import { ErrorDetails } from '@/components/shared/ErrorDetails'
 
 const nodeTypes = { stageNode: StageNode }
 const PARALLEL_WORKER_OPTIONS = [1, 2, 3, 4]
 
-export function NodesPage() {
+export function NodesPage({ selectedDeviceId, onDeviceSelected }: {
+  selectedDeviceId: string
+  onDeviceSelected: (id: string) => void
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const render = useRenderJob()
@@ -46,7 +50,6 @@ export function NodesPage() {
   const videoPath = queue[0]?.input_path ?? null
   const displayedInput = render.isRunning ? render.inputPath : videoPath
   const [devices, setDevices] = useState<DeviceInfo[]>([])
-  const [selectedDeviceId, setSelectedDeviceId] = useState("cpu")
   const [deviceEtas, setDeviceEtas] = useState<DeviceEtaMap>({})
   const [selectedVram, setSelectedVram] = useState<{ used: number | null; total: number | null }>({
     used: null, total: null,
@@ -58,7 +61,6 @@ export function NodesPage() {
     bridge.listLanguages().then(setLanguages).catch(() => {})
     bridge.getHardwareSnapshot().then((snap) => {
       setDevices(snap.devices)
-      setSelectedDeviceId(snap.default_device_id)
     })
   }, [])
 
@@ -292,11 +294,11 @@ export function NodesPage() {
 
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs text-muted-foreground">Device</span>
-                <Select value={selectedDeviceId} onValueChange={setSelectedDeviceId}>
+                <Select value={selectedDeviceId} onValueChange={onDeviceSelected}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {devices.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
+                      <SelectItem key={d.id} value={d.id} disabled={d.backend === 'unsupported'}>{d.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -369,14 +371,15 @@ export function NodesPage() {
                   <span className="text-muted-foreground">{render.statusText || render.status.toUpperCase()}</span>
                   <span className="text-primary">{render.percent}%</span>
                 </div>
-                <Progress value={render.percent} />
-                {render.stillWorking && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning" />
-                    Still working - this stage can take a while depending on your hardware.
-                  </div>
+                <Progress value={render.percent} aria-label="Render progress" />
+                {render.waitingSeconds !== null && (
+                  <p className="text-xs text-muted-foreground">
+                    Last progress update {formatDuration(render.waitingSeconds)} ago. ReFlow is waiting for this step to finish.
+                  </p>
                 )}
-                {render.errorMessage && <div className="text-xs text-destructive">{render.errorMessage}</div>}
+                {render.errorMessage && <ErrorDetails message={render.errorMessage} />}
+                {render.status === 'error' && <Button disabled={render.isRunning}
+                  onClick={() => void render.retry()}>Retry</Button>}
               </CardContent>
             </Card>
           )}

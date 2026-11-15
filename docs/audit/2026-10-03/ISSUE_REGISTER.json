@@ -1,0 +1,330 @@
+{
+  "report": "FULL_PROJECT_AUDIT_2026-10-03.md",
+  "count": 40,
+  "priorities": {
+    "P1": 31,
+    "P2": 9
+  },
+  "findings": [
+    {
+      "id": "A01",
+      "priority": "P1",
+      "confidence": "Risk",
+      "title": "Stop races with in-process work and cleanup",
+      "detail": "Evidence: `bridge/api.py::stop_render`, `_run_render_inner`,\n`core/janitor.py::sweep`, `core/pipeline.py::_dub_all_segments`.\nStop sets a flag, kills selected child processes and deletes the shared temp\nfolder immediately. In-process XTTS/RVC/F5, image loops and HTTP calls do not\nreceive a cancellation token. The bridge checks the flag only when a generator\nyields. Workers can continue touching deleted files, and the UI reports stopped\nbefore those workers necessarily exit. Proposed fix: job-owned cancellation and\ntemporary directories; wait for owned workers before cleanup. Acceptance:\ncancel each phase and parallel mode; no post-stop writes, success events, or\ncleanup of another job; restarting remains blocked until the old worker exits.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A02",
+      "priority": "P1",
+      "confidence": "Risk",
+      "title": "CPU segment workers share mutable speech engines",
+      "detail": "Evidence: `core/pipeline.py::_dub_all_segments`,\n`core/providers/tts/xtts_local.py::synthesize`, `core/rvc/rvc_handler.py::infer`.\nOnly GPU inference is locked. CPU workers share a lazy handler, per-actor\nproviders and RVC configuration/model mutation. The actor-resolution lock does\nnot serialize inference or lazy XTTS construction. Multiple constructors/model\nloads or wrong-model use are possible. Fix: define per-engine synchronization or\nisolated workers before advertising safe CPU speedups. Acceptance: concurrent\nreal engine calls cannot duplicate initialization, cross voices or corrupt config;\nbenchmark throughput before raising worker defaults.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A03",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Destructive operations have no active-job guard",
+      "detail": "Evidence: `bridge/api.py::factory_reset`, `remove_model`,\n`frontend/src/pages/Assets.tsx::handleFactoryReset`.\nFactory reset and model removal can run while a renderer/download is active.\nThe reset deletes outputs and temp; model removal can delete files in use.\nFix: synchronize with lifecycle, block or explicitly stop affected work before\ndestruction and expose a concrete affected-file list. Acceptance: reset/remove\nduring every job phase leaves no inconsistent registry, output or live worker.\nThis audit did not invoke either operation.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A04",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Frontend and backend queues are disconnected",
+      "detail": "Evidence: `frontend/src/lib/use-queue.ts`, `pages/Assets.tsx`, `lib/api.ts`,\n`bridge/api.py::add_queue_item`, `core/queue_manager.py`.\nAssets stores a browser-memory array; Dashboard/Nodes render one head item.\nFrontend API wrappers do not submit those items to QueueManager. Backend\nauto-advance tests therefore do not establish end-user batch processing.\nFix: one queue authority and explicit batch start/pause/status wiring. Acceptance:\nthree UI-added files run once in order, a failed file advances appropriately,\nand removal/pause/status apply to the same jobs.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A05",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Render status is lost on page remount",
+      "detail": "Evidence: `frontend/src/App.tsx` conditional pages, `lib/use-render.ts`,\n`lib/events.ts`. Each mounted hook starts from INITIAL; events are not retained\nor replayed. Navigating away during work and returning can hide running state,\nsource feedback and output; controls may look idle while the backend is busy.\nFix: persistent shared job state plus backend snapshot on subscription.\nAcceptance: navigation, experience-level changes and resume retain correct state.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A06",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "Rejected starts still consume selected input",
+      "detail": "Evidence: `pages/Dashboard.tsx::handleStart`, `pages/Nodes.tsx::handleStart`,\n`lib/use-render.ts::start`. The hook consumes a backend rejection internally and\nreturns no success indicator; callers still pop the queue or clear audio input.\nFix: return an accepted-job result and remove input only on acceptance.\nAcceptance: overlapping start rejection retains the input and queue order.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A07",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Registry/settings/state persistence is non-atomic",
+      "detail": "Evidence: `core/model_registry.py::_save`, `settings.py::_save`,\n`render_state.py::mark_started`, `hardware_profile.py::capture`.\nWhole JSON files are overwritten directly, and model-download threads/UI calls\ncan mutate the shared registry without a lock. Crash/interleaved writes can\ntruncate files or lose updates. Loaders also do not validate complete shapes.\nFix: locking, schema validation and atomic replacement; preserve corrupt files\nfor recovery. Acceptance: concurrent updates and interrupted writes preserve a\nvalid prior or new state. No real registry was modified by audit probes.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A08",
+      "priority": "P2",
+      "confidence": "Reproduced",
+      "title": "Cross-stage active model selection is accepted",
+      "detail": "Evidence: `ModelRegistry.set_active`; SAFE_REPRODUCTIONS.json. An in-memory\nTTS entry was successfully assigned as active translation. Existence is checked,\nbut stage compatibility is not. Fix: verify stage, kind, availability and\nadapter compatibility before activation. Acceptance: wrong-stage assignments\nfail without persistence; legitimate stage selection still works.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A09",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Video stem export raises after publishing output",
+      "detail": "Evidence: `core/pipeline.py::process_video_gen` export block. `temp_bg` and\n`temp_vocals` are read but never defined. Enabling export_stems raises NameError\nafter final merge, so a render can publish a video then be reported failed.\nFix: export the actual separation/mix artifacts through validated staging.\nAcceptance: background on/off stem jobs produce documented playable stems,\nwith consistent success/failure and preservation of existing outputs.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A10",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "Audio export parameters are accepted but unused",
+      "detail": "Evidence: `process_audio_dub_gen` accepts `export_stems` and `sub_style`;\nits body implements neither. Dashboard's shared payload builder does not expose\nstem/style settings either. Fix: implement applicable audio exports or reject\nunsupported options; avoid UI promises for disconnected parameters.\nAcceptance: each accepted option changes an observable artifact or fails early.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A11",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Enabled lip sync may silently disappear",
+      "detail": "Evidence: `process_video_gen` result_video conditional; `LipSyncHandler.execute`.\nThe local handler returns None on errors and the pipeline proceeds with the\noriginal visuals. A requested lip-sync render can report complete without lip\nsync. Child exit status is not required for success. Fix: fail enabled stages\nor obtain an explicit user-selected degraded mode. Acceptance: nonzero exit,\ntimeout and invalid media produce a clear failed lip-sync stage.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A12",
+      "priority": "P1",
+      "confidence": "Risk",
+      "title": "MuseTalk can accept a stale result",
+      "detail": "Evidence: `core/providers/lipsync/musetalk_local.py::execute`. Fixed task/config\nand result names are reused; the previous result is not cleared before execution,\nand success uses existence/size without checking returncode. A failed process\ncan leave a previous result accepted. Fix: per-job output directories, checked\nexit code and decoded media validation. Acceptance: seeded stale result plus\nfailed subprocess never returns success or overwrites a good destination.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A13",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Enhancer failures can masquerade as completion",
+      "detail": "Evidence: `core/enhancer.py`. Missing/failed GFPGAN initialization returns the\ninput. Frame errors write original-sized frames into a writer sized for upscale;\nouter failures are swallowed and any existing output is treated as complete.\nVideoCapture/Writer open state and complete frame count are not checked.\nFix: strict stage contract, dimension-consistent fallback only when explicit,\nstaged output validation. Acceptance: 1x/2x/4x errors never silently truncate\nvideo or claim enhancement completed.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A14",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Visual filtering fails open",
+      "detail": "Evidence: `core/vision/vision_handler.py`, `providers/filter/nudenet_local.py`.\nInitialization failures disable detection; frame detection exceptions return\nno boxes. Since NudeNet is absent, the default route can produce an unchanged\nvideo while filtering was requested. API call/label compatibility also needs\nvalidation against an approved installed version. Fix: surface unavailability\nand frame errors, validate writer/output and define an explicit failure policy.\nAcceptance: unavailable or failing detector cannot be presented as filtered media.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A15",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Classifier label matching is ambiguous",
+      "detail": "Evidence: `profanity_filter/classifier_local.py` searches for substring `toxic`,\nand `filter/vision_classifier_local.py` searches for `nsfw`, taking the first\nmatch. Labels such as `non-toxic` and `not_nsfw` also match those substrings.\nFix: exact normalized label mappings with declared positive class and ambiguity\nrejection. Acceptance: reversed label order and negative labels cannot invert\nmoderation; unsupported multi-class schemas fail clearly.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A16",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Profanity failures and output validation lag translation",
+      "detail": "Evidence: `profanity_filter/ollama_local.py`, `profanity_filter/cloud_rest.py`,\n`pipeline.py::_translate_line`. Ollama failure/empty output returns the original\nline; custom cloud moderation can fall back to input. The pipeline does not apply\nstrict string/nonblank validation to the moderation result. Fixed classifier\ninstructions are accepted but ignored; a removed-line English placeholder may\nbe spoken as target-language dialogue. Fix: explicit contract and failure policy,\nlanguage-appropriate removal behavior, and instruction capability checks.\nAcceptance: broken/empty/malformed moderation cannot silently bypass requested\nfiltering or create later unexplained speech failures.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A17",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Keep-source jobs skip profanity filtering",
+      "detail": "Evidence: all translation loops invoke filtering through `_translate_line` only\nwhen target_lang != source. Activating moderation does not cause a separate pass\nin keep-source mode. Fix: independent transcript moderation stage with clear\norder and language context. Acceptance: identical moderation behavior for source\nand translated jobs, including subtitle templates if that feature is promised.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A18",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Separation hides its own failures",
+      "detail": "Evidence: `core/audio_separator.py::separate`, video/audio separation callers.\nTimeout, child failure or missing artifacts returns (None, None), contradicting\nthe comment that errors reach the bridge. Callers then choose a missing\ntranscription source when background preservation is enabled. Stems use shared\nnames and are not decoded before use. Fix: checked separation artifacts and\ncontextual errors; fallback only when explicitly selected. Acceptance: a failed\nseparator reports that stage and does not proceed with None or stale stems.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A19",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "Device selection is not a per-stage guarantee",
+      "detail": "Evidence: Whisper forces CPU; Wav2Lip auto-selects CUDA/CPU; MuseTalk provider\nstores device but does not pass gpu_id/device, and vendored inference auto-selects\nCUDA; NLLB resolver does not pass the selected compute device; classifier routes\nfall back to CPU for non-CUDA. UI/ETA device selection can imply a broader effect\nthan it has. Fix: stage-specific effective device report and supported overrides.\nAcceptance: CPU/CUDA-index/MPS requests produce documented actual routing and\nestimates based on those routes, with visible unsupported choices.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A20",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "SRT parser silently omits malformed cues",
+      "detail": "Evidence: `core/srt_utils.py::parse_srt`. Regex finds valid-looking blocks and\ndoes not reject unmatched content. A partly malformed subtitle file can yield\na subset and be exported as a successful translation; multiline text is flattened.\nFix: strict whole-file cue parsing or an explicit partial-import report.\nAcceptance: one bad cue cannot disappear without a diagnostic; define formatting\npreservation for multiline captions and tags.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A21",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "Output naming can overwrite unrelated jobs",
+      "detail": "Evidence: pipeline filenames derive from input basename and target only.\nInputs in different directories with the same name/target publish to the same\ndestination. Atomic replacement protects against broken partial output but still\nreplaces a valid previous job. Fix: explicit overwrite policy or unique job IDs.\nAcceptance: duplicate basenames in a batch cannot silently erase earlier results.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A22",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Cloud request settings are discarded",
+      "detail": "Evidence: `core/providers/resolve.py`, bridge add_cloud/add_local_api methods.\nTranslation forwards meta.translation_request; STT, TTS, voice, enhancement,\nfiltering, lipsync and profanity resolvers do not forward their adapters' extra\nconfiguration. TTS voice is also omitted. UI add forms expose base URL/preset/key\nbut not the full request contract. Async video settings therefore remain unused\nthrough normal resolver flow. Fix: validated per-stage configuration schema and\nconsistent registry/UI/resolver forwarding. Acceptance: custom paths, headers,\nbody/model/voice and async fields survive add/save/restart/resolve exactly.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A23",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Cloud voice identity is confused with display name",
+      "detail": "Evidence: `_dub_segment` passes actor display_name as model_name;\n`voice/cloud_rest.py::_elevenlabs_sts_request` uses it as voice_id. TTS ElevenLabs\nneeds voice_id, but resolver supplies neither voice nor extras. Display labels\nare not service IDs. Fix: distinct immutable entry ID, display name and vendor\nvoice ID; bind selected actor to its actual service configuration.\nAcceptance: a friendly display name and different vendor ID render correctly.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A24",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "F5 Marketplace installation follows RVC installation",
+      "detail": "Evidence: recommended F5 entry is a voice local_file repository; bridge\n`_run_local_download` sends every voice download to\n`install_downloaded_voice_model`, which accepts only .pth or .zip, not a Hugging\nFace repository directory. F5 provider subsequently loads package defaults and\nignores the connected local path. Fix: F5-specific setup/checkpoint binding,\napproved package availability and explicit language capabilities. Acceptance:\nconnecting F5 reaches a usable installed state and uses the selected checkpoint\nwithout downloading it twice. No package addition is approved by this audit.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A25",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "RVC display name may not match installed checkpoint",
+      "detail": "Evidence: voice installer returns filename-derived _name, but bridge ignores it;\nRVC infer builds weights/<actor display name>.pth and ignores registry.local_path.\nA custom name can select a nonexistent file. Archive installs may move several\nweights but register only the last one; indexes are sorted by their own filename\nrather than an explicit voice association. Fix: bind voice entries to checkpoint\nand index paths, inspect architecture rather than force all models to V2.\nAcceptance: renamed voices, multi-weight archives, and V1/V2/index combinations\neither work as declared or reject clearly before inference.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A26",
+      "priority": "P1",
+      "confidence": "Reproduced",
+      "title": "Marketplace downloader accepts invalid artifacts",
+      "detail": "Evidence: `core/downloader.py::download_with_progress`; safe reproductions.\nHTML bytes (24 written, 100 declared) and a short binary (3 written, 100 declared)\nboth produced phase done. Writes go directly to destination; no nonempty/content\ntype/length/architecture checks. This is distinct from the stricter model_assets\nhelper repaired earlier. Fix: stage-aware verified download/install with staging,\natomic publication and integrity policy. Acceptance: HTML, truncated, empty and\nwrong-architecture inputs never become installed models or erase valid files.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A27",
+      "priority": "P2",
+      "confidence": "Risk",
+      "title": "Removing a Hugging Face download does not stop its worker",
+      "detail": "Evidence: `_download_hf_snapshot` creates a background thread; bridge removal\nbreaks out of the progress generator, then can delete the destination. The thread\nhas no cancellation handle and may continue writing after registry removal.\nFix: download lifecycle ownership and coordinated cancellation/join/cleanup.\nAcceptance: removal stops actual transfer, creates no later files/events, and\ndoes not leave uncontrolled cache growth.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A28",
+      "priority": "P1",
+      "confidence": "Risk",
+      "title": "Model deletion trusts stored filesystem paths",
+      "detail": "Evidence: `bridge/api.py::remove_model`. Existing local_path is recursively\ndeleted without verifying ownership/containment in managed model storage.\nRegistry loading accepts externally edited paths; this makes a malformed or\nimported entry potentially destructive. Archive installation also replaces\nsame-named weights, and removal may leave index/extra weights behind.\nFix: explicit ownership records, canonical-path containment, reference counting\nand verified deletion plans. Acceptance: external/custom files and shared models\nare preserved; only owned unused files are removed. No destructive probe run.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A29",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Local model selection does not ensure adapter compatibility",
+      "detail": "Evidence: resolvers treat local translation as NLLB, local TTS as XTTS,\nlocal lip sync as MuseTalk; enhancer uses bundled GFPGAN regardless of active\nlocal path; visual filters only honor one classifier preset. New XTTS preflight\nnarrows its own error, but generic Marketplace labels imply wider interchangeability.\nFix: adapter/architecture declarations and validation before install/activate;\nnever silently substitute a missing selected model with a default.\nAcceptance: each supported model uses its registered files and unsupported\narchitectures fail before a large download/load or unrelated default render.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A30",
+      "priority": "P1",
+      "confidence": "Risk",
+      "title": "Async cloud URLs receive stored authentication headers",
+      "detail": "Evidence: enhancement/filter/lipsync cloud adapters send their original headers\nto server-provided status_url and result_url. There is no origin policy; a URL\non another host receives the API key explicitly. Normal resolver flow currently\ndoes not enable async settings, but direct/configured adapters expose the risk.\nFix: validate schemes/origins; separate service authentication from signed asset\ndownloads. Acceptance: foreign-origin response URLs never receive credentials;\nvalid same-origin polling and signed downloads still function. No secret read or\nnetwork exploit was performed.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A31",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Advertised optional engines are absent",
+      "detail": "Evidence: RUNTIME_METADATA.json and package directory inspection. F5, NudeNet,\nAirLLM, diffusers and face-alignment are unavailable in the embedded environment.\nEnabling these features either fails late or takes a silent fallback in the\nvisual-filter route. Fix: feature dependency manifest and preflight availability\nreport; agree whether optional engines ship or install on demand.\nAcceptance: every advertised selectable feature is available or clearly marked\nunavailable before a job starts. Installation requires a separate user approval.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A32",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Dependency environment does not satisfy installed requirements",
+      "detail": "Evidence: PIP_CHECK.txt, exit 1. Missing legacy TTS dependencies and incompatible\nNumPy/SciPy/fairseq/rvc-python/spacy-related requirements are present; pip metadata\nis damaged. Fix: build a tested compatible environment from a reviewed lock,\nrather than patching versions one by one in the production folder.\nAcceptance: dependency checks and real imports/inference pass in a freshly\nassembled runtime; old environment remains recoverable during migration.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A33",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Dependency manifests disagree and omit RVC runtime",
+      "detail": "Evidence: both requirements files versus actual metadata. Main manifest asks for\ncoqui-tts; portable manifest pins a different Torch set and OpenCV flavor.\nNeither declares rvc-python despite the handler's required import. Main manifest\nalso omits explicit GFPGAN/basicsr/realesrgan dependencies relied on by startup/\nenhancement. Fix: one supported lock/profile system with feature ownership and\nOS-specific constraints. Acceptance: clean install supplies the approved feature\nset without relying on the mutable self-healing guard.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A34",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Startup integrity can install silently and claim success",
+      "detail": "Evidence: `IntegrityDoctor.check_libraries/install_package`, bridge integrity\nmethod. Missing imports invoke pip; install exceptions are printed and swallowed;\nno successful re-import is required, and the bridge can return ok. find_spec checks\npresence, not loadability. STT/TTS/F5 and other feature dependencies are not fully\ncovered. Fix: separate read-only diagnosis from approved repair, validate actual\nimports and return structured unmet requirements. Acceptance: an unavailable\nengine is never labeled verified; boot does not mutate dependencies unexpectedly.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A35",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Frozen build subprocess contracts are incompatible",
+      "detail": "Evidence: PyInstaller entry is main.py; STT, Demucs, Wav2Lip and MuseTalk execute\nsys.executable with Python script/-m arguments. In a frozen build sys.executable\nis the application executable, whose entry point has no worker CLI dispatch.\nThose calls cannot be assumed to behave as an interpreter and can start another\nGUI. Wav2Lip/MuseTalk source/data and runtime asset locations are not completely\nassembled by build_dist/spec; source-relative paths can differ from executable\nasset paths. Fix: choose an approved portable interpreter strategy or explicit\nfrozen-worker entry points and data manifest. Acceptance: actual packaged builds\nexecute every worker once, resolve assets after relocation, and never spawn\nunintended app instances. No executable build was attempted in this audit.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A36",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "CI builds artifacts without release acceptance checks",
+      "detail": "Evidence: `.github/workflows/build.yml`. Uses npm install, floating Python\ndependencies and OS runners; no backend tests, dependency check, packaged smoke\ntest, actual feature render, size budget or OS GUI acceptance. Windows fresh\ncheckout does not obtain ignored FFmpeg binaries/shared libraries; packaging\ncopies folders only if they already exist. Linux webview system dependencies\nand macOS bundle/signing acceptance are not established. Fix: reproducible\nportable-build pipeline with explicit assets and approval-controlled publishing.\nAcceptance: three clean runners validate the approved feature matrix and release\ncontents before artifact promotion. External tooling choices need review first.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A37",
+      "priority": "P1",
+      "confidence": "Confirmed",
+      "title": "Nodes omits source language; some graph controls are cosmetic",
+      "detail": "Evidence: `frontend/src/pages/Nodes.tsx` builds RenderParams without\nsource_language, while Dashboard uses the shared builder. Manual source choice\nis lost for jobs started from Nodes. The subtitles node has no mapping to the\npipeline's always-generated subtitles, and dragged positions are not persisted\nas an execution graph. Fixed graph edges do not schedule a general DAG.\nFix: use a common job contract and define which nodes actually control behavior.\nAcceptance: Dashboard/Nodes submit equal language settings and each enabled\ncontrol has a documented effect; cosmetic layout is labeled appropriately.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A38",
+      "priority": "P2",
+      "confidence": "Confirmed",
+      "title": "Offline and portable instructions overstate current guarantees",
+      "detail": "Evidence: README.txt, public README, launchers and model_assets. Public docs\nrefer to the old PyQt entry point. Local README points to a removed VC installer,\ncalls M2M100 built-in/offline although its weights are recovered separately, and\ninstructs `sh LAUNCH_REFLOW.sh` despite Bash-specific source/BASH_SOURCE syntax.\nREFLOW_OFFLINE controls model_assets only, not Whisper/HF/AirLLM/cloud paths;\nstartup guard may install packages. The workspace remains several GB, not a\n500 MB self-contained runtime. Fix: regenerate instructions from verified release\nprofiles; define offline mode across all downloads and service calls.\nAcceptance: documented commands/files exist, fresh startup behavior matches the\nguide, and offline missing assets fail locally without attempted network access.",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A39",
+      "priority": "P1",
+      "confidence": "External constraint",
+      "title": "Commercial model permissions are unresolved",
+      "detail": "Wav2Lip's original open-source release restricts commercial use; XTTS-v2's\npublished CPML restricts model/output use to non-commercial purposes. These\nconstraints require a product decision before commercial distribution/use of\nthose artifacts. This audit does not determine whether separate permissions\nhave already been obtained or select replacements. Maintain per-model provenance,\nlicense/version records and distribution notices; obtain appropriate permissions\nor approve a different model before a business release. Sources checked in this\niteration: [Wav2Lip upstream](https://github.com/Rudrabha/Wav2Lip),\n[XTTS-v2 published license](https://huggingface.co/coqui/XTTS-v2/blob/main/LICENSE.txt).",
+      "status": "open; no audit repair authorized"
+    },
+    {
+      "id": "A40",
+      "priority": "P2",
+      "confidence": "Release gap",
+      "title": "End-to-end, resource and GUI evidence is incomplete",
+      "detail": "There is no current real-engine/fresh-machine/three-OS acceptance result in this\niteration. Frontend dependencies remain cleared, so build/lint/26 source-language\nUI checks from the earlier UI iteration were not rerun here. No live native GUI\nor browser was available for interaction verification. Long media is decoded\ninto memory; parallelism queues all segment futures and retains clips before\nmixing. No measured limits for input duration, RAM, worker count or disk growth\nare established. Fix: small approved acceptance dataset and supported hardware\nmatrix, then staged real-engine/GUI/resource tests. Acceptance: reproducible\noutputs and clear limits, rather than inferring reliability from mocks or ETA.",
+      "status": "open; no audit repair authorized"
+    }
+  ]
+}

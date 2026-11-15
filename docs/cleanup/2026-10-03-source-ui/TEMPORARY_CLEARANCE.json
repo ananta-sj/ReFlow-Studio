@@ -1,0 +1,27 @@
+{
+  "planned_cleanup": [
+    {
+      "path": "frontend/node_modules",
+      "files": 11960,
+      "bytes": 162465041
+    },
+    {
+      "path": "frontend/.source-language-npm-cache",
+      "files": 383,
+      "bytes": 40502135
+    },
+    {
+      "path": "temp/source-language-dist-before",
+      "files": 5,
+      "bytes": 1005244
+    },
+    {
+      "path": "temp/source-language-ui-qa",
+      "files": 3,
+      "bytes": 5580
+    }
+  ],
+  "total_bytes": 203978000,
+  "status": "complete",
+  "all_targets_absent": true
+}

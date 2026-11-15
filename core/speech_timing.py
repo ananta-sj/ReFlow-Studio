@@ -1,6 +1,13 @@
 """Natural speech fitting policy and durable measured-overflow evidence."""
 import math,uuid
 
+def dialogue_end(cue, next_start=None):
+    """Allow a brief natural tail, never fill a long scene pause with speech."""
+    end = float(cue['end'])
+    if next_start is None:
+        return end
+    return max(end, min(float(next_start), end+.35))
+
 def bounded_cues(transcript,total_duration):
     """Honor existing ASR rounding tolerance without offering time past the media."""
     from core.transcription import require_media_bounds
@@ -23,9 +30,9 @@ class SpeechTimingReviewRequired(RuntimeError):
 def speed_for_window(duration_ms,available_ms,language,native_delivery=False):
     if any(not math.isfinite(value) or value<=0 for value in [duration_ms,available_ms]):raise ValueError('Speech durations must be finite and positive')
     if native_delivery:return 1.0
-    if language=='hi':return 1.342
     # Spare time is silence on the source timeline, not a reason to stretch words.
-    return max(1.0,min(duration_ms/available_ms,1.3))
+    limit = 1.15 if language == 'hi' else 1.3
+    return max(1.0, min(duration_ms/available_ms, limit))
 
 def measured_conflict(manifest,clip,*,index,segment,actor,generated_seconds,available_seconds,speed,native_delivery):
     report=dict(schema='reflow.measured-speech-timing.v1',status='needs_review',index=index,cue_id=segment.get('cue_id'),actor=actor,

@@ -30,20 +30,27 @@ class XTTSLocalProvider(TTSProvider):
         # per video, not once per segment.
 
     def synthesize(self, text, output_path, language="en", reference_audio=None):
+        return self._synthesize(text, output_path, language, reference_audio)
+
+    def synthesize_retry(self, text, output_path, language="en", reference_audio=None):
+        return self._synthesize(text, output_path, language, reference_audio, retry=True)
+
+    def _synthesize(self, text, output_path, language, reference_audio, *, retry=False):
         if language == "source":
             raise ValueError("XTTS requires an explicit speech language; 'source' is not supported yet.")
         language = require_xtts_language(language, self.model_path)
         if self.runtime=='isolated':
-            return self._isolated(text,output_path,language,reference_audio)
+            return self._isolated(text,output_path,language,reference_audio,retry=retry)
         if self._handler is None:
             from bridge import push
             self._handler = TTSHandler(
                 device=self.device, model_path=self.model_path, language=language,
                 warning_callback=lambda message: push.emit("log", {"level": "warning", "message": message}),
             )
-        return self._handler.generate_audio(text, output_path, language=language, reference_audio=reference_audio)
+        return self._handler.generate_audio(text, output_path, language=language, reference_audio=reference_audio,
+                                            **({'alternate_take': True} if retry else {}))
 
-    def _isolated(self,text,output_path,language,reference_audio):
+    def _isolated(self,text,output_path,language,reference_audio,*,retry=False):
         from core.render_context import current_job,RenderContext,bind_job
         from core.python_runtime import project_root
         from core.xtts_runtime import validate,model_identity
@@ -58,7 +65,7 @@ class XTTSLocalProvider(TTSProvider):
         if job is None:
             owned=RenderContext(project_root()/'temp')
             try:
-                with bind_job(owned):return self._isolated(text,output_path,language,reference_audio)
+                with bind_job(owned):return self._isolated(text,output_path,language,reference_audio,retry=retry)
             finally:owned.cleanup()
         runtime=validate()
         model=Path(self.model_path or project_root()/'models/xtts/default').resolve()
@@ -85,7 +92,7 @@ class XTTSLocalProvider(TTSProvider):
         pending_worker=job.workspace/('xtts-'+uuid.uuid4().hex+'.wav')
         try:
             self.last_result=self.session.call(dict(text=text.strip(),output_path=str(pending_worker),
-                language=language,reference_audio=str(Path(reference_audio).resolve())))
+                language=language,reference_audio=str(Path(reference_audio).resolve()),alternate_take=retry))
             load_speech_audio(str(pending_worker))
             with _staged_output(output_path) as pending:
                 import shutil

@@ -28,11 +28,15 @@ export function TitleBar({ onNavigate, theme, onToggleTheme }: TitleBarProps) {
   const render = useRenderJob()
 
   async function handleClose() {
+    const settings = await bridge.getSettings()
+    const cleanup = settings.values.clear_temp_on_exit
+      ? ' Temporary working files will be cleared on exit. Saved recovery files remain available.'
+      : ' Temporary working files will be kept according to your cleanup settings.'
     const ok = await confirmAction({
       title: "Close Reflow Studio?",
       description: render.isRunning
-        ? "A render is currently in progress. Closing now will stop it, and any progress on the current job will be lost."
-        : "Are you sure you want to close the app?",
+        ? "ReFlow will pause the current job. On reopening, Resume can reuse completed work." + cleanup
+        : "Close ReFlow Studio?" + cleanup,
       confirmLabel: "Close",
       destructive: render.isRunning,
     })

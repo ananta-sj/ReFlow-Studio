@@ -1,4 +1,4 @@
-"""Verified local recognition/translation reuse; never stores generated speech."""
+"""Verified local recognition and translation reuse."""
 from copy import deepcopy
 import hashlib
 import json
@@ -8,6 +8,7 @@ import os
 import re
 from pathlib import Path
 import stat
+import sys
 import wave
 
 from core.render_context import check_cancelled, RenderCancelled
@@ -15,6 +16,41 @@ from core.run_manifest import _publish_bytes, file_identity, provider_identity
 from core.transcription import normalize_transcription, require_media_bounds, require_spoken_transcription
 
 MAX_BYTES = 32 * 1024 * 1024
+
+
+def stage_code_identity(project, stage):
+    """Fingerprint inference/segmentation code without unrelated export/UI code."""
+    import ast
+    project = Path(project)
+    pipeline = project/'core/pipeline.py'
+    if not pipeline.is_file():
+        return tree_identity(project/'core', {'.py'})
+    common = ('core/stage_checkpoints.py', 'core/transcription.py',
+              'core/pipeline_contracts.py', 'core/source_language.py')
+    specific = {
+        'stt': ('core/stt/stt_handler.py', 'core/providers/stt/whisper_local.py',
+                'core/providers/stt/whisper_turbo_local.py', 'core/recognition_compat.py',
+                'core/recognition_language.py', 'core/recognition_worker.py',
+                'core/sentence_grouping.py', 'core/cuda_worker.py', 'core/cuda_providers.py'),
+        'translation': ('core/providers/translation/nllb_local.py', 'core/nllb_worker.py',
+                        'core/translation_completion.py', 'core/generation_control.py',
+                        'core/providers/translation/indictrans2_local.py',
+                        'core/indictrans2_worker.py', 'core/cuda_worker.py', 'core/cuda_providers.py',
+                        'core/dialogue_integrity.py'),
+        'speech': ('core/batch_speakers.py', 'core/speech_performance.py', 'core/speech_timing.py'),
+    }[stage]
+    methods = {'stt': {'_transcribe_source', '_merge_short_segments', '_require_dialogue', '_cue_namespace'},
+               'translation': {'_translate_cues', '_translate_line', '_translation_target'},
+               'speech': {'_dub_segment', '_dub_segment_bound', 'speed_change', '_maybe_locked'}}[stage]
+    module = ast.parse(pipeline.read_text(encoding='utf-8-sig'))
+    selected = {node.name: ast.dump(node, include_attributes=False)
+                for cls in module.body if isinstance(cls, ast.ClassDef) and cls.name == 'ReflowPipeline'
+                for node in cls.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name in methods}
+    if not methods <= selected.keys():
+        raise ValueError('Stage implementation changed; checkpoint reuse requires review')
+    return digest(dict(methods=selected, files={name: file_identity(project/name)['sha256']
+                  for name in common+specific if (project/name).is_file()}))
 SUPPORTED = {
     'stt': 'core.providers.stt.whisper_turbo_local.WhisperTurboLocalProvider',
     'translation': 'core.providers.translation.indictrans2_local.IndicTrans2LocalProvider',
@@ -73,6 +109,34 @@ def tree_identity(root, suffixes=None):
     return digest(records)
 
 
+def environment_identity(root):
+    """Cache invalidation identity, not executable trust verification.
+
+    Package installers publish METADATA/RECORD content. Hash those records and
+    inventory installed files, rather than repeatedly reading multi-GB DLLs.
+    Model weights and recovery audio retain their full content checksums.
+    """
+    root = safe_path(root)
+    records, content = [], {}
+    for directory, dirs, files in os.walk(root, followlinks=False):
+        dirs[:] = sorted(name for name in dirs if name not in ('.git', '.cache', '__pycache__'))
+        for name in [*dirs, *sorted(files)]:
+            path = Path(directory)/name
+            info = path.lstat()
+            if stat.S_ISLNK(info.st_mode) or getattr(info, 'st_file_attributes', 0) & 0x400:
+                raise ValueError('Runtime fingerprints must not contain links or junctions')
+            if not stat.S_ISREG(info.st_mode) or path.suffix in ('.pyc', '.pyo'):
+                continue
+            relative = path.relative_to(root).as_posix()
+            records.append((relative, info.st_size, info.st_mtime_ns, info.st_ino))
+            if (name in ('METADATA', 'RECORD', 'WHEEL', 'profile.json', 'pyvenv.cfg')
+                    or path.parent == root and (name == 'python.exe' or path.suffix in ('.dll', '._pth'))):
+                content[relative] = file_identity(path)['sha256']
+    if not records:
+        raise ValueError('No installed runtime files')
+    return digest(dict(schema='reflow.environment-key.v1', inventory=records, content=content))
+
+
 def validate_payload(payload, stage, inputs):
     result = normalize_transcription(payload)
     require_spoken_transcription(result)
@@ -121,6 +185,12 @@ class StageCheckpoints:
         self.root, self.manifest, self.registry = Path(root), manifest, registry
         self.project_root = Path(project_root)
         self.fingerprints = {}
+        from core.code_updates import backend_version
+        self.code_version = backend_version(self.project_root)
+
+    def code_unchanged(self):
+        from core.code_updates import backend_version
+        return backend_version(self.project_root) == self.code_version
 
     def event(self, stage, status, key=None, **evidence):
         with self.manifest.lock:
@@ -128,28 +198,66 @@ class StageCheckpoints:
             self.manifest.save()
 
     def key(self, stage, provider, inputs, disabled=False):
+        if not self.code_unchanged():
+            self.event(stage, 'disabled', reason='source-code-changed-during-run')
+            return None
         entry = self.registry.get_active(stage)
-        if disabled or not entry or entry.get('kind') != 'local_file' or provider_identity(provider)['adapter'] != SUPPORTED.get(stage):
+        adapter = provider_identity(provider)['adapter']
+        nllb = stage == 'translation' and adapter in ('core.providers.translation.nllb_local.NLLBLocalProvider',
+                                                     'core.cuda_providers.CudaNLLBProvider')
+        cuda = ((stage == 'translation' and adapter == 'core.cuda_providers.CudaNLLBProvider')
+                or (stage == 'stt' and adapter == 'core.cuda_providers.CudaWhisperProvider'))
+        if disabled or not entry or entry.get('kind') != 'local_file' or (adapter != SUPPORTED.get(stage) and not nllb and not cuda):
             self.event(stage, 'disabled', reason='unsupported-provider-or-moderation')
             return None
         try:
             model = Path(entry['local_path'])
-            if stage == 'stt':
+            if cuda:
+                from core.cuda_runtime import validate
+                route_key = ('validated-route', 'cuda', stage)
+                if route_key not in self.fingerprints:
+                    self.fingerprints[route_key] = validate('translation' if nllb else 'recognition')
+                runtime = Path(self.fingerprints[route_key]['executable']).parent
+            elif nllb:
+                if provider.runtime == 'isolated':
+                    from core.nllb_runtime import validate
+                    route_key = ('validated-route', 'nllb')
+                    if route_key not in self.fingerprints:
+                        self.fingerprints[route_key] = validate()
+                    executable = self.fingerprints[route_key]['executable']
+                else:
+                    from core.python_runtime import worker_python
+                    executable = worker_python()
+                runtime = Path(executable).parent
+            elif stage == 'stt':
                 from core.whisper_turbo_assets import isolated_interpreter
+                runtime = Path(isolated_interpreter()).parent
             else:
                 from core.indictrans2_assets import isolated_interpreter
-            runtime = Path(isolated_interpreter()).parent
+                runtime = Path(isolated_interpreter()).parent
             def fingerprint(path, suffixes=None):
                 cache_key = (str(path), tuple(sorted(suffixes or [])))
                 if cache_key not in self.fingerprints:
                     self.fingerprints[cache_key] = tree_identity(path, suffixes)
                 return self.fingerprints[cache_key]
+            code_key = ('stage-code', stage)
+            if code_key not in self.fingerprints:
+                self.fingerprints[code_key] = (file_identity(sys.executable)['sha256'] if getattr(sys, 'frozen', False)
+                                              else stage_code_identity(self.project_root, stage))
+            code = self.fingerprints[code_key]
+            configuration_key = ('configuration-code',)
+            if configuration_key not in self.fingerprints:
+                self.fingerprints[configuration_key] = (code if getattr(sys, 'frozen', False)
+                    else file_identity(self.project_root / 'config.py')['sha256'])
+            configuration = self.fingerprints[configuration_key]
+            environment_key = ('environment', str(runtime))
+            if environment_key not in self.fingerprints:
+                self.fingerprints[environment_key] = environment_identity(runtime)
             return digest(dict(schema='reflow.checkpoint-key.v1', stage=stage, inputs=inputs,
                 source_sha256=self.manifest.data['source']['sha256'], entry=digest(entry),
-                adapter=SUPPORTED[stage], model=fingerprint(model),
-                runtime=fingerprint(runtime),
-                code=fingerprint(self.project_root / 'core', {'.py'}),
-                configuration_code=file_identity(self.project_root / 'config.py')['sha256']))
+                adapter=adapter, model=fingerprint(model),
+                runtime=self.fingerprints[environment_key],
+                code=code, configuration_code=configuration))
         except RenderCancelled:
             raise
         except (OSError, ValueError, KeyError) as error:
@@ -162,7 +270,7 @@ class StageCheckpoints:
         return safe_path(self.root / stage / (key + '.json'))
 
     def load(self, stage, key, inputs):
-        if key is None:
+        if key is None or not self.code_unchanged():
             return None
         try:
             check_cancelled()
@@ -192,7 +300,7 @@ class StageCheckpoints:
         return None
 
     def store(self, stage, key, inputs, transcript, provider):
-        if key is None:
+        if key is None or not self.code_unchanged():
             return
         check_cancelled()
         payload = deepcopy(transcript.to_payload())

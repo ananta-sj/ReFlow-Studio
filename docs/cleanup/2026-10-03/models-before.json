@@ -1,0 +1,107 @@
+{
+  "entries": [
+    {
+      "id": "aa37350b-69f9-407f-b741-f4d38541d875",
+      "stage_type": "translation",
+      "kind": "local_file",
+      "display_name": "NLLB-200 (Meta)",
+      "source_url": "https://huggingface.co/facebook/nllb-200-distilled-600M",
+      "local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\aa37350b-69f9-407f-b741-f4d38541d875\\nllb-200-distilled-600M",
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": null,
+      "status": "installed",
+      "meta": {
+        "file_size_bytes": 2482656261
+      },
+      "custom_instructions": ""
+    },
+    {
+      "id": "8220b16c-4e55-4d85-92da-d8c2dee4b846",
+      "stage_type": "tts",
+      "kind": "local_file",
+      "display_name": "XTTS v2 (Coqui)",
+      "source_url": "https://huggingface.co/coqui/XTTS-v2",
+      "local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\8220b16c-4e55-4d85-92da-d8c2dee4b846\\XTTS-v2",
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": null,
+      "status": "installed",
+      "meta": {
+        "file_size_bytes": 2089349204
+      },
+      "custom_instructions": ""
+    },
+    {
+      "id": "77ed5413-10ca-4a6b-8ee3-81a4186b7b82",
+      "stage_type": "filter",
+      "kind": "local_file",
+      "display_name": "Llama Guard 3 Vision",
+      "source_url": "https://huggingface.co/meta-llama/Llama-Guard-3-11B-Vision",
+      "local_path": null,
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": null,
+      "status": "error",
+      "meta": {
+        "note": "Not re-downloaded: the real repo is 42.6GB (11B-param vision-language model) and this machine is CPU-only with 15.6GB RAM - can't hold the weights in memory, let alone run inference, regardless of local_file wiring. See the 'NSFW Image Detection (Falconsai)' entry for the CPU-feasible alternative now active for this stage instead."
+      },
+      "custom_instructions": ""
+    },
+    {
+      "id": "0a6522fa-d2eb-4a48-a269-9189b21710e3",
+      "stage_type": "filter",
+      "kind": "local_file",
+      "display_name": "NSFW Image Detection (Falconsai)",
+      "source_url": "https://huggingface.co/Falconsai/nsfw_image_detection",
+      "local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\0a6522fa-d2eb-4a48-a269-9189b21710e3\\nsfw_image_detection",
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": "image_classifier",
+      "status": "installed",
+      "meta": {
+        "note": "Wired to a real VisionClassifierLocalProvider (core/providers/filter/vision_classifier_local.py). CPU-feasible lightweight ViT NSFW classifier, added as an alternative to Llama Guard 3 Vision (42.6GB, needs a real GPU). Whole-frame blur on flagged frames, since a classifier has no bounding-box localization the way NudeNet does."
+      },
+      "custom_instructions": ""
+    },
+    {
+      "id": "faf8fe20-15b7-43ee-aae3-21141ad8dfb5",
+      "stage_type": "lipsync",
+      "kind": "local_file",
+      "display_name": "MuseTalk",
+      "source_url": "https://huggingface.co/TMElyralab/MuseTalk",
+      "local_path": "C:\\Projects\\Reflow Studio\\core\\MuseTalk\\models",
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": null,
+      "status": "installed",
+      "meta": {
+        "note": "Wired to a real MuseTalkLocalProvider (core/providers/lipsync/musetalk_local.py) - a genuine vendored port of TMElyralab/MuseTalk's inference pipeline (core/MuseTalk/), with mmpose/DWPose swapped for the face-alignment PyPI package (mmcv doesn't support this project's torch version) and 9 real bugs fixed along the way (path quoting, encoding, legacy checkpoint format, frame/coord-list index misalignment on faces-not-detected frames, and more - see core/MuseTalk/musetalk/utils/preprocessing.py's patch notes). Verified end to end with a real generated output video. Weights live in core/MuseTalk/models/ (this project's own download layout), not this registry's local_path convention - the provider resolves its own paths directly."
+      },
+      "custom_instructions": ""
+    },
+    {
+      "id": "5955dcca-ff80-4d49-b7e1-add7db17ef02",
+      "stage_type": "profanity_filter",
+      "kind": "local_file",
+      "display_name": "XLM-RoBERTa (toxicity fine-tune)",
+      "source_url": "https://huggingface.co/textdetox/xlmr-large-toxicity-classifier",
+      "local_path": "C:\\Projects\\Reflow Studio\\dist\\ReflowStudio\\models\\_downloads\\5955dcca-ff80-4d49-b7e1-add7db17ef02\\xlmr-large-toxicity-classifier",
+      "api_base_url": null,
+      "credential_ref": null,
+      "request_preset": null,
+      "status": "installed",
+      "meta": {
+        "file_size_bytes": 3358919187
+      },
+      "custom_instructions": ""
+    }
+  ],
+  "active": {
+    "translation": "aa37350b-69f9-407f-b741-f4d38541d875",
+    "tts": "8220b16c-4e55-4d85-92da-d8c2dee4b846",
+    "filter": "0a6522fa-d2eb-4a48-a269-9189b21710e3",
+    "lipsync": null,
+    "profanity_filter": "5955dcca-ff80-4d49-b7e1-add7db17ef02"
+  }
+}

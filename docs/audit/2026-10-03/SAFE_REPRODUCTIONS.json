@@ -1,0 +1,21 @@
+[
+  {
+    "probe": "HTML accepted",
+    "phase": "done",
+    "declared_length": 100,
+    "written_bytes": 24,
+    "network_used": false
+  },
+  {
+    "probe": "Short transfer accepted",
+    "phase": "done",
+    "declared_length": 100,
+    "written_bytes": 3,
+    "network_used": false
+  },
+  {
+    "probe": "Cross-stage activation accepted",
+    "active_translation_stage": "tts",
+    "persisted": false
+  }
+]

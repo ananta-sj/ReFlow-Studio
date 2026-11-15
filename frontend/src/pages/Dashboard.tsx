@@ -26,6 +26,7 @@ import {
   type PipelineTemplateMap,
 } from "@/lib/api"
 import { useRenderJob } from "@/lib/use-render"
+import { BatchReviewSummary } from "@/components/shared/BatchReviewSummary"
 import { buildRenderParams } from "@/lib/render-params"
 import { addToQueue, useQueue } from "@/lib/use-queue"
 import { QUALITY_STEPS, updateConfig, useRenderConfig } from "@/lib/use-render-config"
@@ -33,6 +34,7 @@ import { levelAtLeast, type ExperienceLevel } from "@/lib/use-experience"
 import { confirmAction } from "@/lib/use-confirm"
 import { loadGaugeColor } from "@/lib/gauge-color"
 import { formatDuration, relativeSpeedPercent, projectedLoadPercent, jobMemoryBudget } from "@/lib/eta"
+import { ErrorDetails } from '@/components/shared/ErrorDetails'
 import { HelpTooltip } from "@/components/shared/HelpTooltip"
 import { SourceLanguageReport } from "@/components/shared/SourceLanguageReport"
 import { CueReviewPanel } from "@/components/shared/CueReviewPanel"
@@ -344,9 +346,18 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleBrowseAudio}>
-                  {cfg.refAudio ? cfg.refAudio.split(/[\\/]/).pop() : "Select Reference Audio"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="min-w-0 flex-1" onClick={handleBrowseAudio}>
+                    {cfg.refAudio ? cfg.refAudio.split(/[\\/]/).pop() : "Select Reference Audio"}
+                  </Button>
+                  {cfg.refAudio && <Button variant="outline" size="sm" onClick={() => updateConfig({ refAudio: null })}>
+                    Clear reference
+                  </Button>}
+                </div>
+                {cfg.voice === 'CLONED_USER' && <p className="text-xs text-muted-foreground">
+                  With XTTS and no custom reference, ReFlow matches source character voices automatically and flags uncertain lines for review.
+                  A custom reference uses that voice throughout the dub.
+                </p>}
               </>
             )}
           </CardContent>
@@ -558,10 +569,6 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
         </p>
       )}
 
-      {(inputKind === 'audio' || (inputKind === 'video' && cfg.template === 'video_dub')) && (
-        <CueReviewPanel inputPath={effectivePath} params={params} />
-      )}
-
       {render.status !== "idle" && (
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col gap-2 pt-6">
@@ -571,20 +578,29 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
             {render.sourceFeedback && (
               <SourceLanguageReport feedback={render.sourceFeedback} />
             )}
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">{render.statusText || render.status.toUpperCase()}</span>
-              <span className="text-primary">{render.percent}%</span>
+            <div className="flex items-baseline justify-between gap-3" role="status">
+              <span className="text-sm font-medium">
+                {render.status === "error" ? render.errorMessage?.startsWith('Dialogue review required:') ? "Dialogue review required — batch paused" : "Job stopped with an error" : render.statusText || render.status}
+              </span>
+              <span className="shrink-0 text-sm font-semibold tabular-nums text-primary">{render.percent}%</span>
             </div>
-            <Progress value={render.percent} />
-            {render.stillWorking && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning" />
-                Still working - this stage can take a while depending on your hardware.
-              </div>
+            <Progress value={render.percent} aria-label="Job progress" className="h-2.5" />
+            {render.waitingSeconds !== null && (
+              <p className="text-xs text-muted-foreground">
+                Last progress update {formatDuration(render.waitingSeconds)} ago. ReFlow is waiting for this step to finish.
+              </p>
             )}
-            {render.errorMessage && <div className="text-xs text-destructive">{render.errorMessage}</div>}
+            {render.errorMessage && <ErrorDetails message={render.errorMessage} />}
+            {render.status === 'finished' && <BatchReviewSummary outputPath={render.outputPath} />}
+            {render.status === 'error' && <BatchReviewSummary outputPath={null} failed />}
+            {render.status === 'error' && <Button className="self-start" disabled={render.isRunning}
+              onClick={() => void render.retry()}>Retry</Button>}
           </CardContent>
         </Card>
+      )}
+
+      {(inputKind === 'audio' || (inputKind === 'video' && cfg.template === 'video_dub')) && (
+        <CueReviewPanel inputPath={effectivePath} params={params} />
       )}
 
       {render.isRunning ? (

@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-03",
+  "timezone": "Asia/Calcutta",
+  "before_bytes": 31083341771,
+  "after_bytes": 6460068238,
+  "net_freed_bytes": 24623273533,
+  "reduction_percent": 79.217,
+  "after_files": 110336,
+  "estimated_shipping_files_bytes": 2993568001,
+  "shipping_definition": "Excludes Git, development venv, user media/configuration, docs/audit, dev/packaging/workflow and frontend source; retains embedded runtime and FFmpeg. Estimate, not a validated release build.",
+  "original_files_removed": 13283,
+  "original_removed_file_lengths_bytes": 24626983215,
+  "scope": "Summed file lengths within the workspace, including Git and audit. After-files CSV excludes audit artifacts themselves."
+}

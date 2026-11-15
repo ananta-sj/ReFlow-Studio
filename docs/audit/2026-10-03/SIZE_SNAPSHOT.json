@@ -1,0 +1,109 @@
+{
+  "measurement": "Logical bytes; compressed release size and disk allocation not measured",
+  "folders": [
+    {
+      "folder": ".git",
+      "bytes": 1121698810,
+      "files": 21376,
+      "read_errors": []
+    },
+    {
+      "folder": ".github",
+      "bytes": 1781,
+      "files": 1,
+      "read_errors": []
+    },
+    {
+      "folder": ".venv",
+      "bytes": 2267880580,
+      "files": 46048,
+      "read_errors": []
+    },
+    {
+      "folder": ".vite",
+      "bytes": 23,
+      "files": 1,
+      "read_errors": []
+    },
+    {
+      "folder": "assets",
+      "bytes": 735493,
+      "files": 2,
+      "read_errors": []
+    },
+    {
+      "folder": "bridge",
+      "bytes": 47968,
+      "files": 2,
+      "read_errors": []
+    },
+    {
+      "folder": "build",
+      "bytes": 2370599939,
+      "files": 42808,
+      "read_errors": []
+    },
+    {
+      "folder": "core",
+      "bytes": 6170308,
+      "files": 130,
+      "read_errors": []
+    },
+    {
+      "folder": "dev",
+      "bytes": 150217,
+      "files": 19,
+      "read_errors": []
+    },
+    {
+      "folder": "docs",
+      "bytes": 4159136,
+      "files": 54,
+      "read_errors": []
+    },
+    {
+      "folder": "ffmpeg",
+      "bytes": 465983488,
+      "files": 9,
+      "read_errors": []
+    },
+    {
+      "folder": "frontend",
+      "bytes": 1872570,
+      "files": 160,
+      "read_errors": []
+    },
+    {
+      "folder": "models",
+      "bytes": 365682,
+      "files": 4,
+      "read_errors": []
+    },
+    {
+      "folder": "outputs",
+      "bytes": 49749795,
+      "files": 3,
+      "read_errors": []
+    },
+    {
+      "folder": "packaging",
+      "bytes": 11413,
+      "files": 3,
+      "read_errors": []
+    },
+    {
+      "folder": "Sample",
+      "bytes": 26562673,
+      "files": 3,
+      "read_errors": []
+    },
+    {
+      "folder": "temp",
+      "bytes": 0,
+      "files": 0,
+      "read_errors": []
+    }
+  ],
+  "root_file_bytes": 67328,
+  "total_bytes": 6316057204
+}

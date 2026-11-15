@@ -1,0 +1,9 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'bridge/api.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/hardware_monitor.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/providers/resolve.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/srt_utils.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'requirements.txt', LF will be replaced by CRLF the next time Git touches it
+core/hardware_monitor.py:310: trailing whitespace.
++                    

@@ -1,0 +1,13 @@
+{
+  "report_findings": 40,
+  "inventoried_sources_unchanged": true,
+  "source_file_count": 286,
+  "backend_tests": 242,
+  "backend_seconds": 17.526,
+  "backend_exit_code": 0,
+  "dependency_check_exit_code": 1,
+  "implementation_fixes": 0,
+  "new_dependencies": 0,
+  "real_model_downloads": 0,
+  "live_gui_tested": false
+}

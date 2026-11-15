@@ -1,6 +1,7 @@
 """Job-owned cancellation, process handles and temporary workspaces."""
 from contextlib import contextmanager
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -9,6 +10,9 @@ import threading
 import time
 
 import psutil
+from core.worker_lifetime import watch_parent
+
+watch_parent()
 
 _local = threading.local()
 
@@ -45,6 +49,9 @@ class RenderContext:
         if jobs.is_symlink() or jobs.resolve() != jobs or getattr(jobs.lstat(), "st_file_attributes", 0) & 0x400:
             raise RuntimeError("Unsafe job workspace root.")
         self.workspace = Path(tempfile.mkdtemp(prefix="job-", dir=jobs))
+        (self.workspace/'workspace-owner.json').write_text(json.dumps(dict(
+            schema='reflow.workspace-owner.v1',workspace=self.workspace.name,pid=os.getpid(),
+            process_created=psutil.Process().create_time(),created_at=time.time())),encoding='utf-8')
         self.cancelled = threading.Event()
         self.lock = threading.RLock()
         self.processes = set()
@@ -135,10 +142,31 @@ def _stop_process(process):
         raise RuntimeError("Owned subprocess descendants did not exit; workspace retained.")
 
 
-def run_process(args, timeout=None, check=False, **kwargs):
+def run_process(args, timeout=None, check=False, activity_path=None, idle_timeout=None, **kwargs):
+    if isinstance(args,(list,tuple)) and args:
+        stem=Path(str(args[0])).stem.lower()
+        suffix=stem.removeprefix('python')
+        if (stem in ('python','pythonw') or (stem.startswith('python') and suffix.replace('.','').isdigit())) and (len(args)<2 or args[1]!='-B'):
+            args=[args[0],'-B',*args[1:]]
     job = current_job()
     if job is None:
         return subprocess.run(args, timeout=timeout, check=check, **kwargs)
+    # Long video encodes must not be killed at the short command deadline
+    # while FFmpeg is still reporting activity. Keep cancellation, an idle
+    # deadline and an absolute upper bound. The diagnostic file belongs to
+    # the caller and is retained for its normal bounded error reporting.
+    activity_stream = None
+    if (isinstance(args, (list, tuple)) and args
+            and Path(str(args[0])).stem.lower() == 'ffmpeg'
+            and '-c:v' in args and timeout == 1800
+            and activity_path is None and idle_timeout is None):
+        stream = kwargs.get('stderr')
+        try:
+            if stream is not None and os.fstat(stream.fileno()):
+                activity_stream = stream
+                timeout, idle_timeout = 24 * 3600, 1800
+        except (AttributeError, OSError, ValueError):
+            pass
     if kwargs.pop('capture_output', False):
         if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
             raise ValueError('stdout and stderr arguments may not be used with capture_output.')
@@ -149,6 +177,8 @@ def run_process(args, timeout=None, check=False, **kwargs):
         process = subprocess.Popen(args, **kwargs)
         job.processes.add(process)
     deadline = time.monotonic() + timeout if timeout is not None else None
+    last_activity = time.monotonic()
+    activity_stamp = None
     exited = False
     try:
         while True:
@@ -162,6 +192,19 @@ def run_process(args, timeout=None, check=False, **kwargs):
                 _stop_process(process)
                 exited = True
                 raise RenderCancelled("Owned subprocess stopped.")
+            if (activity_path is not None or activity_stream is not None) and idle_timeout is not None:
+                try:
+                    info = (os.fstat(activity_stream.fileno()) if activity_stream is not None
+                            else Path(activity_path).stat())
+                    stamp = (info.st_size, info.st_mtime_ns)
+                    if stamp != activity_stamp:
+                        activity_stamp, last_activity = stamp, time.monotonic()
+                except FileNotFoundError:
+                    pass
+                if time.monotonic()-last_activity >= idle_timeout:
+                    _stop_process(process)
+                    exited = True
+                    raise TimeoutError(f'Processing stopped after {idle_timeout:g} seconds without reported activity.')
             if deadline is not None and time.monotonic() >= deadline:
                 _stop_process(process)
                 exited = True

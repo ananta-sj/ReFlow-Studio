@@ -32,7 +32,10 @@ def include(name):
         return False
     if path.suffix.lower() in DENY_SUFFIXES or path.name in DENY_NAMES or path.name.startswith('.env'):
         return False
-    if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md','docs/RC2_PLATFORM_RELEASES.md'}:
+    if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md','docs/RC2_PLATFORM_RELEASES.md',
+            'docs/DEVELOPMENT_CHECKOUT.md','docs/REVIEW_WORKFLOW_2026-11-15.md','docs/DISPOSABLE_CLEANUP.md',
+            'docs/CHARACTER_MATCHING_2026-11-15.md','docs/QWEN35_DIALOGUE_TRIAL_2026-11-15.md',
+            'docs/PROJECT_DIRECTION.md'}:
         return True
     if name in {'assets/icon.ico','assets/icon.png'}:
         return True
@@ -70,6 +73,7 @@ def collect_names():
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--name',default='ReflowStudio-source.zip')
+    parser.add_argument('--manifest-only',action='store_true',help='Refresh the source inventory without creating a release ZIP')
     args=parser.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9_.-]+\.zip',args.name):
         raise ValueError('Use a simple source ZIP name')
@@ -79,6 +83,20 @@ def main():
     names,revisions,missing=collect_names()
     if not {'main.py','frontend/package.json','.github/workflows/build.yml'}<=set(names):
         raise RuntimeError('Source inventory is incomplete')
+    if args.manifest_only:
+        records=[]
+        for name in names:
+            source=ROOT/name
+            if source.is_symlink() or not source.resolve().is_relative_to(ROOT):
+                raise RuntimeError('Source inventory escaped project')
+            payload=source.read_bytes()
+            records.append(dict(path=name,bytes=len(payload),sha256=hashlib.sha256(payload).hexdigest()))
+        (ROOT/'SOURCE_MANIFEST.json').write_text(json.dumps(dict(files=records,
+            release_ready=False,licensing_review_pending=True,episode_dubbing_validated=False,personal_media_excluded=True,
+            model_weights_excluded=True,nested_source_revisions=revisions,
+            unavailable_nested_repositories=missing),indent=2),encoding='utf-8')
+        print(json.dumps(dict(manifest=str(ROOT/'SOURCE_MANIFEST.json'),files=len(records))))
+        return
     records=[]
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED,strict_timestamps=False) as bundle:
         for name in names:

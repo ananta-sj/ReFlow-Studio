@@ -1,4 +1,5 @@
 import os
+import logging
 import math
 from pydub import AudioSegment, effects
 from pydub.silence import detect_nonsilent
@@ -36,7 +37,7 @@ class AudioEngineer:
         """
         if not os.path.exists(input_path): return input_path
 
-        print(f"[AUDIO FX] 🧼 Scrubbing reference audio: {os.path.basename(input_path)}")
+        logging.getLogger(__name__).info('Cleaning reference audio: %s', os.path.basename(input_path))
         audio = load_playable_audio(input_path)
 
         # 1. Convert to Mono (AI prefers mono reference)
@@ -135,11 +136,20 @@ class AudioEngineer:
 
         bg_out = AudioSegment.silent(duration=0)
         cursor = 0
-        for start, end in speech_ranges:
-            if start > cursor:
-                bg_out += bg_track[cursor:start].apply_gain(ducking_db)
+        for index, (start, end) in enumerate(speech_ranges):
+            ramp_in = max(cursor, start-65)
+            if ramp_in > cursor:
+                bg_out += bg_track[cursor:ramp_in].apply_gain(ducking_db)
+            if start > ramp_in:
+                bg_out += bg_track[ramp_in:start].fade(
+                    from_gain=ducking_db, to_gain=active_ducking_db, start=0, end=start-ramp_in)
             bg_out += bg_track[start:end].apply_gain(active_ducking_db)
-            cursor = end
+            following = speech_ranges[index+1][0] if index+1 < len(speech_ranges) else len(bg_track)
+            ramp_out = min(end+125, following)
+            if ramp_out > end:
+                bg_out += bg_track[end:ramp_out].fade(
+                    from_gain=active_ducking_db, to_gain=ducking_db, start=0, end=ramp_out-end)
+            cursor = ramp_out
         if cursor < len(bg_track):
             bg_out += bg_track[cursor:].apply_gain(ducking_db)
 

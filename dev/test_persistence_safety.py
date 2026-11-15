@@ -303,7 +303,7 @@ store.update({'default_language': 'de'})
         store.update({'default_language': 'fr'})
         original = builtins.open
         def denied(path, *args, **kwargs):
-            if str(path) == str(self.root / 'settings.json'):
+            if isinstance(path,(str,Path)) and Path(path) == self.root / 'settings.json':
                 raise PermissionError('read denied')
             return original(path, *args, **kwargs)
         with patch('builtins.open', side_effect=denied):
