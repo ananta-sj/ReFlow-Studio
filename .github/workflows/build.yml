@@ -42,6 +42,9 @@ jobs:
           node-version: '22'
       - name: Check development publisher
         run: node --test packaging/tests/test_development_preview.mjs
+      - name: Validate frontend lockfile before native builds
+        working-directory: frontend
+        run: npm ci --dry-run --ignore-scripts --no-audit --no-fund
       - name: Check packaging and export clean source
         run: |
           python -m unittest discover -s packaging/tests -v
@@ -54,6 +57,7 @@ jobs:
           compression-level: 0
           retention-days: 14
   build:
+    needs: source
     name: ${{ matrix.target }}
     timeout-minutes: 60
     strategy:

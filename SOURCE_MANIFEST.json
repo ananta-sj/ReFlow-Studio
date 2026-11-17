@@ -7,8 +7,8 @@
     },
     {
       "path": ".github/workflows/build.yml",
-      "bytes": 5274,
-      "sha256": "fff58d2102ce2d4567089e8c0c67a8f74df090d2d46de472311aaecc7b81def3"
+      "bytes": 5459,
+      "sha256": "7e56d47198d0486e1184fa6e1f9da8bc03e48cf27c52297eca18200084ff9ec4"
     },
     {
       "path": ".gitignore",
@@ -3657,8 +3657,8 @@
     },
     {
       "path": "docs/DEVELOPMENT_PREVIEW.md",
-      "bytes": 4839,
-      "sha256": "da2dd3414e69e499bf024bf2ed340abe61d0c8ec81781ae56f0c5c3e92cbcb6c"
+      "bytes": 4959,
+      "sha256": "8248707847a98077cf3d715569433a714e6763cd04128e2706f96665c8d2c3da"
     },
     {
       "path": "docs/DISPOSABLE_CLEANUP.md",
@@ -3782,8 +3782,8 @@
     },
     {
       "path": "frontend/package-lock.json",
-      "bytes": 166647,
-      "sha256": "cb7ea4567a70afff81cd7d85a32c7cfacb90896a13731e269cfb7b630f385447"
+      "bytes": 166841,
+      "sha256": "609b0dc74cfed454dfd738a2337e95ddb263c59324459e6c48d36ed165f9d17d"
     },
     {
       "path": "frontend/package.json",
@@ -4737,8 +4737,8 @@
     },
     {
       "path": "packaging/tests/test_development_preview.mjs",
-      "bytes": 8386,
-      "sha256": "c7606502efbe9704cb5505008239dd0d38bbd3a696f854296710847d191464cd"
+      "bytes": 8525,
+      "sha256": "e3b44d2b231fbc1d0e356a4100138b4fe506e2867a069b10c8d14bf8e809a055"
     },
     {
       "path": "packaging/tests/test_native_packaging.py",

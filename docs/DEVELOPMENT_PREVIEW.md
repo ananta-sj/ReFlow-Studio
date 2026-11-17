@@ -1,7 +1,7 @@
 # Automatic development previews
 
 Pushing application/build changes to `main` starts **Build native desktop candidates**.
-After the source checks and all four native package/smoke jobs pass, the workflow
+A shared source job first validates the frontend lockfile with a clean-install dry run. Native jobs wait for this gate. After the source checks and all four native package/smoke jobs pass, the workflow
 updates one public **Development Preview** pre-release:
 
 https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview

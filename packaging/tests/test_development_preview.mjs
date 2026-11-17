@@ -158,6 +158,8 @@ test('workflow gates publishing on all builds, main, and a job-local write token
   const workflow = await readFile(new URL('../../.github/workflows/build.yml', import.meta.url), 'utf8')
   assert.match(workflow, /branches: \[main\]/)
   assert.match(workflow, /needs: \[source, build\]/)
+  assert.match(workflow, /build:\s+needs: source/)
+  assert.match(workflow, /run: npm ci --dry-run --ignore-scripts --no-audit --no-fund/)
   assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/)
   assert.match(workflow, /cancel-in-progress: false/)
   assert.equal((workflow.match(/contents: write/g) ?? []).length, 1)
