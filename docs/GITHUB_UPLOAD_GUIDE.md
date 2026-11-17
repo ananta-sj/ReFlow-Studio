@@ -1,66 +1,43 @@
-# Publishing source from the consolidated checkout
+# Publishing source and automatic previews
 
-Use the existing repository at `C:\Projects\Reflow Studio\Reflow Studio`.
-Add that folder in GitHub Desktop; no second clone or source-copy folder is needed.
-The development branch is `codex/episode-readiness`, based on the published `main`.
-The native repository's former history is preserved on
-`codex/native-history-before-consolidation`.
+The current checkout is `C:\Projects\Reflow Studio\Github\ReFlow-Studio`, on
+`main`. The former large native installation is not required to publish source.
+Do not create another branch unless you deliberately want one.
 
-The development changes are currently uncommitted. The selected source files are
-prepared in Git's staging area for your review and commit. No commit, push, tag
-or release was performed by this work. Local experimental notes and media outside
-the selected source inventory remain on disk and should not be added wholesale.
+## Push with GitHub Desktop
 
-You may publish this as a development source update now, with the limitations in
-the README. That does not make it a new tested executable or an episode-ready
-release. Suggested commit title:
-`Improve recovery, GPU routing, character review and development documentation`.
+1. Add/select this existing repository and confirm Current Branch is `main`.
+2. Review Changes. Keep `PRIVATE-RECOVERY`, settings, models, runtimes, recordings,
+   outputs and generated build directories excluded. Do not force-add them.
+3. Commit the reviewed changes to `main`, then click **Push origin**.
+4. Open the repository's Actions tab and watch **Build native desktop candidates**.
+5. After source plus all four platform jobs pass, **Update Development Preview**
+   publishes/updates the rolling testing pre-release automatically.
 
-In a terminal opened in this folder:
+Suggested commit for this workflow update:
+`Automate cross-platform development preview releases`.
 
-```text
-git diff --cached --stat
-git commit -m "Improve recovery, GPU routing, character review and development documentation"
-git push -u origin codex/episode-readiness
-```
+No commit or push was performed while preparing this update. Your normal GitHub
+Desktop account handles your push; Actions uses its own built-in repository token.
+You do not need to enter a personal token into the workflow or this chat.
 
-Use the staged selection; do not run `git add .` to include all local research
-notes. In GitHub Desktop, inspect the selection before committing, since its
-checkboxes can include additional unstaged/untracked files. After pushing, open a
-pull request from this development branch to `main` if you want to merge it.
+## What gets released
 
-## Review what Git will publish
+The automatic pre-release contains Windows x64, Linux x64, both Mac architectures,
+clean source, checksums and a build manifest. It is a desktop preview, not the
+former fuller Windows AI-engine bundle. No model weights, local installed engines,
+voices, credentials or FFmpeg binaries are uploaded. Reliable unattended episode
+quality is not established by packaging or smoke-test success.
 
-In this checkout, use `git status --short` and GitHub Desktop's Changes panel.
-Application source belongs in `core/`, `bridge/`, `frontend/src/`, `packaging/`,
-`.github/`, and the root source/launcher/license files. Reviewed tests and user
-documentation are also source. Keep the existing vendor notices.
+The preview remains separate from stable/RC2 releases. A `v*` tag still creates
+candidate artifacts, but does not publish a stable release automatically. Markdown
+and specified documentation-only pushes normally skip rebuilding. Use Actions →
+Run workflow on `main` when you deliberately need a manual preview rebuild.
 
-The ignore rules exclude models, installed runtimes, executables, release ZIPs,
-temporary media, output/review/checkpoint data, personal settings, credentials,
-personal samples, diagnostic archives and local validation receipts. Do not use
-force-add to bypass these rules. `core/Wav2Lip/models/` is application code;
-the root `models/` folder contains downloaded weights and remains excluded.
+See [development preview details](DEVELOPMENT_PREVIEW.md) for triggers, recovery,
+required permissions and testing limitations. Source exports remain available via
+`python packaging/create_source_archive.py`; `--manifest-only` refreshes the local
+source inventory without generating a ZIP when a suitable Python is installed.
 
-Refresh the source inventory with
-`python packaging/create_source_archive.py --manifest-only` after final source
-changes. This creates no release ZIP. The source archive exporter can produce a
-separate source-only ZIP if needed, without copying installed engines or media.
-
-Once the development has passed its acceptance checks, review the staged diff,
-commit it on the development branch, push that branch and merge through GitHub.
-Do not label the source episode-ready until continuous multi-character listening
-and complete-episode checks have actually passed. Current published binaries do
-not automatically include these source changes.
-
-## Executables
-
-Publish tested executable archives as GitHub Release assets, not as ordinary
-repository files. Generate new platform builds from the final source revision;
-do not reuse the old RC2 executable as evidence that this development was tested.
-Keep Windows companion files together. Linux/macOS desktop previews still need
-their own engine and fresh-machine validation.
-
-See [checkout details](DEVELOPMENT_CHECKOUT.md),
-[review workflow](REVIEW_WORKFLOW_2026-11-15.md) and
-[cleanup policy](DISPOSABLE_CLEANUP.md).
+`PRIVATE-RECOVERY` is a private local backup, not source to publish. Its metadata
+archive does not restore model weights, installed runtimes or missing review audio.

@@ -13,6 +13,16 @@ export your results from the same project.
 [Builds](https://github.com/ananta-sj/ReFlow-Studio/actions) ·
 [Report an issue](https://github.com/ananta-sj/ReFlow-Studio/issues)
 
+## Automatic development previews
+
+Code/build updates pushed to `main` build Windows x64, Linux x64 and both Mac
+architectures. When all required checks pass, the workflow updates the rolling
+[Development Preview pre-release](https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview)
+with packages, source, commit details and checksums. The link appears after the
+first successful publishing run. Documentation-only changes normally skip builds.
+These desktop previews do not bundle AI engines, model weights, voices or FFmpeg;
+they do not replace the RC2 engine bundle or establish episode-dubbing quality.
+See [automation, setup and testing details](docs/DEVELOPMENT_PREVIEW.md).
 ## Development checkout status
 
 ReFlow's goal includes family-friendly edits as well as language dubbing. Beeping

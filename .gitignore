@@ -102,3 +102,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Private handoff/configuration archives are never public source.
+/PRIVATE-RECOVERY/

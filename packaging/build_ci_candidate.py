@@ -62,7 +62,7 @@ def assemble(target):
         'Windows needs WebView2 and Visual C++ runtimes. Linux uses the Qt backend.\n'
         'The macOS preview is not Developer ID signed or notarized.\n'
         'macOS writable-data layout/signing and native engine support need further validation.\n'
-        'These are development previews, not approved public releases.\n'
+        'These are development previews, not stable production releases.\n'
         'Application licensing and component distribution review remain pending.\n')
     (base/'START_HERE.txt').write_text(status,encoding='utf-8')
     return base,payload
