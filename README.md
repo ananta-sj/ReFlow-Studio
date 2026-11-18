@@ -5,6 +5,7 @@
   <p>A desktop workspace for transcription, translation, voice generation, dialogue review and media export.</p>
 
   [![Native builds](https://github.com/ananta-sj/ReFlow-Studio/actions/workflows/build.yml/badge.svg)](https://github.com/ananta-sj/ReFlow-Studio/actions/workflows/build.yml)
+  [![Licence](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
   ![Status](https://img.shields.io/badge/status-desktop_preview-c8ff4d?style=flat)
   ![Desktop Python](https://img.shields.io/badge/desktop-Python_3.13-3776ab?logo=python&logoColor=white)
   ![Interface](https://img.shields.io/badge/interface-React_%2B_TypeScript-3178c6?logo=typescript&logoColor=white)
@@ -208,7 +209,7 @@ Share confirmed, sanitized reports with your exact download filename, OS/archite
 
 ## License and components
 
-Read [LICENSE.txt](LICENSE.txt) before distributing the application or using its source. Third-party engines, models and media tools carry their own licenses and access conditions. Distribution licensing review remains part of release preparation.
+Original ReFlow code is licensed under **AGPL-3.0-only**. Read [LICENSE](LICENSE) and the [licensing scope and source-distribution notes](LICENSING.md). [LICENSE.txt](LICENSE.txt) preserves Python's licence. Third-party components and model weights retain their own terms. Their distribution review remains part of release preparation.
 
 ---
 

@@ -62,6 +62,8 @@ export function releaseBody(repository, sha, runId, changes = '') {
     '**Scope:** desktop application and Python only. AI engine environments, model weights, voices, ' +
     'credentials and FFmpeg/FFprobe are not bundled. Windows requires WebView2/Visual C++ runtimes. ' +
     'macOS builds are not Developer ID signed or notarized. Full engine/fresh-machine validation is ongoing.\n\n' +
+    'Original ReFlow code is AGPL-3.0-only. Download the matching source ZIP alongside these packages. ' +
+    'Third-party components and models retain their own terms. See LICENSING.md in the source/package.\n\n' +
     'Reliable unattended multi-character episode/movie dubbing remains unvalidated. Build/smoke checks ' +
     'do not verify translation meaning, natural acting or complete episode quality. Component licensing ' +
     'review remains pending; these are development testing packages.\n\n' +

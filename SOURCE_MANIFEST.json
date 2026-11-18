@@ -21,9 +21,19 @@
       "sha256": "433eedb1a1e9b19b058709f6125be5ae33ecdb79071bf0726cf9dc09dafc1e44"
     },
     {
+      "path": "LICENSE",
+      "bytes": 34255,
+      "sha256": "79735a75d0274d2a5dcc240d11a0f81e34cfc3533939b7fce8e84e35a150a238"
+    },
+    {
       "path": "LICENSE.txt",
       "bytes": 32831,
       "sha256": "01508d47c4a3f7d7a28f91051765094e1a67c4cc0c0bd27b67833979d9b0bc0d"
+    },
+    {
+      "path": "LICENSING.md",
+      "bytes": 2900,
+      "sha256": "b77fe82a28c2ae8de5420476bfbb47168292009d2825b9c68f585e2add5b1a55"
     },
     {
       "path": "Launch_Reflow.bat",
@@ -32,8 +42,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 13032,
-      "sha256": "cd47f6fd140fd9a38dd7d88972399c5042cd70c74d7cf6367f872ab9337e397f"
+      "bytes": 13415,
+      "sha256": "3920f117d751534574540818d1a1ff417df94423c36d4bef33e692a783caa5b6"
     },
     {
       "path": "README.txt",
@@ -4662,8 +4672,8 @@
     },
     {
       "path": "packaging/build_portable.py",
-      "bytes": 7403,
-      "sha256": "b5ca7d9d13ed42f6ab9d471b61c6cbbb8919e5e91402285a87c4bd77e4b9c234"
+      "bytes": 7430,
+      "sha256": "0161d7c7585097c7b4b799725eae259ca5805059d054d494112dfd7a064c5ab8"
     },
     {
       "path": "packaging/check_windows_candidate.py",
@@ -4677,8 +4687,8 @@
     },
     {
       "path": "packaging/create_source_archive.py",
-      "bytes": 6999,
-      "sha256": "7a5a34734896d3d8b7e84194eb5cd190adac17c7ce69654b08dbc56a4625f769"
+      "bytes": 7024,
+      "sha256": "a66bf6633c5b9231ddf8b1d337fe50e2776a8a713767c53ead61bd95808c22ba"
     },
     {
       "path": "packaging/finalize_executable_candidate.py",
@@ -4727,8 +4737,8 @@
     },
     {
       "path": "packaging/publish_development_preview.mjs",
-      "bytes": 13351,
-      "sha256": "b261d195fcd8b02b88a6021b9d35d9cd3d5f52c9be2084c36b887bed21ea3301"
+      "bytes": 13570,
+      "sha256": "66d577ca104664fb3fad7e140e64a0a33a545b02d88d3bf1482430e89ccab916"
     },
     {
       "path": "packaging/reflow.spec",
@@ -4767,8 +4777,8 @@
     },
     {
       "path": "packaging/tests/test_native_packaging.py",
-      "bytes": 10850,
-      "sha256": "50ae103fb0a15036314c8baf580cbb84d6ca4818aa4c73f89a9701a8034679ec"
+      "bytes": 11219,
+      "sha256": "3f2178167737d4296ec801eb7f076d6445ba05584492e6cb1c98e802ceea9a2b"
     },
     {
       "path": "packaging/tests/test_release_refresh.py",

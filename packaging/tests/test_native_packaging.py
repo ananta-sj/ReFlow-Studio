@@ -128,6 +128,14 @@ class RuntimeDownloadTests(unittest.TestCase):
 
 
 class SourceExportTests(unittest.TestCase):
+    def test_project_and_python_licences_are_included_in_source_and_native_payloads(self):
+        inventory = load('build_portable')
+        for name in ('LICENSE', 'LICENSING.md', 'LICENSE.txt'):
+            with self.subTest(name=name):
+                self.assertTrue(source_export.include(name))
+                self.assertIn(name, inventory.ROOT_FILES)
+
+
     def test_nested_vendor_repository_is_exported_as_source_not_as_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary)

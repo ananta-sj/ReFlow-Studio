@@ -1,3 +1,11 @@
+# Licensing decision update — November 18, 2026
+
+The owner subsequently delegated the choice. ReFlow original code now uses
+AGPL-3.0-only, with the full text in ../LICENSE and scope in ../LICENSING.md.
+The existing Python licence remains in ../LICENSE.txt. Third-party component
+and model review remains open. The discussion below is historical and its
+pending-decision statements describe the earlier state.
+
 # Reflow licensing discussion — decision pending
 
 The user requested a discussion before choosing a license. No license has been assigned to Reflow's original code, and the existing Python license is preserved.

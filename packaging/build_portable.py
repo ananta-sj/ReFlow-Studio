@@ -13,7 +13,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = Path(__file__).resolve().parents[1]
-ROOT_FILES = ('main.py', 'config.py', 'Launch_Reflow.bat', 'README.txt', 'requirements.txt', 'LICENSE.txt', 'assets/icon.ico', 'assets/icon.png')
+ROOT_FILES = ('main.py', 'config.py', 'Launch_Reflow.bat', 'README.txt', 'requirements.txt', 'LICENSE', 'LICENSING.md', 'LICENSE.txt', 'assets/icon.ico', 'assets/icon.png')
 TREES = ('bridge', 'core', 'frontend/dist', 'ffmpeg', 'build/windows-portable')
 WEIGHT_SUFFIXES = {'.pth', '.pt', '.onnx', '.safetensors', '.th', '.bin'}
 XTTS_PROFILE = 'xtts-security-candidate'

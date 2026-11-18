@@ -8,7 +8,7 @@ import re
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-ROOT_FILES={'main.py','config.py','requirements.txt','README.txt','README.md','LICENSE.txt',
+ROOT_FILES={'main.py','config.py','requirements.txt','README.txt','README.md','LICENSE','LICENSING.md','LICENSE.txt',
             'Launch_Reflow.bat','LAUNCH_REFLOW.sh','.gitignore','.gitattributes','.gitmodules'}
 LOCKS={'docs/validation/2026-10-13-xtts-security-cpu-lock-review.json',
        'docs/validation/2026-10-15-recognition-candidate-lock-review.json',
