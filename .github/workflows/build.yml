@@ -1,6 +1,6 @@
 name: Build native desktop candidates
 
-# Main builds publish a rolling Desktop Preview release only after every build passes.
+# Main builds publish a new versioned Desktop Preview release only after every build passes.
 # Local AI engine environments require separate per-platform acceptance.
 on:
   workflow_dispatch: {}
@@ -41,7 +41,7 @@ jobs:
         with:
           node-version: '22'
       - name: Check development publisher
-        run: node --test packaging/tests/test_development_preview.mjs
+        run: node --test packaging/tests/test_development_preview.mjs packaging/tests/test_preview_versions.mjs
       - name: Validate frontend lockfile before native builds
         working-directory: frontend
         run: npm ci --dry-run --ignore-scripts --no-audit --no-fund
@@ -139,7 +139,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
   publish:
-    name: Update Desktop Preview
+    name: Publish versioned Desktop Preview
     needs: [source, build]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-22.04

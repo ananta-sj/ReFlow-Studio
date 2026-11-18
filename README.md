@@ -10,7 +10,7 @@
   ![Desktop Python](https://img.shields.io/badge/desktop-Python_3.13-3776ab?logo=python&logoColor=white)
   ![Interface](https://img.shields.io/badge/interface-React_%2B_TypeScript-3178c6?logo=typescript&logoColor=white)
 
-  **[Download Desktop Preview](https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview)** · **[All releases](https://github.com/ananta-sj/ReFlow-Studio/releases)** · **[Builds](https://github.com/ananta-sj/ReFlow-Studio/actions)** · **[Feedback](https://github.com/ananta-sj/ReFlow-Studio/issues)**
+  **[Download Desktop Preview](https://github.com/ananta-sj/ReFlow-Studio/releases/latest)** · **[All releases](https://github.com/ananta-sj/ReFlow-Studio/releases)** · **[Builds](https://github.com/ananta-sj/ReFlow-Studio/actions)** · **[Feedback](https://github.com/ananta-sj/ReFlow-Studio/issues)**
 </div>
 
 > [!IMPORTANT]
@@ -61,7 +61,7 @@ flowchart LR
 
 ## Choose your download
 
-The rolling [Desktop Preview release](https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview) contains one package for each target plus a clean source archive and checksums.
+The latest [Desktop Preview release](https://github.com/ananta-sj/ReFlow-Studio/releases/latest) contains one package for each target plus a clean source archive and checksums.
 
 | Your computer | Package target | Archive |
 | --- | --- | --- |
@@ -175,7 +175,7 @@ npm run test:ui
 npm run lint
 npm run build
 cd ..
-node --test packaging/tests/test_development_preview.mjs
+node --test packaging/tests/test_development_preview.mjs packaging/tests/test_preview_versions.mjs
 ```
 
 Run Python checks using your desktop environment's interpreter. On Windows,
@@ -189,9 +189,9 @@ Backend tests under `dev/` have individual dependency requirements. Some use syn
 
 ## Builds and automatic release notes
 
-Application/build changes pushed to `main` trigger the native build workflow. After source checks and all four platform builds succeed, the publisher updates the rolling **Desktop Preview** regular release and marks it **Latest**.
+Application/build changes pushed to `main` trigger the native build workflow. After source checks and all four platform builds succeed, the publisher creates a new **Desktop Preview** regular release and marks it **Latest**. Earlier releases retain their downloads.
 
-Notes include the ten most recent commit summaries, source commit, build link, package scope and checksum guidance. Write clear commit messages to make the automated notes useful. The release tag stays `development-preview`, and the application version is not automatically incremented.
+Notes include the ten most recent commit summaries, source commit, build link, package scope and checksum guidance. Write clear commit messages to make the automated notes useful. Tags advance as `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, and so on. Numbering checks existing tags and releases to avoid reusing a version. This preview build number does not declare a stable product milestone or rewrite source version constants.
 
 Documentation-only pushes normally skip builds. Use **Actions → Build native desktop candidates → Run workflow** on `main` to rebuild manually. Failed or superseded builds cannot promote their packages through the normal publication checks.
 

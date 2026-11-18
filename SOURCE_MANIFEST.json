@@ -7,8 +7,8 @@
     },
     {
       "path": ".github/workflows/build.yml",
-      "bytes": 5616,
-      "sha256": "3e8979071fbb39244e35b03d95574f2daeb94471eb729edcac77719667a8594a"
+      "bytes": 5675,
+      "sha256": "f783a668caf3f7ecc9f4cb94671fe654370bfa22e92b062ce3ecc81937aabc25"
     },
     {
       "path": ".gitignore",
@@ -42,8 +42,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 13536,
-      "sha256": "44c9e766a66aa1d52f4c84d327060fca7ab4dda8654225e23981d2a37b7810ba"
+      "bytes": 13729,
+      "sha256": "bfe7363ffce57b89884e26aa54c6582f0f7da605efc2643568902cf6d53265bd"
     },
     {
       "path": "README.txt",
@@ -3677,8 +3677,8 @@
     },
     {
       "path": "docs/DEVELOPMENT_PREVIEW.md",
-      "bytes": 5189,
-      "sha256": "ab558785339bedff09b3c3321216dc7a478ece6f289af659f4265de6c5a2f519"
+      "bytes": 5741,
+      "sha256": "b84262fc814315e80c33cc443b420724ac0a6a57e5ca2e099d8691fd514ea7b6"
     },
     {
       "path": "docs/DISPOSABLE_CLEANUP.md",
@@ -4752,8 +4752,8 @@
     },
     {
       "path": "packaging/publish_development_preview.mjs",
-      "bytes": 13570,
-      "sha256": "66d577ca104664fb3fad7e140e64a0a33a545b02d88d3bf1482430e89ccab916"
+      "bytes": 14694,
+      "sha256": "c19d0a31b23d3ad6f2cdbb2f222b2b004a6aebf057ba4afe32da740a11f6f37b"
     },
     {
       "path": "packaging/reflow.spec",
@@ -4787,13 +4787,18 @@
     },
     {
       "path": "packaging/tests/test_development_preview.mjs",
-      "bytes": 9102,
-      "sha256": "3fe661dc7636c0f379fe4e108a521c6946ea517ea2ece785bfb69375ca5d875d"
+      "bytes": 12709,
+      "sha256": "14b84b3116ca96b1d94925252a04400cfc75a0d20a2a638e915b7fb68b7f34a6"
     },
     {
       "path": "packaging/tests/test_native_packaging.py",
       "bytes": 11219,
       "sha256": "3f2178167737d4296ec801eb7f076d6445ba05584492e6cb1c98e802ceea9a2b"
+    },
+    {
+      "path": "packaging/tests/test_preview_versions.mjs",
+      "bytes": 744,
+      "sha256": "e3d6b885853f6fe5a1d6da5e12af4271a3b594655b5c9a4cf4b7da4a02af8f66"
     },
     {
       "path": "packaging/tests/test_release_refresh.py",

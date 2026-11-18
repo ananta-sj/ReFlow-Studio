@@ -2,14 +2,14 @@
 
 Pushing application/build changes to `main` starts **Build native desktop candidates**.
 A shared source job first validates the frontend lockfile with a clean-install dry run. Native jobs wait for this gate. After the source checks and all four native package/smoke jobs pass, the workflow
-updates one public **Desktop Preview** release:
+creates a new versioned public **Desktop Preview** release:
 
-https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview
+https://github.com/ananta-sj/ReFlow-Studio/releases/latest
 
 The target platforms are Windows x64, Linux x64, macOS Apple Silicon (ARM64), and
 macOS Intel (x64). The same release also includes a clean source ZIP, build manifest
 and SHA-256 checksums. It is published as a regular GitHub release and marked Latest, with Desktop Preview
-in its title. Historical RC2 downloads remain separate releases. The application version is not automatically incremented. Release notes include the ten
+in its title. Historical RC2 downloads remain separate releases. Tags increment the patch number in the current 0.7 series: `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, etc. The publisher checks existing tags and release drafts before choosing the next unused number. Reserved/failed versions can leave gaps. Source version constants are not rewritten by publication. Release notes include the ten
 most recent commit summaries, source links and the matching build.
 
 ## What is bundled
@@ -29,10 +29,10 @@ Runtime/model distribution licensing review remains pending.
   no automatic rebuild when those are the only changes. Runtime lock JSON changes
   still trigger builds.
 - Actions → Build native desktop candidates → Run workflow → choose `main`:
-  manually rebuild/publish even after documentation-only changes.
+  manually build/publish a new preview even after documentation-only changes.
 - A `v*` tag: retain the existing candidate build behavior; this does not publish
   a stable release automatically.
-- Manual runs on other branches build candidates but cannot update the preview.
+- Manual runs on other branches build candidates but cannot publish a preview.
 
 ## Publication and recovery behavior
 
@@ -46,30 +46,13 @@ archives and the source archive must be present, nonempty, below the individual
 asset size limit, and match their builder-generated SHA-256 sidecars. Unexpected
 files fail validation. Private recovery data is not selected for publication.
 
-Downloads include a commit/run/attempt suffix. New files upload without overwriting
-the previous download set. The release notes identify the valid set; pending files
-can temporarily appear during an upload. Only after all new uploads verify does
-the publisher move the lightweight preview tag and update the release notes.
-Older generated assets are then removed; manually attached files are kept.
+Downloads include a commit/run/attempt suffix. A new release is prepared as a draft, and its uploads must pass size/digest checks before it is published as a regular Latest release. Release titles include the readable version and **Desktop Preview**. The Latest link follows the newest successful publication. Earlier releases, including the old `development-preview` release and historical RC2 releases, are preserved with their downloads.
 
-An outdated main build skips publication. Runs for the same ref are serialized
-without canceling an active publisher. Main is checked before and after uploads;
-a push after the last check can briefly leave an older preview until its next
-successful build. An older build is not blindly promoted over a newer observed
-main commit. No stable/version tag is moved.
+The publisher recognizes its own interrupted draft using an exact workflow-run, attempt and source-commit marker. Verified uploads on an owned unpublished draft are reused; matching files with missing or incorrect size/digest are replaced only within that draft. An already published build is left alone, including immutable releases. No existing version tag is force-moved. A conflicting tag fails safely; new numbering considers both repository tags and release drafts. All tags/releases are paginated, so history beyond the first100entries is included. Protecting a tag name/ruleset may still require maintainer action if GitHub refuses creation.
 
-Failed checks/builds never reach publication. Failed uploads leave existing files
-and notes intact and attempt to clean their new uploads. Metadata-update failures
-are reconciled where possible, with best-effort tag rollback/cleanup. If network
-failure prevents confirmation, both asset sets are retained for inspection rather
-than deleting potentially published downloads. This is not an atomic GitHub-wide
-transaction. Inspect the failed job and release if cleanup cannot complete.
+An outdated main build skips publication. Runs for the same ref are serialized without canceling an active publisher. Main is checked before and after uploads. A push after the last check can briefly leave an older preview Latest until the next successful build publishes. No stable/version tag is moved.
 
-The first release is prepared as a draft until uploads pass. A failed first run
-can leave a draft for a rerun/maintainer to inspect. An existing unowned
-or immutable release at `development-preview` is refused. This rolling release
-requires mutable releases; immutable-release policies need a different versioned
-release design, not weaker checks.
+Failed checks/builds never reach publication. Failed uploads/promotion clean only this build's unpublished uploads and, when verified safe, its newly created tag. Earlier releases are never cleaned or replaced. An interrupted run may retain a draft for inspection. If a publication response is lost, the publisher checks GitHub before cleanup; uncertain outcomes preserve potentially published files and tags. This is not a GitHub-wide atomic transaction. Inspect failed jobs if cleanup cannot be confirmed.
 
 ## After pushing this change
 

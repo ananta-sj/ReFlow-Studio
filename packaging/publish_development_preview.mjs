@@ -5,7 +5,7 @@ import { lstat, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const TAG = 'development-preview'
+export const VERSION_SERIES = '0.7'
 export const MARKER = '<!-- reflow-development-preview:v1 -->'
 export const PACKAGES = Object.freeze({
   'windows-x64': 'ReflowStudio-windows-x64-desktop-preview.zip',
@@ -69,7 +69,7 @@ export function releaseBody(repository, sha, runId, changes = '') {
     'review remains pending; these are development testing packages.\n\n' +
     `${changes}\n**Current download set:** filenames containing \`${sha.slice(0, 12)}-r${runId}-\`. ` +
     'Use the matching SHA256SUMS and manifest. During an upload, additional files from a pending build ' +
-    'may appear; use only the set identified here. After a successful update, older generated assets are removed.\n\n' +
+    'may appear; use only the set identified here. Earlier preview releases and their downloads are preserved.\n\n' +
     'Report your OS/architecture, filename, engine setup and reproduction steps in ' +
     `[Issues](https://github.com/${repository}/issues), without credentials or private media.\n`
 }
@@ -113,49 +113,78 @@ async function optional(api, route) {
   try { return await api(route) } catch (error) { if (error.status === 404) return null; throw error }
 }
 
-async function listAssets(api, id) {
-  const assets = []
+async function listRecords(api, route) {
+  const rows = []
   for (let page = 1; ; page++) {
-    const rows = await api(`/releases/${id}/assets?per_page=100&page=${page}`)
-    assets.push(...rows)
-    if (rows.length < 100) return assets
+    const batch = await api(`${route}?per_page=100&page=${page}`)
+    rows.push(...batch)
+    if (batch.length < 100) return rows
   }
 }
 
-export async function findPreviewRelease(api) {
-  const published = await optional(api, `/releases/tags/${TAG}`)
-  if (published) return published
-  // The tag endpoint is documented for published releases. Resume a draft
-  // left by an interrupted first run via the authenticated release listing.
-  for (let page = 1; ; page++) {
-    const rows = await api(`/releases?per_page=100&page=${page}`)
-    const draft = rows.find(row => row.tag_name === TAG)
-    if (draft) return draft
-    if (rows.length < 100) return null
+export function nextPreviewTag(tags) {
+  const prefix = `v${VERSION_SERIES}.`
+  let patch = 0
+  for (const tag of tags) {
+    if (!tag?.startsWith(prefix)) continue
+    const match = tag.slice(prefix.length).match(/^(0|[1-9]\d*)(?:-[a-zA-Z0-9.-]+)?$/)
+    if (!match) continue
+    const value = Number(match[1])
+    if (!Number.isSafeInteger(value) || value >= Number.MAX_SAFE_INTEGER) throw new Error('Preview version exceeds safe range')
+    patch = Math.max(patch, value)
   }
+  return `${prefix}${patch + 1}-desktop-preview`
 }
 
-/** Serialized by the workflow. Keep old downloads until new uploads verify. */
-export async function publish({ api, repository, sha, runId, assets, changes = '' }) {
+function buildIdentity(runId, attempt, sha) {
+  if (!/^\d+$/.test(runId) || !/^\d+$/.test(attempt) || !/^[a-f0-9]{40}$/.test(sha)) {
+    throw new Error('Invalid build identity')
+  }
+  return `<!-- reflow-preview-build:${runId}:${attempt}:${sha} -->`
+}
+
+export function findPreviewRelease(releases, runId, attempt, sha) {
+  const identity = buildIdentity(runId, attempt, sha)
+  return releases.find(row => row.body?.includes(MARKER) && row.body.includes(identity))
+}
+
+/** Serialized by the workflow. Every build owns a separate versioned release. */
+export async function publish({ api, repository, sha, runId, attempt = '1', assets, changes = '' }) {
+  const identity = buildIdentity(runId, attempt, sha)
   const head = () => api('/git/ref/heads/main')
   if ((await head()).object.sha !== sha) return { skipped: true, reason: 'Newer main commit exists' }
-  let release = await findPreviewRelease(api)
+  const releases = await listRecords(api, '/releases')
+  let release = findPreviewRelease(releases, runId, attempt, sha)
+  if (release && !/^v0\.7\.[1-9]\d*-desktop-preview$/.test(release.tag_name)) {
+    throw new Error('Build identity is attached to an unexpected release tag')
+  }
+  if (release && !release.draft) return { skipped: false, tag: release.tag_name, alreadyPublished: true }
   validateExistingRelease(release)
   if (!release) {
-    release = await api('/releases', { method: 'POST', body: { tag_name: TAG,
-      target_commitish: sha, name: 'Desktop Preview', draft: true, prerelease: false,
-      make_latest: 'true', body: MARKER + '\nPreparing the first development preview.' } })
+    const tags = await listRecords(api, '/tags')
+    const tag = nextPreviewTag([...tags.map(row => row.name), ...releases.map(row => row.tag_name)])
+    release = await api('/releases', { method: 'POST', body: {
+      tag_name: tag, target_commitish: sha, name: `ReFlow Studio ${tag.replace('-desktop-preview', '')} - Desktop Preview`,
+      draft: true, prerelease: false,
+      body: `${MARKER}\n${identity}\nPreparing this desktop preview.` } })
   }
-  const oldAssets = await listAssets(api, release.id)
+  const tag = release.tag_name
+  const oldAssets = await listRecords(api, `/releases/${release.id}/assets`)
   const uploaded = []
   let promoted = false
-  let oldTag
-  let tagChanged = false
+  let tagCreated = false
   let promotionUncertain = false
   try {
-    const existing = new Set(oldAssets.map(asset => asset.name))
+    const existing = new Map(oldAssets.map(asset => [asset.name, asset]))
     for (const asset of assets) {
-      if (existing.has(asset.name)) throw new Error('Build-specific asset name already exists; rerun with a new attempt')
+      const previous = existing.get(asset.name)
+      if (previous) {
+        if (previous.state === 'uploaded' && previous.size === asset.bytes &&
+            previous.digest === `sha256:${asset.sha256}`) continue
+        // This exact build owns the unpublished draft. Replace only an expected
+        // artifact whose integrity cannot be verified; preserve unrelated files.
+        await api(`/releases/assets/${previous.id}`, { method: 'DELETE' })
+      }
       const url = release.upload_url.replace(/\{.*$/, '') + '?name=' + encodeURIComponent(asset.name)
       const result = await api(url, { method: 'POST', file: asset.file })
       uploaded.push(result)
@@ -164,48 +193,50 @@ export async function publish({ api, repository, sha, runId, assets, changes = '
         throw new Error(`Upload integrity check failed: ${asset.name}`)
       }
     }
-    // A push can arrive while native builds/uploads are in progress.
     if ((await head()).object.sha !== sha) return { skipped: true, reason: 'Newer main commit exists' }
-    oldTag = await optional(api, `/git/ref/tags/${TAG}`)
-    if (oldTag && oldTag.object.type !== 'commit') throw new Error('Preview tag must be lightweight')
-    if (oldTag) await api(`/git/refs/tags/${TAG}`, { method: 'PATCH', body: { sha, force: true } })
-    else await api('/git/refs', { method: 'POST', body: { ref: `refs/tags/${TAG}`, sha } })
-    tagChanged = true
-    const publication = {
-      tag_name: TAG, name: `Desktop Preview - ${sha.slice(0, 12)}`, draft: false,
-      prerelease: false, make_latest: 'true', body: releaseBody(repository, sha, runId, changes) }
+    const existingTag = await optional(api, `/git/ref/tags/${tag}`)
+    if (existingTag && (existingTag.object.type !== 'commit' || existingTag.object.sha !== sha)) {
+      throw new Error('Version tag already belongs to another commit; refusing to move it')
+    }
+    if (!existingTag) {
+      await api('/git/refs', { method: 'POST', body: { ref: `refs/tags/${tag}`, sha } })
+      tagCreated = true
+    }
+    const publication = { tag_name: tag,
+      name: `ReFlow Studio ${tag.replace('-desktop-preview', '')} - Desktop Preview`, draft: false,
+      prerelease: false, make_latest: 'true',
+      body: releaseBody(repository, sha, runId, changes).replace(MARKER, `${MARKER}\n${identity}`) }
     try {
       await api(`/releases/${release.id}`, { method: 'PATCH', body: publication })
       promoted = true
     } catch (error) {
-      // A lost HTTP response is not proof that GitHub rejected the update.
       let observed
       try { observed = await api(`/releases/${release.id}`) }
       catch {
         promotionUncertain = true
-        console.warn('Cannot confirm publication. Keeping both asset sets; inspect the release before cleanup.')
+        console.warn('Cannot confirm publication. Keeping this build for maintainer inspection.')
         throw error
       }
       if (observed.body === publication.body && !observed.draft && observed.prerelease === false) promoted = true
-      else throw error
+      else {
+        promotionUncertain = !observed.draft
+        throw error
+      }
     }
-    for (const asset of oldAssets.filter(row => row.name.startsWith('ReflowStudio-dev-'))) {
-      try { await api(`/releases/assets/${asset.id}`, { method: 'DELETE' }) }
-      catch { console.warn('Preview published; an older asset could not be removed. Current notes identify the valid download set.') }
-    }
-    return { skipped: false, tag: TAG }
+    return { skipped: false, tag }
   } finally {
     if (!promoted && !promotionUncertain) {
-      // Best-effort rollback: network failures can also prevent cleanup.
-      if (tagChanged) {
+      if (tagCreated) {
         try {
-          if (oldTag) await api(`/git/refs/tags/${TAG}`, { method: 'PATCH', body: { sha: oldTag.object.sha, force: true } })
-          else await api(`/git/refs/tags/${TAG}`, { method: 'DELETE' })
-        } catch { console.warn('Preview tag rollback needs maintainer attention.') }
+          const current = await optional(api, `/git/ref/tags/${tag}`)
+          if (current?.object.type === 'commit' && current.object.sha === sha) {
+            await api(`/git/refs/tags/${tag}`, { method: 'DELETE' })
+          }
+        } catch { console.warn('Unpublished version tag cleanup needs maintainer attention.') }
       }
       for (const asset of uploaded) {
         try { await api(`/releases/assets/${asset.id}`, { method: 'DELETE' }) }
-        catch { console.warn('An unpromoted upload needs maintainer cleanup; existing preview notes remain authoritative.') }
+        catch { console.warn('An unpromoted upload needs maintainer cleanup.') }
       }
     }
   }
@@ -234,11 +265,11 @@ async function main() {
     const subject = commit.commit.message.split(/\r?\n/)[0].replace(/[\r\n]/g, ' ')
     return `- ${subject} ([${commit.sha.slice(0, 12)}](https://github.com/${repository}/commit/${commit.sha}))`
   }).join('\n') + '\n'
-  const result = await publish({ api, repository, sha, runId, assets, changes })
+  const result = await publish({ api, repository, sha, runId, attempt, assets, changes })
   console.log(JSON.stringify(result))
   if (process.env.GITHUB_STEP_SUMMARY) {
-    const summary = result.skipped ? `Preview not updated: ${result.reason}.\n` :
-      `Desktop Preview published: https://github.com/${repository}/releases/tag/${TAG}\n\nCommit: ${sha}\n`;
+    const summary = result.skipped ? `Preview not published: ${result.reason}.\n` :
+      `Desktop Preview published: https://github.com/${repository}/releases/tag/${result.tag}\n\nCommit: ${sha}\n`;
     await writeFile(process.env.GITHUB_STEP_SUMMARY, summary, { flag: 'a' })
   }
 }
