@@ -1,6 +1,6 @@
 name: Build native desktop candidates
 
-# Main builds publish a rolling development pre-release only after every build passes.
+# Main builds publish a rolling Desktop Preview release only after every build passes.
 # Local AI engine environments require separate per-platform acceptance.
 on:
   workflow_dispatch: {}
@@ -45,6 +45,8 @@ jobs:
       - name: Validate frontend lockfile before native builds
         working-directory: frontend
         run: npm ci --dry-run --ignore-scripts --no-audit --no-fund
+      - name: Check cloud provider boundaries
+        run: python dev/test_cloud_boundary_regressions.py
       - name: Check packaging and export clean source
         run: |
           python -m unittest discover -s packaging/tests -v
@@ -96,6 +98,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
+          npm run test:ui
           npm run build
       - name: Check packaging contracts
         run: python -m unittest discover -s packaging/tests -v
@@ -136,7 +139,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
   publish:
-    name: Update Development Preview
+    name: Update Desktop Preview
     needs: [source, build]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-22.04

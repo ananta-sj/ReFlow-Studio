@@ -173,8 +173,7 @@ class RunManifest:
             item['status'] = 'cancelled' if isinstance(error, (GeneratorExit, RenderCancelled)) else 'failed'
             # Provider errors can contain URLs/tokens. Preserve type and operation
             # identity here; the existing UI owns the diagnostic message.
-            from core.failure_diagnostics import summarize
-            item['error'] = summarize(error)
+            item['error'] = {'type': type(error).__name__}
             raise
         else:
             item['status'] = 'completed'
@@ -193,10 +192,9 @@ class RunManifest:
             artifact = file_identity(output) if output else None
             if artifact is not None and artifact['bytes'] == 0:
                 raise RuntimeError('Process returned an empty output.')
-            from core.failure_diagnostics import summarize
             self.data.update(status=status, finished_at=datetime.now(timezone.utc).isoformat(),
                 output=artifact,
-                error=summarize(error) if error else None)
+                error={'type': type(error).__name__} if error else None)
             self.save()
 
 

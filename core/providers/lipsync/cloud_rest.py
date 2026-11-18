@@ -7,7 +7,7 @@ enhancer/filter.
 """
 
 from core.providers.base import LipSyncProvider
-from core.providers.cloud_rest_common import asset_headers, poll_until_done, request, resolve_credential
+from core.providers.cloud_rest_common import asset_headers, poll_until_done, request, resolve_credential, read_json
 from core.http_media import write_media
 
 
@@ -34,7 +34,7 @@ class LipSyncCloudRestProvider(LipSyncProvider):
         if extra.get("mode", "sync") == "sync":
             return write_media(resp, output_path, {'video'})
 
-        payload = resp.json()
+        payload = read_json(resp)
         status_url = payload[extra.get("status_url_field", "status_url")]
         result_url = poll_until_done(
             status_url,

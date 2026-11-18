@@ -2,14 +2,15 @@
 
 Pushing application/build changes to `main` starts **Build native desktop candidates**.
 A shared source job first validates the frontend lockfile with a clean-install dry run. Native jobs wait for this gate. After the source checks and all four native package/smoke jobs pass, the workflow
-updates one public **Development Preview** pre-release:
+updates one public **Desktop Preview** release:
 
 https://github.com/ananta-sj/ReFlow-Studio/releases/tag/development-preview
 
 The target platforms are Windows x64, Linux x64, macOS Apple Silicon (ARM64), and
 macOS Intel (x64). The same release also includes a clean source ZIP, build manifest
-and SHA-256 checksums. It is explicitly not marked Latest and does not replace RC2
-or stable releases. The application version is not automatically incremented.
+and SHA-256 checksums. It is published as a regular GitHub release and marked Latest, with Desktop Preview
+in its title. Historical RC2 downloads remain separate releases. The application version is not automatically incremented. Release notes include the ten
+most recent commit summaries, source links and the matching build.
 
 ## What is bundled
 
@@ -65,7 +66,7 @@ than deleting potentially published downloads. This is not an atomic GitHub-wide
 transaction. Inspect the failed job and release if cleanup cannot complete.
 
 The first release is prepared as a draft until uploads pass. A failed first run
-can leave a draft for a rerun/maintainer to inspect. An existing stable, unowned,
+can leave a draft for a rerun/maintainer to inspect. An existing unowned
 or immutable release at `development-preview` is refused. This rolling release
 requires mutable releases; immutable-release policies need a different versioned
 release design, not weaker checks.
@@ -74,7 +75,7 @@ release design, not weaker checks.
 
 1. Open the repository's Actions tab and select the new run.
 2. Confirm source plus Windows/Linux/both Mac jobs succeed.
-3. Confirm the publish job succeeds, then open the Development Preview release.
+3. Confirm the publish job succeeds, then open the Desktop Preview release.
 4. Choose your platform and the commit/run set identified in its notes. Compare
    its downloaded archive's SHA-256 with the matching SHA256SUMS file.
 5. Test a small disposable sample and report the precise build/OS/engine setup.

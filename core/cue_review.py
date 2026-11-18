@@ -415,7 +415,8 @@ class ReviewStore:
         path = self.asset(manifest, 'source.wav')
         if digest(path) != manifest['assets']['source.wav']:
             raise ValueError('Saved source audio changed. Prepare a new review.')
-        clip = AudioSegment.from_file(path, start_second=cue['start'], duration=cue['end']-cue['start'])
+        with open(path, 'rb') as source_audio:
+            clip = AudioSegment.from_file(source_audio, start_second=cue['start'], duration=cue['end']-cue['start'])
         buffer = io.BytesIO()
         clip.export(buffer, format='wav')
         data = buffer.getvalue()
@@ -979,7 +980,9 @@ def operate(store, pipeline, identifier, revision, action, index, settings, prog
         background = store.asset(manifest, 'background.wav')
         if digest(background) != manifest['assets']['background.wav']:
             raise ValueError('Saved background changed. Prepare a new review.')
-        mixed = AudioEngineer().dynamic_mix(voice, AudioSegment.from_file(background), ducking_db=-12)
+        with open(background, 'rb') as background_audio:
+            background_track = AudioSegment.from_file(background_audio)
+        mixed = AudioEngineer().dynamic_mix(voice, background_track, ducking_db=-12)
     if manifest.get('preserved_events'):
         from core.dub_recovery import restore_source_ranges
         source=store.asset(manifest,'source.wav')

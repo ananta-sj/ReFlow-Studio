@@ -1,4 +1,3 @@
-from core.render_context import check_cancelled, wait_or_cancel
 """Shared HTTP plumbing for the generic per-stage cloud-REST providers.
 
 Each stage's cloud_rest.py stays stage-shaped (STT uploads audio and gets
@@ -14,6 +13,7 @@ import requests
 from urllib.parse import urljoin, urlsplit
 
 from core.credential_store import get_credential
+from core.render_context import check_cancelled, wait_or_cancel
 
 
 class CloudRestError(RuntimeError):
@@ -37,10 +37,39 @@ def resolve_credential(credential_ref):
 
 
 def _origin(url):
-    parsed = urlsplit(url)
-    if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
-        raise CloudRestError('Expected an HTTP(S) URL without embedded credentials')
-    return parsed.scheme, parsed.hostname.lower(), parsed.port or (443 if parsed.scheme == 'https' else 80)
+    try:
+        parsed = urlsplit(url)
+        if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
+            raise CloudRestError('Expected an HTTP(S) URL without embedded credentials')
+        port = parsed.port
+        return parsed.scheme, parsed.hostname.lower(), port if port is not None else (443 if parsed.scheme == 'https' else 80)
+    except ValueError:
+        raise CloudRestError('Invalid HTTP(S) service URL') from None
+
+
+def _joined_url(base, target):
+    try:
+        return urljoin(base, target)
+    except ValueError:
+        raise CloudRestError('Remote service returned an invalid URL') from None
+
+
+def read_json(response):
+    """Consume and close JSON without echoing upstream read/decoder details."""
+    try:
+        return response.json()
+    except (ValueError, requests.RequestException):
+        raise CloudRestError('Remote service response could not be read as JSON.') from None
+    finally:
+        response.close()
+
+
+def iter_response(response, chunk_size):
+    """Keep ownership with the caller and sanitize only transport failures."""
+    try:
+        yield from response.iter_content(chunk_size=chunk_size)
+    except requests.RequestException:
+        raise CloudRestError('Remote response transfer failed; check the service connection.') from None
 
 
 def asset_headers(service_url, asset_url, headers):
@@ -53,20 +82,21 @@ def asset_headers(service_url, asset_url, headers):
 
 def request(method, url, headers=None, json_body=None, data=None, files=None, timeout=120):
     from core.network_policy import require_network_allowed
+    _origin(url)
     require_network_allowed(url)
     check_cancelled()
-    _origin(url)
     if files:
         from core.http_media import MultipartBody
         data = MultipartBody(data, files)
         headers = {**(headers or {}), 'Content-Type': data.content_type}
         files = None
+    request_timeout = timeout if isinstance(timeout, tuple) else (min(15, timeout), timeout)
     resp = None
     try:
         for redirect in range(6):
             resp = requests.request(
                 method, url, headers=headers, json=json_body, data=data, files=files,
-                timeout=(min(15, timeout), timeout), allow_redirects=False, stream=True,
+                timeout=request_timeout, allow_redirects=False, stream=True,
             )
             if resp.status_code not in (301, 302, 303, 307, 308):
                 resp.raise_for_status()
@@ -75,15 +105,17 @@ def request(method, url, headers=None, json_body=None, data=None, files=None, ti
             resp.close()
             if method.upper() != 'GET' or not location or redirect == 5:
                 raise CloudRestError('Unsupported service redirect; configure the final endpoint URL')
-            next_url = urljoin(url, location)
-            require_network_allowed(next_url)
+            next_url = _joined_url(url, location)
             headers = asset_headers(url, next_url, headers)
+            require_network_allowed(next_url)
             url = next_url
             check_cancelled()
-    except requests.RequestException as e:
+    except requests.RequestException:
         if resp is not None:
             resp.close()
-        raise CloudRestError(f"{method} {url} failed: {e}") from e
+        status = getattr(resp, 'status_code', None)
+        detail = f" (HTTP {status})" if isinstance(status, int) and 400 <= status <= 599 else ""
+        raise CloudRestError(f"{method} request failed{detail}; check the service endpoint, connection or credentials.") from None
     try:
         check_cancelled()
     except BaseException:
@@ -100,21 +132,21 @@ def poll_until_done(status_url, headers, done_field, done_value, result_field, p
     (typically a download URL). Raises on timeout rather than looping forever."""
     deadline = time.monotonic() + timeout
     if service_url:
-        status_url = urljoin(service_url + '/', status_url)
+        status_url = _joined_url(service_url + '/', status_url)
         if _origin(status_url) != _origin(service_url):
             raise CloudRestError('Polling URL must share the configured service origin')
     while time.monotonic() < deadline:
         remaining = deadline - time.monotonic()
         resp = request("GET", status_url, headers=headers, timeout=max(.001, min(120, remaining)))
-        payload = resp.json()
+        payload = read_json(resp)
         if not isinstance(payload, dict):
             raise CloudRestError('Remote job status must be a JSON object')
         if payload.get(done_field) == done_value:
             result = payload.get(result_field)
             if not isinstance(result, str) or not result.strip():
                 raise CloudRestError('Completed remote job has no usable result URL')
-            return urljoin(service_url + '/', result) if service_url else result
+            return _joined_url(service_url + '/', result) if service_url else result
         if payload.get(done_field) in ("failed", "error"):
-            raise CloudRestError(f"Remote job failed: {payload}")
+            raise CloudRestError("Remote job failed; check the service status without sharing private response data.")
         wait_or_cancel(min(poll_interval, max(0, deadline - time.monotonic())))
-    raise CloudRestError(f"Timed out after {timeout}s waiting on {status_url}")
+    raise CloudRestError(f"Timed out after {timeout}s waiting for the remote job.")

@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "motion/react"
 interface BootScreenProps {
   visible: boolean
   statusText: string
+  error?: string | null
+  onRetry?: () => void
 }
 
-export function BootScreen({ visible, statusText }: BootScreenProps) {
+export function BootScreen({ visible, statusText, error, onRetry }: BootScreenProps) {
   return (
     <AnimatePresence>
       {visible && (
@@ -44,8 +46,15 @@ export function BootScreen({ visible, statusText }: BootScreenProps) {
               animate={{ opacity: [1, 0.3, 1] }}
               transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
             />
-            <span>{statusText}</span>
+            <span role="status">{statusText}</span>
           </div>
+          {error && <div className="flex max-w-md flex-col items-center gap-3 px-6 text-center">
+            <p role="alert" className="text-sm text-destructive">{error}</p>
+            {onRetry && <button type="button" onClick={onRetry}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              Retry startup
+            </button>}
+          </div>}
         </motion.div>
       )}
     </AnimatePresence>

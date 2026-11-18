@@ -122,8 +122,9 @@ class HTTPMediaTests(unittest.TestCase):
         response = Mock(status_code=404)
         response.raise_for_status.side_effect = requests.HTTPError('not found')
         with patch.dict(os.environ, {'REFLOW_OFFLINE': '0'}), patch('requests.request', return_value=response):
-            with self.assertRaisesRegex(RuntimeError, 'not found'):
+            with self.assertRaisesRegex(RuntimeError, 'HTTP 404') as caught:
                 request('GET', 'https://example.invalid/output')
+        self.assertNotIn('not found', str(caught.exception))
         response.close.assert_called_once()
 
     def test_actual_loopback_upload_and_streamed_audio_publication(self):

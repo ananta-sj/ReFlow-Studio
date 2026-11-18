@@ -6,8 +6,9 @@ user-supplied endpoint/body template, same as every other stage's custom
 preset.
 """
 
+from string import Formatter
 from core.providers.base import ProfanityFilterProvider
-from core.providers.cloud_rest_common import request, resolve_credential
+from core.providers.cloud_rest_common import request, resolve_credential, read_json
 
 _SYSTEM_PROMPT = (
     "You censor profanity and slurs in a line of dialogue while preserving "
@@ -31,7 +32,7 @@ def _openai_chat_request(base_url, api_key, text, extra, custom_instructions="")
         "temperature": extra.get("temperature", 0.2),
     }
     resp = request("POST", url, headers=headers, json_body=body)
-    payload = resp.json()
+    payload = read_json(resp)
     return payload["choices"][0]["message"]["content"].strip()
 
 
@@ -42,12 +43,23 @@ def _custom_request(base_url, api_key, text, extra, custom_instructions=""):
     auth_prefix = extra.get("auth_prefix", "Bearer ")
     headers = {auth_header: f"{auth_prefix}{api_key}"} if api_key else {}
     body_template = extra.get("body", {"text": "{text}"})
+    if custom_instructions and custom_instructions.strip():
+        instruction_fields = [
+            (format_spec, conversion)
+            for value in body_template.values() if isinstance(value, str)
+            for _, field, format_spec, conversion in Formatter().parse(value)
+            if field == "custom_instructions"
+        ]
+        if not instruction_fields or any(spec or conversion for spec, conversion in instruction_fields):
+            raise ValueError("Custom profanity request must transmit custom instructions: "
+                             "add an unmodified {custom_instructions} placeholder to a request body string "
+                             "or clear the instructions.")
     body = {
         k: (v.format(text=text, custom_instructions=custom_instructions or "") if isinstance(v, str) else v)
         for k, v in body_template.items()
     }
     resp = request("POST", url, headers=headers, json_body=body)
-    payload = resp.json()
+    payload = read_json(resp)
     response_field = extra.get("response_field", "text")
     return payload[response_field].strip() if isinstance(payload, dict) else str(payload).strip()
 

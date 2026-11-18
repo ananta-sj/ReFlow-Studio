@@ -25,7 +25,8 @@ def refine_turns(audio_path, transcript, provider):
     from core.render_context import current_job, check_cancelled
     from core.transcription import normalize_transcription
     from core.pipeline_contracts import identify_cues
-    audio = AudioSegment.from_wav(audio_path).set_channels(1)
+    with open(audio_path, 'rb') as source_audio:
+        audio = AudioSegment.from_wav(source_audio).set_channels(1)
     folder = current_job().workspace/'source-turns'
     folder.mkdir(exist_ok=True)
     plans, paths = [], []
@@ -94,7 +95,8 @@ def analyze(audio_path, cues, folder, encode):
     from pydub import AudioSegment
     from core.speaker_matching import speech_excerpt
     from core.render_context import check_cancelled
-    audio = AudioSegment.from_wav(audio_path).set_channels(1)
+    with open(audio_path, 'rb') as source_audio:
+        audio = AudioSegment.from_wav(source_audio).set_channels(1)
     clips, vectors, indices, rows = {}, [], [], []
     for index, cue in enumerate(cues):
         check_cancelled()

@@ -15,7 +15,7 @@ from core.audio_utils import load_speech_audio
 
 def _openai_tts_request(base_url, api_key, text, language, voice, extra):
     url = f"{base_url}/v1/audio/speech"
-    headers = {"Authorization": f"Bearer {api_key}"}
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     body = {
         "model": extra.get("model", "tts-1"),
         "voice": voice or extra.get("voice", "alloy"),

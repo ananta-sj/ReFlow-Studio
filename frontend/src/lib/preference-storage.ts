@@ -1,4 +1,5 @@
 import { bridge } from './api'
+import { withStartupTimeout } from './startup-timeout'
 
 const keys = ['reflow-theme', 'reflow-experience-level', 'reflow.accentColor',
   'reflow.helpTooltipsEnabled', 'reflow.tourComplete', 'reflow.renderConfig', 'reflow.device']
@@ -12,7 +13,7 @@ function warn(error: unknown) {
 
 export async function initializePreferences() {
   try {
-    values = await bridge.getUiPreferences()
+    values = await withStartupTimeout(bridge.getUiPreferences(), 'Saved interface settings did not respond. Please retry.')
     // Migrate only app-owned keys from an existing browser session.
     const migration: Record<string, string> = {}
     for (const key of keys) {
@@ -23,10 +24,13 @@ export async function initializePreferences() {
       } catch { /* Session cache is optional. */ }
     }
     for (const [key, value] of Object.entries(migration)) {
-      try { values = await bridge.updateUiPreferences({ [key]: value }) }
+      try { values = await withStartupTimeout(bridge.updateUiPreferences({ [key]: value }), 'Settings migration did not respond. Please retry.') }
       catch (error) { warn(error) }
     }
-  } catch (error) { warn(error) }
+  } catch (error) {
+    warn(error)
+    throw new Error('Saved interface settings could not be loaded. Please retry before continuing.')
+  }
 }
 
 export const preferenceStorage = {

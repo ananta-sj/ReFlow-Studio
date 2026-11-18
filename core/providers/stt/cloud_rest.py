@@ -6,19 +6,19 @@ overall design rationale.
 
 from core.providers.base import STTProvider
 from core.transcription import normalize_transcription
-from core.providers.cloud_rest_common import request, resolve_credential
+from core.providers.cloud_rest_common import request, resolve_credential, read_json
 
 
 def _openai_whisper_request(base_url, api_key, audio_path, extra):
     url = f"{base_url}/v1/audio/transcriptions"
-    headers = {"Authorization": f"Bearer {api_key}"}
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     data = {"model": extra.get("model", "whisper-1"), "response_format": "verbose_json"}
     if extra.get('_source_language'):
         data['language'] = extra['_source_language']
     with open(audio_path, "rb") as f:
         files = {"file": (audio_path, f, "application/octet-stream")}
         resp = request("POST", url, headers=headers, data=data, files=files)
-    payload = resp.json()
+    payload = read_json(resp)
     return normalize_transcription(payload)
 
 
@@ -40,7 +40,7 @@ def _custom_request(base_url, api_key, audio_path, extra):
     with open(audio_path, "rb") as f:
         files = {"file": (audio_path, f, "application/octet-stream")}
         resp = request("POST", url, headers=headers, files=files, **kwargs)
-    payload = resp.json()
+    payload = read_json(resp)
     return normalize_transcription(payload)
 
 

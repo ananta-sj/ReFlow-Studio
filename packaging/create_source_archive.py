@@ -35,7 +35,7 @@ def include(name):
     if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md','docs/RC2_PLATFORM_RELEASES.md',
             'docs/DEVELOPMENT_CHECKOUT.md','docs/REVIEW_WORKFLOW_2026-11-15.md','docs/DISPOSABLE_CLEANUP.md',
             'docs/CHARACTER_MATCHING_2026-11-15.md','docs/QWEN35_DIALOGUE_TRIAL_2026-11-15.md',
-            'docs/PROJECT_DIRECTION.md','docs/DEVELOPMENT_PREVIEW.md'}:
+            'docs/PROJECT_DIRECTION.md','docs/DEVELOPMENT_PREVIEW.md','docs/AUDIT_2026-11-18.md'}:
         return True
     if name in {'assets/icon.ico','assets/icon.png'}:
         return True

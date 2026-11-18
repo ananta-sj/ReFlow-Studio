@@ -52,11 +52,11 @@ export async function collectAssets(folder, sha, runId, attempt) {
   return assets
 }
 
-export function releaseBody(repository, sha, runId) {
-  return `${MARKER}\n# ReFlow Studio — Development Preview\n\n` +
+export function releaseBody(repository, sha, runId, changes = '') {
+  return `${MARKER}\n# ReFlow Studio - Desktop Preview\n\n` +
     `Automatically built from [\`${sha.slice(0, 12)}\`](https://github.com/${repository}/commit/${sha}).\n` +
     `[Build checks and dependency inventories](https://github.com/${repository}/actions/runs/${runId}).\n\n` +
-    '**Pre-release for volunteer testing. This does not replace the stable/RC releases.**\n\n' +
+    '**Desktop Preview for volunteer testing. Published as a regular GitHub release.**\n\n' +
     'Choose `windows-x64`, `linux-x64`, `macos-arm64` (Apple Silicon), or `macos-x64` (Intel). ' +
     'Extract the entire package; keep its companion files together. The `source` ZIP contains source code.\n\n' +
     '**Scope:** desktop application and Python only. AI engine environments, model weights, voices, ' +
@@ -65,7 +65,7 @@ export function releaseBody(repository, sha, runId) {
     'Reliable unattended multi-character episode/movie dubbing remains unvalidated. Build/smoke checks ' +
     'do not verify translation meaning, natural acting or complete episode quality. Component licensing ' +
     'review remains pending; these are development testing packages.\n\n' +
-    `**Current download set:** filenames containing \`${sha.slice(0, 12)}-r${runId}-\`. ` +
+    `${changes}\n**Current download set:** filenames containing \`${sha.slice(0, 12)}-r${runId}-\`. ` +
     'Use the matching SHA256SUMS and manifest. During an upload, additional files from a pending build ' +
     'may appear; use only the set identified here. After a successful update, older generated assets are removed.\n\n' +
     'Report your OS/architecture, filename, engine setup and reproduction steps in ' +
@@ -73,8 +73,8 @@ export function releaseBody(repository, sha, runId) {
 }
 
 export function validateExistingRelease(release) {
-  if (release && (!release.prerelease || !release.body?.includes(MARKER) || release.immutable)) {
-    throw new Error('Refusing to replace an unowned, stable or immutable release')
+  if (release && (!release.body?.includes(MARKER) || release.immutable)) {
+    throw new Error('Refusing to replace an unowned or immutable release')
   }
 }
 
@@ -134,15 +134,15 @@ export async function findPreviewRelease(api) {
 }
 
 /** Serialized by the workflow. Keep old downloads until new uploads verify. */
-export async function publish({ api, repository, sha, runId, assets }) {
+export async function publish({ api, repository, sha, runId, assets, changes = '' }) {
   const head = () => api('/git/ref/heads/main')
   if ((await head()).object.sha !== sha) return { skipped: true, reason: 'Newer main commit exists' }
   let release = await findPreviewRelease(api)
   validateExistingRelease(release)
   if (!release) {
     release = await api('/releases', { method: 'POST', body: { tag_name: TAG,
-      target_commitish: sha, name: 'Development Preview', draft: true, prerelease: true,
-      make_latest: 'false', body: MARKER + '\nPreparing the first development preview.' } })
+      target_commitish: sha, name: 'Desktop Preview', draft: true, prerelease: false,
+      make_latest: 'true', body: MARKER + '\nPreparing the first development preview.' } })
   }
   const oldAssets = await listAssets(api, release.id)
   const uploaded = []
@@ -170,8 +170,8 @@ export async function publish({ api, repository, sha, runId, assets }) {
     else await api('/git/refs', { method: 'POST', body: { ref: `refs/tags/${TAG}`, sha } })
     tagChanged = true
     const publication = {
-      tag_name: TAG, name: `Development Preview — ${sha.slice(0, 12)}`, draft: false,
-      prerelease: true, make_latest: 'false', body: releaseBody(repository, sha, runId) }
+      tag_name: TAG, name: `Desktop Preview - ${sha.slice(0, 12)}`, draft: false,
+      prerelease: false, make_latest: 'true', body: releaseBody(repository, sha, runId, changes) }
     try {
       await api(`/releases/${release.id}`, { method: 'PATCH', body: publication })
       promoted = true
@@ -184,7 +184,7 @@ export async function publish({ api, repository, sha, runId, assets }) {
         console.warn('Cannot confirm publication. Keeping both asset sets; inspect the release before cleanup.')
         throw error
       }
-      if (observed.body === publication.body && !observed.draft && observed.prerelease) promoted = true
+      if (observed.body === publication.body && !observed.draft && observed.prerelease === false) promoted = true
       else throw error
     }
     for (const asset of oldAssets.filter(row => row.name.startsWith('ReflowStudio-dev-'))) {
@@ -226,11 +226,17 @@ async function main() {
   const checksums = path.join(folder, `ReflowStudio-dev-SHA256SUMS-${stamp}.txt`)
   await writeFile(checksums, assets.map(row => `${row.sha256}  ${row.name}\n`).join(''))
   assets.push({ name: path.basename(checksums), file: checksums, bytes: (await lstat(checksums)).size, sha256: await hash(checksums) })
-  const result = await publish({ api: apiClient(repository, token), repository, sha, runId, assets })
+  const api = apiClient(repository, token)
+  const commits = await api(`/commits?sha=${sha}&per_page=10`)
+  const changes = '## Recent changes\n\n' + commits.map(commit => {
+    const subject = commit.commit.message.split(/\r?\n/)[0].replace(/[\r\n]/g, ' ')
+    return `- ${subject} ([${commit.sha.slice(0, 12)}](https://github.com/${repository}/commit/${commit.sha}))`
+  }).join('\n') + '\n'
+  const result = await publish({ api, repository, sha, runId, assets, changes })
   console.log(JSON.stringify(result))
   if (process.env.GITHUB_STEP_SUMMARY) {
     const summary = result.skipped ? `Preview not updated: ${result.reason}.\n` :
-      `Development Preview published: https://github.com/${repository}/releases/tag/${TAG}\n\nCommit: ${sha}\n`;
+      `Desktop Preview published: https://github.com/${repository}/releases/tag/${TAG}\n\nCommit: ${sha}\n`;
     await writeFile(process.env.GITHUB_STEP_SUMMARY, summary, { flag: 'a' })
   }
 }

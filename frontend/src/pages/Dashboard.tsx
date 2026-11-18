@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { withStartupTimeout } from "@/lib/startup-timeout"
 import { Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,7 +63,10 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
   })
   const [languages, setLanguages] = useState<Language[]>([])
   const [sourceLanguages, setSourceLanguages] = useState<Language[]>([])
-  const [sourceLanguageError, setSourceLanguageError] = useState<string | null>(null)
+  const [optionErrors, setOptionErrors] = useState<Record<string, string>>({})
+  const [loadingOptions, setLoadingOptions] = useState(true)
+  const [optionsAttempt, setOptionsAttempt] = useState(0)
+  const sourceLanguageError = optionErrors.source ?? null
   const [setupReport, setSetupReport] = useState<EngineReadiness | null>(null)
   const [checkingSetup, setCheckingSetup] = useState(false)
   const [setupError, setSetupError] = useState<string | null>(null)
@@ -71,14 +75,26 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
   const render = useRenderJob()
 
   useEffect(() => {
-    bridge.listModels("voice").then((models) => setVoices(models.filter((m) => m.status === "installed")))
-    bridge.listPipelineTemplates().then(setTemplates)
-    bridge.getHardwareSnapshot().then((snap) => setDevices(snap.devices))
-    bridge.listLanguages().then(setLanguages)
-    bridge.listSourceLanguages().then(setSourceLanguages).catch(() => {
-      setSourceLanguageError("Could not load source languages. Restart Reflow to try again.")
-    })
-  }, [])
+    let active = true
+    setLoadingOptions(true)
+    setOptionErrors({})
+    async function load<T>(key: string, label: string, read: () => Promise<T>, accept: (value: T) => void) {
+      try {
+        const value = await withStartupTimeout(read(), `Could not load ${label}.`)
+        if (active) accept(value)
+      } catch {
+        if (active) setOptionErrors(previous => ({ ...previous, [key]: `Could not load ${label}.` }))
+      }
+    }
+    void Promise.all([
+      load("voices", "voice options", () => bridge.listModels("voice"), models => setVoices(models.filter(model => model.status === "installed"))),
+      load("templates", "workflows", bridge.listPipelineTemplates, setTemplates),
+      load("devices", "devices", bridge.getHardwareSnapshot, snapshot => setDevices(snapshot.devices)),
+      load("languages", "target languages", bridge.listLanguages, setLanguages),
+      load("source", "source languages", bridge.listSourceLanguages, setSourceLanguages),
+    ]).then(() => { if (active) setLoadingOptions(false) })
+    return () => { active = false }
+  }, [optionsAttempt])
 
   // Current VRAM headroom for whichever device is selected, so the
   // Projected System Load gauge reflects "what's already used" + "what
@@ -94,6 +110,13 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
 
   const inputKind = templates?.[cfg.template]?.input_kind ?? "video"
   const effectivePath = inputKind === "video" ? videoPath : inputPath
+  const requiredOptions = inputKind === "subtitle"
+    ? ["templates", "languages", "source"] : ["templates", "languages", "source", "voices", "devices"]
+  const optionsReady = !loadingOptions && templates !== null && requiredOptions.every(key => !optionErrors[key])
+  const selectionsAvailable = !!templates?.[cfg.template]
+    && languages.some(language => language.code === cfg.lang)
+    && (cfg.sourceLanguage === "auto" || sourceLanguages.some(language => language.code === cfg.sourceLanguage))
+    && (inputKind === "subtitle" || devices.some(device => device.id === selectedDeviceId && device.backend !== "unsupported"))
 
   // ETA only means something for an actual video render - stt/tts/lipsync/etc
   // stage costs don't apply to audio_dub or subtitle_translate the same way,
@@ -162,7 +185,7 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
   const loadTooHigh = loadPercent != null && loadPercent >= 95
 
   async function handleStart() {
-    if (!effectivePath) return
+    if (!effectivePath || !optionsReady || !selectionsAvailable) return
 
     if (loadTooHigh) {
       await confirmAction({
@@ -188,6 +211,16 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
 
   return (
     <div className="flex flex-col gap-4 p-6">
+      {loadingOptions && <p role="status" className="text-sm text-muted-foreground">Loading workflow options…</p>}
+      {Object.keys(optionErrors).length > 0 && <div role="alert" className="rounded-md border border-destructive/40 p-3 text-sm">
+        {Object.entries(optionErrors).map(([key, message]) => <p key={key}>{message}</p>)}
+        <p className="mt-1 text-muted-foreground">Your selections are kept. Retry loading the options before starting affected workflows.</p>
+        <Button className="mt-2" variant="outline" disabled={loadingOptions}
+          onClick={() => setOptionsAttempt(attempt => attempt + 1)}>Retry loading options</Button>
+      </div>}
+      {optionsReady && !selectionsAvailable && <p role="alert" className="text-sm text-destructive">
+        A selected workflow, language or device is unavailable. Choose available options before starting.
+      </p>}
       {/* Row 1: everything that fits comfortably side by side, instead of
           stacking full-width cards and forcing a long vertical scroll -
           the window is wide, so use the width. */}
@@ -622,7 +655,7 @@ export function Dashboard({ selectedDeviceId, level, onNavigate }: DashboardProp
               ? "bg-destructive text-white shadow-[0_0_24px_-4px_var(--destructive)] hover:bg-destructive/90"
               : "shadow-[0_0_24px_-4px_var(--primary)]"
           )}
-          disabled={!effectivePath}
+          disabled={!effectivePath || !optionsReady || !selectionsAvailable}
           onClick={handleStart}
         >
           {loadTooHigh ? "LOAD TOO HIGH - NOT RECOMMENDED" : inputKind === "video" ? "START VIDEO BATCH" : "INITIALIZE PIPELINE"}

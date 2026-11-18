@@ -5,6 +5,7 @@ import re
 import uuid
 
 from core.render_context import check_cancelled
+from core.providers.cloud_rest_common import iter_response
 
 CHUNK_BYTES = 256 * 1024
 
@@ -75,13 +76,16 @@ def write_media(response, output_path, kinds, *, validate_output=None):
             raise RuntimeError('Remote service returned an error/document instead of media')
         expected = response.headers.get('Content-Length')
         if expected is not None:
-            expected = int(expected)
+            try:
+                expected = int(expected)
+            except (ValueError, TypeError):
+                raise RuntimeError('Invalid media Content-Length') from None
             if expected < 0:
                 raise RuntimeError('Invalid media Content-Length')
         received = 0
         with _staged_output(output_path) as pending:
             with open(pending, 'wb') as stream:
-                for chunk in response.iter_content(chunk_size=CHUNK_BYTES):
+                for chunk in iter_response(response, CHUNK_BYTES):
                     check_cancelled()
                     if not chunk:
                         continue

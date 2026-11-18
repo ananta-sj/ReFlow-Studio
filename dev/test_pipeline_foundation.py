@@ -43,6 +43,13 @@ class PipelineFoundationTests(unittest.TestCase):
         subject.clear_vram = Mock()
         return subject
 
+    def test_terminal_failure_receipt_does_not_persist_provider_error_text(self):
+        record = self.manifest()
+        record.finish('failed', error=RuntimeError('private provider response and unlabelled credential'))
+        saved = record.path.read_text(encoding='utf-8')
+        self.assertNotIn('private provider response', saved)
+        self.assertEqual(json.loads(saved)['error']['type'], 'RuntimeError')
+
     def test_plan_freezes_nested_parameters_and_returns_copies(self):
         params = {'cast_list': ['voice-one'], 'sub_style': {'font_size': 20}}
         spec = PipelineSpec('video_dub', params)

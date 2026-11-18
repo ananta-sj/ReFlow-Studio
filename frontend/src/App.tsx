@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { withStartupTimeout } from "@/lib/startup-timeout"
 import "./lib/events"
 import { TitleBar } from "@/components/shell/TitleBar"
 import { PrimaryNav, type PageId } from "@/components/shell/PrimaryNav"
@@ -44,6 +45,8 @@ function App() {
     }).catch(() => {})
   }, [])
   const [booting, setBooting] = useState(true)
+  const [bootError, setBootError] = useState<string | null>(null)
+  const [bootAttempt, setBootAttempt] = useState(0)
   const [bootStatus, setBootStatus] = useState("CONNECTING TO PYTHON CORE…")
   const [showWizard, setShowWizard] = useState(false)
   const { theme, toggle: toggleTheme } = useTheme()
@@ -53,8 +56,18 @@ function App() {
   useEffect(() => {
     initializeJobs()
     const bootStart = Date.now()
+    let active = true
+    let bootTimer: ReturnType<typeof setTimeout> | undefined
+    setBootError(null)
+    setBootStatus("CONNECTING TO PYTHON CORE…")
+    const reportBootWarning = () => {
+      if (active) window.__reflow.dispatch("log", {
+        level: "warning", message: "Some startup details could not be loaded. Check settings and recovery before starting work.",
+      })
+    }
 
-    bridge.runIntegrityCheck().then((result) => {
+    withStartupTimeout(bridge.runIntegrityCheck(), "Startup checks did not respond. Please retry.").then((result) => {
+      if (!active) return
       setOnline(result.ok)
       setBootStatus(result.ok ? "SYSTEMS ONLINE" : "RUNTIME NEEDS ATTENTION")
       window.__reflow.dispatch("log", {
@@ -63,14 +76,14 @@ function App() {
       })
 
       bridge.getSettings().then((res) => {
-        if (!res.values.onboarding_complete) setShowWizard(true)
-      })
+        if (active && !res.values.onboarding_complete) setShowWizard(true)
+      }).catch(reportBootWarning)
 
       // Captures once (a no-op on every later boot - see
       // capture_hardware_profile()) so the Marketplace's "Best For This
       // Device" hint on recommended models has something to compare
       // against from the very first time it's shown.
-      bridge.captureHardwareProfile()
+      void bridge.captureHardwareProfile().catch(reportBootWarning)
 
       // A non-null result means the app didn't shut down cleanly last time
       // during a render (crash, force-kill, power loss) - a normal finish,
@@ -78,13 +91,14 @@ function App() {
       // core/render_state.py). Restart may reuse verified recognition and
       // translation checkpoints; other stages run again with the same params.
       bridge.getInterruptedRender().then((interrupted) => {
-        if (!interrupted) return
+        if (!active || !interrupted) return
         confirmChoice({
           title: "Resume interrupted render?",
           description: `Continue "${interrupted.input_path.split(/[\\/]/).pop()}"? ReFlow will check saved extraction, separation, translation and voice lines and reuse matching work.${interrupted.queue_item_id ? ' Remaining accepted batch jobs will follow in order.' : ''} Closing this dialog keeps the recovery offer for the next launch.`,
           confirmLabel: interrupted.queue_item_id ? "Resume Batch" : "Resume Render",
           cancelLabel: "Discard",
         }).then(async (choice) => {
+          if (!active) return
           if (choice === 'confirm') {
             const result = await runJobAction(() => bridge.resumeInterruptedRender(interrupted.recovery_token, !!interrupted.queue_item_id))
             if (!result.ok) await confirmAction({ title: "Resume unavailable", description: result.message ?? "The restart was not accepted.", alertOnly: true })
@@ -96,13 +110,19 @@ function App() {
               await confirmAction({ title: "Discard unavailable", description: String(error), alertOnly: true })
             }
           }
-        })
-      })
+        }).catch(reportBootWarning)
+      }).catch(reportBootWarning)
 
       const elapsed = Date.now() - bootStart
-      setTimeout(() => setBooting(false), Math.max(0, MIN_BOOT_MS - elapsed))
+      bootTimer = setTimeout(() => { if (active) setBooting(false) }, Math.max(0, MIN_BOOT_MS - elapsed))
+    }).catch(() => {
+      if (!active) return
+      setOnline(false)
+      setBootStatus("STARTUP NEEDS ATTENTION")
+      setBootError("ReFlow could not finish its startup checks. Retry, or close and reopen the app.")
     })
-  }, [])
+    return () => { active = false; clearTimeout(bootTimer) }
+  }, [bootAttempt])
 
   // The Nodes tab only exists at Advanced+ - if the user drops back to
   // Basic while on it, don't strand them on a page its own nav no longer
@@ -115,7 +135,8 @@ function App() {
 
   return (
     <>
-      <BootScreen visible={booting} statusText={bootStatus} />
+      <BootScreen visible={booting} statusText={bootStatus} error={bootError}
+        onRetry={() => { setBootError(null); setBootAttempt(value => value + 1) }} />
       <ConfirmDialogHost />
       {!booting && showWizard && (
         <SetupWizard

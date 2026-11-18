@@ -10,7 +10,7 @@ from string import Formatter
 from core.languages import require_known_target
 from core.source_language import coerce_source_language, source_prompt, SOURCE_LANGUAGE_NAMES
 from core.providers.base import TranslationProvider, require_translation_text
-from core.providers.cloud_rest_common import request, resolve_credential
+from core.providers.cloud_rest_common import request, resolve_credential, read_json
 
 _TRANSLATE_SYSTEM_PROMPT = (
     "You are a professional translator. Translate the user's text into "
@@ -36,7 +36,7 @@ def _openai_chat_request(base_url, api_key, text, target_language, extra, custom
     }
     resp = request("POST", url, headers=headers, json_body=body, timeout=(5, 120))
     try:
-        payload = resp.json()
+        payload = read_json(resp)
         value = payload["choices"][0]["message"]["content"]
     except (ValueError, KeyError, IndexError, TypeError) as exc:
         raise RuntimeError("Translation endpoint returned an invalid chat response.") from exc
@@ -72,6 +72,10 @@ def _custom_request(base_url, api_key, text, target_language, extra, custom_inst
     if custom_instructions and custom_instructions.strip():
         instruction_keys = [key for key, value in body_template.items() if isinstance(value, str)
                             if any(field == "custom_instructions" for _, field, _, _ in Formatter().parse(value))]
+        for key in instruction_keys:
+            for _, field, format_spec, conversion in Formatter().parse(body_template[key]):
+                if field == "custom_instructions" and (format_spec or conversion):
+                    raise ValueError("Custom instructions placeholders must be unmodified; remove formatting or conversion.")
         if not instruction_keys:
             raise ValueError("Custom translation request cannot transmit custom instructions: "
                              "add {custom_instructions} to a string value in the request body template "
@@ -92,10 +96,7 @@ def _custom_request(base_url, api_key, text, target_language, extra, custom_inst
         raise ValueError("Custom translation request must transmit the full custom instructions; "
                          "the request template discarded or truncated them.")
     resp = request("POST", url, headers=headers, json_body=body, timeout=(5, 120))
-    try:
-        payload = resp.json()
-    except ValueError as exc:
-        raise RuntimeError("Translation endpoint returned invalid JSON.") from exc
+    payload = read_json(resp)
     response_field = extra.get("response_field", "text")
     if isinstance(payload, dict):
         if response_field not in payload:

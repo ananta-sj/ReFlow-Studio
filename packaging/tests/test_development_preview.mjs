@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { PACKAGES, MARKER, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease } from '../publish_development_preview.mjs'
+import { PACKAGES, MARKER, releaseBody, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease } from '../publish_development_preview.mjs'
 
 const SHA = 'a'.repeat(40)
 const OTHER = 'b'.repeat(40)
@@ -70,8 +70,8 @@ test('tampered package and unexpected private files block publication', () => fi
   await assert.rejects(collectAssets(folder, SHA, '123', '1'), /exactly four/)
 }))
 
-test('stable, unowned and immutable releases are never modified', () => {
-  for (const release of [{ prerelease: false, body: MARKER }, { prerelease: true, body: 'user release' },
+test('unowned and immutable releases are never modified', () => {
+  for (const release of [{ prerelease: false, body: 'user release' }, { prerelease: true, body: 'user release' },
     { prerelease: true, body: MARKER, immutable: true }]) assert.throws(() => validateExistingRelease(release), /Refusing/)
 })
 
@@ -88,13 +88,13 @@ test('upload failure retains old assets and cleans only newly uploaded files', a
   assert.ok(!state.calls.some(row => row.method === 'PATCH'))
 })
 
-test('successful promotion follows uploads, is prerelease/not-latest and preserves manual attachments', async () => {
+test('successful promotion follows uploads, is a regular latest Desktop Preview and preserves manual attachments', async () => {
   const state = server()
   assert.equal((await execute(state)).skipped, false)
   const promotion = state.calls.findIndex(row => row.route === '/releases/1' && row.method === 'PATCH')
   assert.ok(promotion > state.calls.findLastIndex(row => row.route.startsWith('https://uploads.github.com/')))
-  assert.equal(state.calls[promotion].body.make_latest, 'false')
-  assert.equal(state.calls[promotion].body.prerelease, true)
+  assert.equal(state.calls[promotion].body.make_latest, 'true')
+  assert.equal(state.calls[promotion].body.prerelease, false)
   assert.ok(state.calls[promotion].body.body.includes(SHA.slice(0, 12)))
   assert.deepEqual(state.calls.filter(row => row.method === 'DELETE').map(row => row.route), ['/releases/assets/9'])
 })
@@ -150,7 +150,7 @@ test('first preview stays draft until uploads complete, then creates its lightwe
   }
   assert.equal((await execute(state)).skipped, false)
   assert.equal(created[0].draft, true)
-  assert.equal(created[0].prerelease, true)
+  assert.equal(created[0].prerelease, false)
   assert.deepEqual(created[1], { ref: 'refs/tags/development-preview', sha: SHA })
 })
 
@@ -167,4 +167,13 @@ test('workflow gates publishing on all builds, main, and a job-local write token
   for (const target of ['windows-x64', 'linux-x64', 'macos-arm64', 'macos-x64']) {
     assert.ok(workflow.includes(`target: ${target}`))
   }
+})
+
+
+test('release notes identify desktop preview scope and include supplied commit changes', () => {
+  const body = releaseBody('owner/repo', SHA, '123', '## Recent changes\n- Fix recovery')
+  assert.match(body, /Desktop Preview/)
+  assert.match(body, /regular GitHub release/)
+  assert.match(body, /Fix recovery/)
+  assert.doesNotMatch(body, /Pre-release for volunteer/)
 })

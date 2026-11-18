@@ -1,3 +1,5 @@
+import { withStartupTimeout } from "./startup-timeout"
+
 // Typed wrapper around window.pywebview.api.* - the bridge/api.py surface.
 // Waits for the `pywebviewready` event since pywebview injects
 // window.pywebview asynchronously after the page's own load.
@@ -512,9 +514,17 @@ let readyPromise: Promise<void> | null = null
 export function whenReady(): Promise<void> {
   if (window.pywebview?.api) return Promise.resolve()
   if (!readyPromise) {
-    readyPromise = new Promise((resolve) => {
-      window.addEventListener("pywebviewready", () => resolve(), { once: true })
+    const onReady = () => { if (window.pywebview?.api) connected() }
+    let connected: () => void
+    const connection = new Promise<void>(resolve => {
+      connected = resolve
+      window.addEventListener("pywebviewready", onReady)
     })
+    readyPromise = withStartupTimeout(connection,
+      "The desktop connection is unavailable. Retry, or close and reopen ReFlow.", 15000)
+      .finally(() => window.removeEventListener("pywebviewready", onReady))
+    // A later connection attempt must not reuse a rejected promise.
+    void readyPromise.catch(() => { readyPromise = null })
   }
   return readyPromise
 }

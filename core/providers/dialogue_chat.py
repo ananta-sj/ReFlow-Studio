@@ -2,7 +2,7 @@
 import json
 import time
 from core.render_context import check_cancelled
-from core.providers.cloud_rest_common import request, resolve_credential
+from core.providers.cloud_rest_common import request, resolve_credential, iter_response
 from core.dialogue_evidence import PROTOCOL
 
 
@@ -37,7 +37,7 @@ class DialogueChatProvider:
             data = bytearray()
             # Check between bytes so a slow-drip body cannot hide inside a
             # large buffered chunk. An idle socket read still has its timeout.
-            for chunk in response.iter_content(chunk_size=1):
+            for chunk in iter_response(response, 1):
                 check_cancelled()
                 if time.monotonic() > deadline:
                     raise TimeoutError('Dialogue response exceeded its time limit.')
@@ -56,8 +56,8 @@ class DialogueChatProvider:
             if not isinstance(result, dict):
                 raise ValueError('Dialogue endpoint must return a JSON object.')
             return result
-        except (TypeError, AttributeError, UnicodeError, json.JSONDecodeError) as error:
-            raise ValueError('Dialogue endpoint returned malformed JSON.') from error
+        except (TypeError, AttributeError, UnicodeError, json.JSONDecodeError):
+            raise ValueError('Dialogue endpoint returned malformed JSON.') from None
         finally:
             response.close()
 
