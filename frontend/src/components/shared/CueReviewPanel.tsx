@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { bridge, type CueReview, type CueReviewResult, type CueTimingResult, type RenderParams, type DialogueReadiness, type ReviewAction } from '@/lib/api'
 import { runJobAction, useJobs } from '@/lib/use-jobs'
 import { CueAudioPlayer } from './CueAudioPlayer'
+import { CueTranscript } from './CueTranscript'
 import { confirmAction } from '@/lib/use-confirm'
 
 const reviewReasons = {
@@ -37,7 +38,7 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
   const [text, setText] = useState('')
   const [startSeconds, setStartSeconds] = useState('')
   const [endSeconds, setEndSeconds] = useState('')
-  const [audio, setAudio] = useState<string | null>(null)
+  const [audio, setAudio] = useState<{ data: string; label: string; identity: string } | null>(null)
   const [timing, setTiming] = useState<(CueTimingResult & { id: string; revision: number; index: number }) | null>(null)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,9 +59,9 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
   const remaining = review?.cues.filter(item => !item.accepted).length ?? 0
 
   useEffect(() => {
-    if (!dirty && firstPending >= 0 && (!cue || (!showAccepted && cue.accepted) ||
-      (onlyUnassigned && cue.speaker && review?.speaker_references?.includes(cue.speaker)))) setIndex(firstPending)
-  }, [cue, dirty, firstPending, onlyUnassigned, review?.speaker_references, showAccepted])
+    // Filtering changes the list, never the cue being edited or auditioned.
+    if (!dirty && !cue && firstPending >= 0) setIndex(firstPending)
+  }, [cue, dirty, firstPending])
 
   useEffect(() => {
     if (jobs.busy) return
@@ -195,14 +196,13 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
             </div>
             {cue.speaker_match && <p>{speakerReasons[cue.speaker_match]}</p>}
           </div>}
-          <label className="flex flex-col gap-1 text-xs">Line
-            <select className="rounded border border-border bg-background p-2" value={index} disabled={busy || dirty}
-              onChange={event => { setIndex(Number(event.target.value)); setError(null) }}>
-              {review.cues.map((item, number) => (number === index || ((!onlyUnassigned || !unassigned || !hasReference(item)) && (showAccepted || !remaining || !item.accepted))) && <option key={item.cue_id || number} value={number}>
-                {number + 1} · {item.start.toFixed(2)}–{item.end.toFixed(2)}s · {item.accepted ? 'Accepted' : 'Needs review'}{item.speaker ? ` · ${item.speaker}` : ''}
-              </option>)}
-            </select>
-          </label>
+          <CueTranscript key={review.id} review={review} selectedIndex={index} disabled={busy || dirty}
+            showAccepted={showAccepted} onlyUnassigned={onlyUnassigned}
+            onSelect={number => { setIndex(number); setError(null) }} />
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
+            <h3 className="text-sm font-medium">Line {index + 1}{cue.speaker ? ` · ${cue.speaker}` : ''}</h3>
+            <span className="text-xs text-muted-foreground">{dirty ? 'Unsaved edits' : 'Saved'} · {cue.start.toFixed(2)}–{cue.end.toFixed(2)}s</span>
+          </div>
           {cue.first_pass && <p className="text-xs text-muted-foreground">
             {reviewReasons[cue.first_pass.reason]}{cue.first_pass.status === 'needs_review' && cue.first_pass.heard ? ` Heard: ${cue.first_pass.heard}` : ''}
           </p>}
@@ -238,7 +238,7 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
             <Button size="sm" variant="outline" disabled={busy || dirty} onClick={() => void perform(async () => {
               const result = await bridge.getReviewSourceAudio(review.id, index)
               if (!result.ok || !result.audio) throw new Error(result.message ?? 'Source audio is unavailable')
-              setAudio(result.audio)
+              setAudio({ data: result.audio, label: `Original line ${index + 1}`, identity: `${review.id}-${review.revision}-${index}-original` })
             })}>Listen to original line</Button>
             <Button size="sm" disabled={busy || !dirty} onClick={() => void perform(save)}>Save changes</Button>
             <Button size="sm" variant="outline" disabled={busy || !dirty} onClick={() => {
@@ -270,12 +270,12 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
             <Button size="sm" variant="outline" disabled={busy || dirty || !cue.candidate} onClick={() => void perform(async () => {
               const result = await bridge.getReviewAudio(review.id, index)
               if (!result.ok || !result.audio) throw new Error(result.message ?? 'Audio is unavailable')
-              setAudio(result.audio)
+              setAudio({ data: result.audio, label: `Candidate take for line ${index + 1}`, identity: `${review.id}-${review.revision}-${index}-candidate` })
             })}>Listen to new take</Button>
             <Button size="sm" variant="outline" disabled={busy || dirty || !cue.accepted} onClick={() => void perform(async () => {
               const result = await bridge.getReviewAudio(review.id, index, true)
               if (!result.ok || !result.audio) throw new Error(result.message ?? 'Audio is unavailable')
-              setAudio(result.audio)
+              setAudio({ data: result.audio, label: `Accepted take for line ${index + 1}`, identity: `${review.id}-${review.revision}-${index}-accepted` })
             })}>Listen to accepted take</Button>
             <Button size="sm" disabled={busy || dirty || !cue.candidate?.fits} onClick={() => void perform(async () => {
               apply(await bridge.acceptReviewCue(review.id, review.revision, index))
@@ -286,6 +286,8 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
             {currentTiming.supported && currentTiming.estimated_seconds != null && currentTiming.available_seconds != null
               ? `Estimated speech: ${currentTiming.estimated_seconds.toFixed(2)} seconds in a ${currentTiming.available_seconds.toFixed(2)}-second window. ${currentTiming.fits ? 'Likely to fit. Generate and listen before accepting.' : 'Too long. Shorten the wording and check again.'}`
               : currentTiming.message}
+            {currentTiming.basis === 'observed_natural_takes' && ` Based on ${currentTiming.sample_count} accepted takes with this reference. Voice, wording and delivery can vary.`}
+            {currentTiming.basis === 'voice_estimator' && ' Based on the selected voice estimator.'}
           </p>}
           {cue.dialogue_options && !dirty && <div className="flex flex-col gap-2 rounded border border-border p-3">
             <p className="text-xs text-muted-foreground">Check each alternative against the original meaning. A timing estimate does not confirm meaning or natural delivery. Choosing wording fills the editor; save and audition it before accepting speech.</p>
@@ -320,7 +322,7 @@ export function CueReviewPanel({ inputPath, params }: { inputPath: string | null
             New take: {cue.candidate.seconds.toFixed(2)} seconds. {cue.candidate.fits ? 'Fits the window. Listen before accepting.' : 'Too long. Shorten the wording and regenerate; words will not be cut.'}
           </p>}
           {cue.accepted && <p className="text-xs text-primary">Accepted take saved ({cue.accepted.seconds.toFixed(2)} seconds).</p>}
-          {audio && <CueAudioPlayer key={`${review.id}-${index}-${audio.length}`} audio={audio} />}
+          {audio && <CueAudioPlayer key={audio.identity} audio={audio.data} label={audio.label} />}
           <Button disabled={busy || dirty || !allAccepted} onClick={() => void perform(() => start('render'))}>Render {review.output_kind === 'video' ? 'video' : 'audio'} from accepted takes</Button>
           {!allAccepted && <p className="text-xs text-muted-foreground">Accept a fitting take for every line before rendering.</p>}
         </>}

@@ -37,7 +37,7 @@ Precise beep/mute editing, same-language dialogue replacement and translated dub
 | 🎬 Video dubbing | Transcription, translation, speech generation, timing, mixing and video export. |
 | 🎙️ Audio dubbing | Process audio input through the dubbing workflow. |
 | 📝 Subtitle translation | Translate supplied subtitle files without speech generation. |
-| 🎧 Dialogue review | Edit wording, audition takes, inspect timing and accept suitable dialogue. |
+| 🎧 Dialogue review | Search dialogue by wording or character, jump to unresolved lines, compare labeled auditions, and accept suitable takes. Timing advice can use compatible accepted takes before another generation. |
 | 🧩 Engine connections | Configure supported local files, local services and cloud API adapters. |
 | 🎭 Voice references | Reference-guided speech and optional voice conversion through compatible engines. |
 | 🎼 Background preservation | Optional vocal separation and mixing, with quality dependent on the source and separator. |

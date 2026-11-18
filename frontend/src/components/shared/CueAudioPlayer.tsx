@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
-export function CueAudioPlayer({ audio }: { audio: string }) {
+export function CueAudioPlayer({ audio, label = 'Preview' }: { audio: string; label?: string }) {
   const context = useRef<AudioContext | null>(null)
   const source = useRef<AudioBufferSourceNode | null>(null)
   const generation = useRef(0)
@@ -65,9 +65,10 @@ export function CueAudioPlayer({ audio }: { audio: string }) {
       if (token === generation.current) setLoading(false)
     }
   }
-  return <div className="flex flex-wrap items-center gap-2 rounded border border-border p-2" data-cue-player>
-    <Button size="sm" disabled={loading || playing} onClick={() => void play()}>Play preview</Button>
-    <Button size="sm" variant="outline" disabled={!loading && !playing} onClick={stop}>Stop preview</Button>
+  return <div className="flex flex-wrap items-center gap-2 rounded border border-border p-2" data-cue-player role="group" aria-label={label}>
+    <span className="text-xs font-medium">{label}</span>
+    <Button size="sm" aria-label={`Play ${label.toLocaleLowerCase()}`} disabled={loading || playing} onClick={() => void play()}>Play preview</Button>
+    <Button size="sm" variant="outline" aria-label={`Stop ${label.toLocaleLowerCase()}`} disabled={!loading && !playing} onClick={stop}>Stop preview</Button>
     <span className="text-xs text-muted-foreground">{loading ? 'Loading audio…' : playing ? 'Playing' : 'Ready'}{seconds !== null && ` · ${seconds.toFixed(3)} seconds`}</span>
     {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
   </div>

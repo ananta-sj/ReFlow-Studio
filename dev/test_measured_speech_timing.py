@@ -11,6 +11,30 @@ from core.dialogue_adaptation import assess
 ROOT=Path(__file__).resolve().parents[1]
 
 class MeasuredSpeechTimingTests(unittest.TestCase):
+    def test_pipeline_observes_raw_speech_before_timing_fit(self):
+        from unittest.mock import patch
+        from core.pipeline import ReflowPipeline
+
+        class Voice:
+            preserves_native_delivery = True
+            def synthesize(self, text, path, **kwargs):
+                Sine(220).to_audio_segment(duration=1200).export(path, format='wav').close()
+
+        with tempfile.TemporaryDirectory() as folder:
+            pipe = ReflowPipeline.__new__(ReflowPipeline)
+            pipe.temp_dir = folder
+            pipe.registry = Mock()
+            pipe.speed_change = Mock(side_effect=lambda clip, speed: clip[:600])
+            observation = {}
+            with patch('core.pipeline.actor_uses_f5', return_value=False), \
+                    patch('core.pipeline.preflight_speech'):
+                clip = pipe._dub_segment_bound(0, dict(start=0, end=1, text='Hello'),
+                    ['CLONED_USER'], 'en', Voice(), {}, None, None, 'cpu', Mock(),
+                    allow_overflow=True, timing_observation=observation)
+            self.assertEqual(observation['seconds'], 1.2)
+            self.assertEqual(len(clip), 600)
+            pipe.speed_change.assert_called_once()
+
     def test_video_recovers_an_oversized_take_and_keeps_other_lines(self):
         from core.pipeline import ReflowPipeline
 

@@ -498,6 +498,77 @@ class CueReviewTests(unittest.TestCase):
             value=deepcopy(saved);mutate(value['cues'][0]['dialogue_supervision'])
             with self.assertRaises(ValueError):review.validate_manifest(value)
 
+    def test_accepted_observations_estimate_without_constructing_a_speech_engine(self):
+        saved = self.store.load(self.identifier)
+        saved['duration'] = 4
+        saved['cues'] = [dict(start=i, end=i+1, available_seconds=1, source_text='Hello',
+            text='नमस्ते' if i < 3 else 'नमस्ते नमस्ते', candidate=None, accepted=None) for i in range(4)]
+        saved['revision'] += 1
+        self.store.save(saved, expected_revision=1)
+        def generate(*args, **kwargs):
+            kwargs['timing_observation']['seconds'] = .75
+            return self.clip
+        self.pipe._dub_segment.side_effect = generate
+        for index in range(3):
+            self.operate('generate', index)
+            current = self.store.load(self.identifier)
+            self.store.accept(self.identifier, current['revision'], index)
+        current = self.store.load(self.identifier)
+        before = (self.folder / 'review.json').read_bytes()
+        with patch.object(providers, 'uses_exact_reference', return_value=False), \
+                patch.object(providers, 'resolve_tts') as resolver:
+            result = review.estimate_timing(self.store, self.pipe, self.identifier, current['revision'], 3, self.settings)
+            self.assertEqual(result['basis'], 'observed_natural_takes')
+            self.assertEqual(result['sample_count'], 3)
+            self.assertAlmostEqual(result['estimated_seconds'], 1.5)
+            self.assertFalse(result['fits'])
+            resolver.assert_not_called()
+        self.assertEqual((self.folder / 'review.json').read_bytes(), before)
+        # An unaccepted replacement must not discard calibration for the accepted take.
+        self.pipe._dub_segment.side_effect = lambda *a, **kw: (
+            kw['timing_observation'].update(seconds=.95) or self.clip.apply_gain(-2))
+        self.operate('generate', 0)
+        current = self.store.load(self.identifier)
+        with patch.object(providers, 'uses_exact_reference', return_value=False):
+            result = review.estimate_timing(self.store, self.pipe, self.identifier, current['revision'], 3, self.settings)
+            self.assertTrue(result['supported'])
+            self.assertEqual(result['sample_count'], 3)
+            self.assertAlmostEqual(result['estimated_seconds'], 1.5)
+        current['cues'][0]['accepted_timing_sample']['reference_sha256'] = 'b'*64
+        current['revision'] += 1
+        self.store.save(current, expected_revision=current['revision']-1)
+        with patch.object(providers, 'uses_exact_reference', return_value=False):
+            result = review.estimate_timing(self.store, self.pipe, self.identifier, current['revision'], 3, self.settings)
+            self.assertFalse(result['supported'])
+
+    def test_observed_timing_requires_three_valid_natural_samples(self):
+        from core.speech_timing import estimate_from_samples
+        samples = [{'text': 'hello there', 'seconds': 2.0},
+                   {'text': 'hello again', 'seconds': 2.0},
+                   {'text': 'world hello', 'seconds': 2.0}]
+        self.assertIsNone(estimate_from_samples('hello there', samples[:2]))
+        result = estimate_from_samples('hello there', samples)
+        self.assertAlmostEqual(result['estimated_seconds'], 2.0)
+        self.assertEqual(result['sample_count'], 3)
+        self.assertIsNone(estimate_from_samples('hello', [{'text': 'hello', 'seconds': float('nan')}]*3))
+
+    def test_invalid_saved_timing_observation_is_rejected(self):
+        saved = self.store.load(self.identifier)
+        saved['cues'][0]['timing_sample'] = dict(text='Hello', seconds=float('inf'),
+            take_sha256='a'*64, reference_sha256='b'*64)
+        with self.assertRaisesRegex(ValueError, 'timing observation'):
+            review.validate_manifest(saved)
+
+    def test_generated_take_records_natural_timing_observation(self):
+        def generate(*args, **kwargs):
+            kwargs['timing_observation']['seconds'] = .75
+            return self.clip
+        self.pipe._dub_segment.side_effect = generate
+        self.operate('generate', 0)
+        cue = self.store.load(self.identifier)['cues'][0]
+        self.assertEqual(cue['timing_sample']['seconds'], .75)
+        self.assertEqual(cue['timing_sample']['text'], cue['text'])
+
     def test_timing_estimate_is_read_only_and_does_not_generate_speech(self):
         before = (self.folder / 'review.json').read_bytes()
         provider = Mock()

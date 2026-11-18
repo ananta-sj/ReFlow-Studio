@@ -52,3 +52,25 @@ def measured_conflict(manifest,clip,*,index,segment,actor,generated_seconds,avai
             report['candidate']={**file_identity(path),'retention':'review-evidence','fits':False}
             manifest.report('measured-speech-timing',report)
     return report
+
+
+def estimate_from_samples(text, samples):
+    """Advisory natural duration from independently observed, compatible takes."""
+    from statistics import median
+    import unicodedata
+
+    def units(value):
+        return sum(unicodedata.category(char)[0] in 'LMN' for char in value)
+
+    length = units(text)
+    rates = []
+    for sample in samples:
+        seconds = sample.get('seconds')
+        count = units(sample.get('text', ''))
+        if (type(seconds) in (int, float) and math.isfinite(seconds)
+                and seconds >= .4 and count >= 4):
+            rates.append(count / seconds)
+    if length < 4 or len(rates) < 3:
+        return None
+    return dict(estimated_seconds=length / median(rates), sample_count=len(rates),
+                basis='observed_natural_takes')

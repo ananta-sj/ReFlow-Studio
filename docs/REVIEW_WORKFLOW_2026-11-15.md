@@ -12,3 +12,11 @@ When an episode stops for dialogue review, choose **Recover into editable review
 An automatic timing/word pass does not verify translation meaning, emotion, or natural acting. The interface now states this explicitly. This change does not enable the rejected experimental translation model and does not establish successful two-minute or full-episode dubbing.
 
 Review preparation also no longer prints an emoji to the Windows console during reference cleaning. That print could raise UnicodeEncodeError under a legacy console encoding and abort preparation; it now uses standard application logging.
+
+## Finding and auditioning dialogue
+
+The dialogue table shows original wording, target wording, character and review status. Search by either text or character name. **Next unresolved line** follows the active filters and wraps to the first matching unresolved line. The selected line stays in the inspector when filters change. Save or discard unsaved edits before changing lines; navigation is also blocked during active work.
+
+Original, candidate and accepted auditions have explicit labels. Switching between them resets the audio player, including when recordings have the same byte length. A saved accepted take remains distinct from a replacement candidate. Changing a filter does not select another character or line. Explicit cue navigation brings the selected row into view; opening a review does not automatically scroll the page.
+
+Timing advice may be calibrated from compatible accepted takes; see [Speech timing advice](TIMING_ADVICE.md). Predictions and automatic checks do not replace listening for pronunciation, identity, meaning or delivery. Native window, playback and scrolling acceptance checks remain pending; component regressions verify state and bridge routing.

@@ -426,7 +426,7 @@ class ReflowPipeline:
                       voice_providers_by_actor, clean_ref_wav, source_reference,
                       effective_device, sound_engineer, inference_lock=None, actor_lock=None,
                       next_start=None, allow_overflow=False, preserve_delivery=False, alternate_take=False,
-                      retain_overflow=True):
+                      retain_overflow=True, timing_observation=None):
         """Return a playable clip, or None only for a legitimate blank gap."""
         text = segment['text'].strip()
         if not text:
@@ -483,6 +483,8 @@ class ReflowPipeline:
 
                     self._maybe_locked(inference_lock, synthesize)
                     raw = load_speech_audio(seg_tts)
+                    if is_cloned and timing_observation is not None:
+                        timing_observation['seconds'] = len(raw) / 1000
                     if is_cloned:
                         shutil.copy(seg_tts, seg_final)
                     else:

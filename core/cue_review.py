@@ -82,6 +82,13 @@ def validate_manifest(value):
             require(take['fits'] == (round(take['seconds']*1000) <= round(available*1000)),
                     f'cue {index+1} {field} fit flag')
             require(field != 'accepted' or take['fits'], f'cue {index+1} accepted overflow')
+        for field in ('timing_sample', 'accepted_timing_sample'):
+            sample = cue.get(field)
+            if sample is not None:
+                require(isinstance(sample, dict) and isinstance(sample.get('text'), str)
+                        and number(sample.get('seconds')) and sample['seconds'] > 0
+                        and sha(sample.get('take_sha256')) and sha(sample.get('reference_sha256')),
+                        f'cue {index+1} timing observation')
         decision = cue.get('first_pass')
         if decision is not None:
             require(isinstance(decision, dict) and decision.get('status') in ('passed', 'needs_review')
@@ -391,6 +398,7 @@ class ReviewStore:
         if len(clip) > round(cue['available_seconds'] * 1000):
             raise ValueError('Saved take exceeds its speech window')
         cue['accepted'] = deepcopy(take)
+        _accept_timing_sample(cue)
         cue.pop('first_pass', None)
         manifest['revision'] += 1
         self.save(manifest, expected_revision=revision)
@@ -559,6 +567,21 @@ def prepare(store, pipeline, input_path, params, settings, progress, recovery=No
     return str(store.folder(identifier) / 'review.json')
 
 
+def _accept_timing_sample(cue):
+    cue.pop('accepted_timing_sample', None)
+    sample = cue.get('timing_sample')
+    if sample and sample['take_sha256'] == cue['accepted']['sha256']:
+        cue['accepted_timing_sample'] = deepcopy(sample)
+
+
+def _record_timing_sample(cue, observation, reference):
+    cue.pop('timing_sample', None)
+    seconds = observation.get('seconds')
+    if type(seconds) in (int, float) and math.isfinite(seconds) and seconds > 0:
+        cue['timing_sample'] = dict(text=cue['text'], seconds=seconds,
+            take_sha256=cue['candidate']['sha256'], reference_sha256=digest(reference))
+
+
 def estimate_timing(store, pipeline, identifier, revision, index, settings):
     """Read-only native budget check; no worker, inference or take mutation."""
     from core.providers import resolve as providers
@@ -570,9 +593,28 @@ def estimate_timing(store, pipeline, identifier, revision, index, settings):
     cue = store.cue(manifest, index)
     if configuration(pipeline, settings) != manifest['configuration']:
         raise ValueError('Model connections or settings changed. Prepare a new review with the current configuration.')
-    reference = store.asset(manifest, 'reference.wav')
-    if digest(reference) != manifest['assets']['reference.wav']:
-        raise ValueError('Review reference audio changed. Prepare a new review.')
+    from core import character_review
+    reference = Path(character_review.reference_for(store, manifest, cue))
+    reference_sha = digest(reference)
+    from core.speech_timing import estimate_from_samples
+    samples = []
+    for item in manifest['cues']:
+        sample = item.get('accepted_timing_sample') or item.get('timing_sample')
+        accepted = item.get('accepted')
+        if (sample and accepted and sample.get('text') == item['text']
+                and sample.get('take_sha256') == accepted['sha256']
+                and sample.get('reference_sha256') == reference_sha):
+            try:
+                if digest(store.asset(manifest, accepted['file'])) != accepted['sha256']:
+                    continue
+            except (OSError, ValueError):
+                continue
+            samples.append(sample)
+    estimate = estimate_from_samples(cue['text'], samples)
+    if estimate:
+        seconds = estimate['estimated_seconds']
+        return dict(supported=True, **estimate, available_seconds=cue['available_seconds'],
+                    fits=round(seconds*1000) <= round(cue['available_seconds']*1000))
     if not providers.uses_exact_reference(pipeline.registry):
         return dict(supported=False, available_seconds=cue['available_seconds'],
                     message='This voice has no pre-generation estimate. Generate and audition a take.')
@@ -581,7 +623,7 @@ def estimate_timing(store, pipeline, identifier, revision, index, settings):
     seconds = tts.estimate_duration_seconds(cue['text'])
     if type(seconds) not in (int, float) or not math.isfinite(seconds) or seconds <= 0:
         raise ValueError('The voice returned an invalid speech duration estimate.')
-    return dict(supported=True, estimated_seconds=seconds, available_seconds=cue['available_seconds'],
+    return dict(supported=True, basis='voice_estimator', estimated_seconds=seconds, available_seconds=cue['available_seconds'],
                 fits=round(seconds*1000) <= round(cue['available_seconds']*1000))
 
 
@@ -764,12 +806,13 @@ def _first_pass(store, pipeline, manifest, settings, progress):
                         decisions[index]['attempts'] = attempt
                     else:
                         decisions[index] = result
+                    timing_observation = {}
                     try:
                         reference = references[cue.get('speaker') if matching else None]
                         clip = pipeline._dub_segment(index, cue, [manifest['actor']], manifest['speech_language'],
                             tts, voices, str(reference), str(reference), manifest['device'], engineer,
                             next_start=cue['start']+cue['available_seconds'], allow_overflow=True,
-                            preserve_delivery=True, alternate_take=attempt == 2)
+                            preserve_delivery=True, alternate_take=attempt == 2, timing_observation=timing_observation)
                     except RenderCancelled:
                         raise
                     except RuntimeError as exc:
@@ -805,7 +848,7 @@ def _first_pass(store, pipeline, manifest, settings, progress):
                     if index not in takes or fits_source or decisions[index]['reason'] == 'too_long':
                         if decisions[index]['reason'] == 'delivery_uncertain':
                             prior_checked[index] = (takes[index], decisions[index], delivery[index])
-                        takes[index] = (take_path, len(clip))
+                        takes[index] = (take_path, len(clip), timing_observation)
                         decisions[index] = result
                         delivery[index] = concern
                     if fits_source:
@@ -836,14 +879,16 @@ def _first_pass(store, pipeline, manifest, settings, progress):
                 cue = manifest['cues'][index]
                 decision = decisions[index]
                 if index in takes:
-                    pending, length = takes[index]
+                    pending, length, observation = takes[index]
                     destination = store.asset(manifest, pending.name)
                     current_job().publish(pending, destination)
                     cue['candidate'] = dict(file=destination.name, seconds=length/1000,
                         fits=length <= round(cue['available_seconds']*1000), sha256=digest(destination))
+                    _record_timing_sample(cue, observation, references[cue.get('speaker') if matching else None])
                     _clear_take_assessment(cue)
                     if decision['status'] == 'passed':
                         cue['accepted'] = deepcopy(cue['candidate'])
+                        _accept_timing_sample(cue)
                 cue['first_pass'] = decision
             manifest['revision'] += 1
             store.save(manifest, expected_revision=manifest['revision']-1)
@@ -932,10 +977,11 @@ def operate(store, pipeline, identifier, revision, action, index, settings, prog
             reference = character_review.reference_for(store, manifest, cue)
             source = _source_performance(_review_vocals(store, manifest), cue, False)
             tts = providers.resolve_tts(pipeline.registry, manifest['device'], runtime=settings.get('xtts_runtime'))
+            timing_observation = {}
             try:
                 clip = pipeline._dub_segment(index, cue, [manifest['actor']], manifest['speech_language'],
                     tts, {}, str(reference), str(reference), manifest['device'], AudioEngineer(),
-                    next_start=cue['start']+cue['available_seconds'], allow_overflow=True,
+                    next_start=cue['start']+cue['available_seconds'], allow_overflow=True, timing_observation=timing_observation,
                     **({'preserve_delivery': True} if source else {}))
             finally:
                 release_speech(tts)
@@ -951,6 +997,7 @@ def operate(store, pipeline, identifier, revision, action, index, settings, prog
             current_job().publish(pending, destination)
             cue['candidate'] = dict(file=filename, seconds=len(clip)/1000,
                 fits=len(clip) <= round(cue['available_seconds']*1000), sha256=digest(destination))
+            _record_timing_sample(cue, timing_observation, reference)
             cue.pop('first_pass', None)
             # A measured wording assessment is bound to this exact take.
             _clear_take_assessment(cue)

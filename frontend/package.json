@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint src",
     "test:startup": "node --test startup-recovery.test.cjs",
-    "test:ui": "node --test startup-recovery.test.cjs dashboard-shell.test.cjs",
+    "test:ui": "node --test startup-recovery.test.cjs dashboard-shell.test.cjs cue-workspace.test.cjs",
     "preview": "vite preview"
   },
   "dependencies": {

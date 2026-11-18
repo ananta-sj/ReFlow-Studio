@@ -272,6 +272,8 @@ export interface CueReview {
   cues: ReviewCue[]
 }
 export interface CueTimingResult {
+  basis?: "observed_natural_takes" | "voice_estimator"
+  sample_count?: number
   ok: boolean
   supported?: boolean
   estimated_seconds?: number

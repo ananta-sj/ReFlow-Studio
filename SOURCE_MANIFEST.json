@@ -42,8 +42,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 13415,
-      "sha256": "3920f117d751534574540818d1a1ff417df94423c36d4bef33e692a783caa5b6"
+      "bytes": 13536,
+      "sha256": "44c9e766a66aa1d52f4c84d327060fca7ab4dda8654225e23981d2a37b7810ba"
     },
     {
       "path": "README.txt",
@@ -507,8 +507,8 @@
     },
     {
       "path": "core/cue_review.py",
-      "bytes": 60505,
-      "sha256": "523fc3673013028ee852b26b74342991491035092e50d6488d85f807835c8ad3"
+      "bytes": 63053,
+      "sha256": "9149c468914373cd745e200c37271c35aa5c07399e68cf29d03e197ac3057cc4"
     },
     {
       "path": "core/deletion_plan.py",
@@ -802,8 +802,8 @@
     },
     {
       "path": "core/pipeline.py",
-      "bytes": 94625,
-      "sha256": "18ce819f40151894a70a52d872da2f6bf317f06564bb48e96bb2c0fbea2d7283"
+      "bytes": 94793,
+      "sha256": "bc982799d5b797a651e0481fd16fd11745c4cc200c2aac485341143ca640ad82"
     },
     {
       "path": "core/pipeline_contracts.py",
@@ -1127,8 +1127,8 @@
     },
     {
       "path": "core/speech_timing.py",
-      "bytes": 3246,
-      "sha256": "7fb8450a67d1a341d8af8114170ab5f0936767b87a37d00a8a94ebb7d710388b"
+      "bytes": 4056,
+      "sha256": "14c2b32733a89f79081a7d2d0fb85ef399ca38d30830a2a997e512c8d5ee5457"
     },
     {
       "path": "core/srt_utils.py",
@@ -2457,8 +2457,8 @@
     },
     {
       "path": "dev/test_cue_review.py",
-      "bytes": 62743,
-      "sha256": "26031863c90d9da0e81d4089df1e946defaedbd09a0f5ee53aae2866ffe2fcc7"
+      "bytes": 67103,
+      "sha256": "6c65dbc23cbdf9adc6a3cc2d7a941f3af3ee9a7fca2630618ebb91894ca8f0da"
     },
     {
       "path": "dev/test_deletion_safety.py",
@@ -2612,8 +2612,8 @@
     },
     {
       "path": "dev/test_measured_speech_timing.py",
-      "bytes": 5720,
-      "sha256": "53a2ca8b3d1d1421fc1b945e66d96b59a7c894af00e91689c0e0e26f4f129a19"
+      "bytes": 6944,
+      "sha256": "08ccd44fc64539b7544afe2b6f9dc4e30f420ea2d543e115bff30babb3081e2a"
     },
     {
       "path": "dev/test_model_assets.py",
@@ -3712,8 +3712,13 @@
     },
     {
       "path": "docs/REVIEW_WORKFLOW_2026-11-15.md",
-      "bytes": 2637,
-      "sha256": "da5ac31fadee65af0bebb1792382403ec2ecd3e2b61ee65d081599c6b9cbd4b2"
+      "bytes": 3834,
+      "sha256": "8b5e78110b4e587686e44815b31601d9783a639b2e038744428b2eab80e5ad87"
+    },
+    {
+      "path": "docs/TIMING_ADVICE.md",
+      "bytes": 1979,
+      "sha256": "8085022358389526cc09d7611f747020080b7e755001f4bc1175026c31e90d6c"
     },
     {
       "path": "docs/validation/2026-10-13-xtts-security-cpu-lock-review.json",
@@ -3759,6 +3764,11 @@
       "path": "frontend/components.json",
       "bytes": 595,
       "sha256": "bc7e614d70343708737ca2fffb768859160f0496e78d99fe9c227d68c2eb81e6"
+    },
+    {
+      "path": "frontend/cue-workspace.test.cjs",
+      "bytes": 8994,
+      "sha256": "d57087c1c851be65e9fd6200cec2032863fc40181a8f97df4e6fb5a5fbb9339c"
     },
     {
       "path": "frontend/dashboard-shell.test.cjs",
@@ -3812,8 +3822,8 @@
     },
     {
       "path": "frontend/package.json",
-      "bytes": 1450,
-      "sha256": "1e3e215dd7bf6b7d5ab9ff69f8ae1c4b6b4c98783c087d4034c54644e6305d6e"
+      "bytes": 1473,
+      "sha256": "eac2acfebc9858083840b7b63dc2332faf01b40d62e6fba63ab351d65b73a4fa"
     },
     {
       "path": "frontend/public/favicon.svg",
@@ -4312,13 +4322,18 @@
     },
     {
       "path": "frontend/src/components/shared/CueAudioPlayer.tsx",
-      "bytes": 3089,
-      "sha256": "a02ab9da8803d66c6c2ca37908da5fc99ac9e43f6e273bfccbedc162acddf08f"
+      "bytes": 3312,
+      "sha256": "b627cd25168bc2bff419e7dea47f8e7543deeb5e7f8fbf0a181ef5013ce4f3fe"
     },
     {
       "path": "frontend/src/components/shared/CueReviewPanel.tsx",
-      "bytes": 26386,
-      "sha256": "171f2b5009a27d401a3400405118726fa77b692b9a762ba5cdbf769ffd78fee6"
+      "bytes": 26890,
+      "sha256": "127a7f61dd77edef6f9cc333ba2a28cf39b271a5ba755b821c6e3e219baf8e16"
+    },
+    {
+      "path": "frontend/src/components/shared/CueTranscript.tsx",
+      "bytes": 5872,
+      "sha256": "b1a3de4d16c78b86f64f82135f8661522b769fe8521d4664981da7b929621c58"
     },
     {
       "path": "frontend/src/components/shared/ErrorDetails.tsx",
@@ -4437,8 +4452,8 @@
     },
     {
       "path": "frontend/src/lib/api.ts",
-      "bytes": 29222,
-      "sha256": "6dafa559287c024e361d04b5aaa6e667f395c16e5c81cfc200fcd5abfdffe77f"
+      "bytes": 29303,
+      "sha256": "ebbf9b38db45270ac6ee84535cabbfb823dd94056493d57bca4107fc7b36ead5"
     },
     {
       "path": "frontend/src/lib/deletion-preview.ts",
@@ -4687,8 +4702,8 @@
     },
     {
       "path": "packaging/create_source_archive.py",
-      "bytes": 7024,
-      "sha256": "a66bf6633c5b9231ddf8b1d337fe50e2776a8a713767c53ead61bd95808c22ba"
+      "bytes": 7048,
+      "sha256": "10411f3d8f8b72a524fbb7eeaf375bfb4184999141e6b7e132109e726cd2b15e"
     },
     {
       "path": "packaging/finalize_executable_candidate.py",
