@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { PACKAGES, MARKER, releaseBody, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease } from '../publish_development_preview.mjs'
+import { PACKAGES, MARKER, releaseBody, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease, formatChanges, changeNotes } from '../publish_development_preview.mjs'
 const SHA='a'.repeat(40), OTHER='b'.repeat(40)
 async function fixture(run) {
   const folder=await mkdtemp(path.join(os.tmpdir(),'reflow-preview-'))
@@ -189,4 +189,55 @@ test('upload accepted with a lost response is recovered on the next invocation',
   assert.equal((await execute(s)).tag,'v0.7.1-desktop-preview')
   assert.equal(s.assetsByRelease.get(1).length,2)
   assert.ok(s.assetsByRelease.get(1).some(a=>a.id===101))
+})
+
+
+test('rich release notes link the exact platform assets and keep preview limits',()=>{
+ const body=releaseBody('owner/repo',SHA,'123','## Changes\n- Recovery fix',[{target:'windows-x64',name:'windows.zip',bytes:1048576}],'v0.7.2-desktop-preview')
+ assert.match(body,/releases\/download\/v0.7.2-desktop-preview\/windows.zip/)
+ assert.match(body,/Windows \(x64\)/)
+ assert.match(body,/Verify your download/)
+ assert.match(body,/not bundled/)
+ assert.match(body,/Security/)
+})
+test('change groups escape commit markup and never invent a feature summary',()=>{
+ const commits=[{sha:SHA,commit:{message:'fix: preserve accepted takes'}},{sha:OTHER,commit:{message:'security: reject <script> @everyone'}}]
+ const body=formatChanges('owner/repo',commits,'https://github.com/owner/repo/compare/v0.7.1...main')
+ assert.match(body,/### Fixes/);assert.match(body,/### Security/)
+ assert.ok(!body.includes('<script>'));assert.ok(!body.includes('@everyone'))
+ assert.match(body,/Full comparison/)
+})
+
+
+test('change notes compare against the prior owned published preview',async()=>{
+ const calls=[]
+ const api=async route=>{calls.push(route)
+  if(route==='/releases?per_page=100&page=1')return [
+   {tag_name:'v0.7.9-desktop-preview',body:MARKER,draft:true,target_commitish:OTHER},
+   {tag_name:'v0.7.8-desktop-preview',body:MARKER,draft:false,target_commitish:SHA},
+   {tag_name:'v0.7.7-desktop-preview',body:'handwritten',draft:false,target_commitish:OTHER},
+   {tag_name:'v0.7.6-desktop-preview',body:MARKER,draft:false,target_commitish:OTHER}]
+  if(route.startsWith(`/compare/v0.7.6-desktop-preview...${SHA}?per_page=100`))return {status:'ahead',total_commits:101,commits:[{sha:SHA,commit:{message:'fix: restore retry'}}]}
+  throw Error(route)
+ }
+ const notes=await changeNotes(api,'owner/repo',SHA)
+ assert.match(notes,/restore retry/);assert.match(notes,/additional commits/)
+ assert.ok(!calls.some(r=>r.startsWith('/commits?')))
+})
+test('change notes fail safely when main diverges from the previous preview',async()=>{
+ const api=async route=>route.startsWith('/releases?')?[{tag_name:'v0.7.1-desktop-preview',body:MARKER,draft:false,target_commitish:OTHER}]:{status:'diverged',commits:[]}
+ await assert.rejects(changeNotes(api,'owner/repo',SHA),/not an ancestor/)
+})
+
+
+test('large release comparisons include the newest commits beyond page one',async()=>{
+ const old={sha:OTHER,commit:{message:'fix: old page'}}
+ const newest={sha:SHA,commit:{message:'fix: newest page'}}
+ const api=async route=>{
+  if(route.startsWith('/releases?'))return [{tag_name:'v0.7.1-desktop-preview',body:MARKER,draft:false,target_commitish:OTHER}]
+  if(route.endsWith('&page=3'))return {commits:[newest]}
+  if(route.endsWith('&page=2'))return {commits:Array(100).fill(old)}
+  return {status:'ahead',total_commits:201,commits:Array(100).fill(old)}
+ }
+ assert.match(await changeNotes(api,'owner/repo',SHA),/newest page/)
 })

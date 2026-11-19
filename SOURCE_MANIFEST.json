@@ -6,9 +6,34 @@
       "sha256": "1df84947e0d933c53fe759123bcf4074fcb674edacd7d3d6de0958311c1e7d4b"
     },
     {
+      "path": ".github/SECURITY.md",
+      "bytes": 1671,
+      "sha256": "60c55d60b3f9774bb313852c3aa1280f45cdb56e19c11299bd9d854537186e44"
+    },
+    {
+      "path": ".github/codeql/config.yml",
+      "bytes": 238,
+      "sha256": "c5282fab4ef1dc7b0d0779d65f51245d917ff9366968af9d4fcc07ffb35e5592"
+    },
+    {
+      "path": ".github/dependabot.yml",
+      "bytes": 572,
+      "sha256": "646e4e75e06fbbc08c7c7d5cea7de77ac1e01f4ad6e08c1a3d562a79f3224f53"
+    },
+    {
+      "path": ".github/releases.yml",
+      "bytes": 291,
+      "sha256": "6a40a0bec8851981b0ffef075750449fb1dc4c9c773121118a04c6ce86bb1fae"
+    },
+    {
       "path": ".github/workflows/build.yml",
       "bytes": 5675,
       "sha256": "f783a668caf3f7ecc9f4cb94671fe654370bfa22e92b062ce3ecc81937aabc25"
+    },
+    {
+      "path": ".github/workflows/codeql.yml",
+      "bytes": 1080,
+      "sha256": "2979f9168cf0872c9cf230a8f676526bd17640b7628b8f321dba0794a01e25e8"
     },
     {
       "path": ".gitignore",
@@ -3677,8 +3702,8 @@
     },
     {
       "path": "docs/DEVELOPMENT_PREVIEW.md",
-      "bytes": 5741,
-      "sha256": "b84262fc814315e80c33cc443b420724ac0a6a57e5ca2e099d8691fd514ea7b6"
+      "bytes": 7388,
+      "sha256": "15200b1c403cece0e8a8eefbc4fc63f864256f5734ca9e8d014b24c76ebf681e"
     },
     {
       "path": "docs/DISPOSABLE_CLEANUP.md",
@@ -4752,8 +4777,8 @@
     },
     {
       "path": "packaging/publish_development_preview.mjs",
-      "bytes": 14694,
-      "sha256": "c19d0a31b23d3ad6f2cdbb2f222b2b004a6aebf057ba4afe32da740a11f6f37b"
+      "bytes": 18096,
+      "sha256": "77d0cf92d282f70c653f3b09300ea78e00df27839d01d43bbe6fffdce9f94ea4"
     },
     {
       "path": "packaging/reflow.spec",
@@ -4787,8 +4812,8 @@
     },
     {
       "path": "packaging/tests/test_development_preview.mjs",
-      "bytes": 12709,
-      "sha256": "14b84b3116ca96b1d94925252a04400cfc75a0d20a2a638e915b7fb68b7f34a6"
+      "bytes": 15685,
+      "sha256": "9a4e7be38cf4888bcd3ac1f81ae2f68df244056c77bf6c76d37c7d5f6ee0c53e"
     },
     {
       "path": "packaging/tests/test_native_packaging.py",

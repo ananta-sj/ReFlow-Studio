@@ -9,8 +9,7 @@ https://github.com/ananta-sj/ReFlow-Studio/releases/latest
 The target platforms are Windows x64, Linux x64, macOS Apple Silicon (ARM64), and
 macOS Intel (x64). The same release also includes a clean source ZIP, build manifest
 and SHA-256 checksums. It is published as a regular GitHub release and marked Latest, with Desktop Preview
-in its title. Historical RC2 downloads remain separate releases. Tags increment the patch number in the current 0.7 series: `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, etc. The publisher checks existing tags and release drafts before choosing the next unused number. Reserved/failed versions can leave gaps. Source version constants are not rewritten by publication. Release notes include the ten
-most recent commit summaries, source links and the matching build.
+in its title. Historical RC2 downloads remain separate releases. Tags increment the patch number in the current 0.7 series: `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, etc. The publisher checks existing tags and release drafts before choosing the next unused number. Reserved/failed versions can leave gaps. Source version constants are not rewritten by publication. Release notes include categorized commit subjects since the previous owned published preview, a full comparison link, exact platform download links and sizes, setup guidance, checksums, preview limits and security-reporting guidance. Up to 30 returned subjects are shown; larger comparisons link to complete history. The first preview falls back to recent history. These are factual commit summaries, not AI-generated claims of tested features.
 
 ## What is bundled
 
@@ -66,3 +65,12 @@ Failed checks/builds never reach publication. Failed uploads/promotion clean onl
 The automation was locally tested with fixture packages and mocked GitHub API
 responses. The real hosted platform builds/upload can only be verified after the
 maintainer pushes the workflow. Local validation does not claim a live release.
+
+
+## Repository security setup
+
+The source includes `.github/SECURITY.md`, weekly Dependabot update configuration, and a dedicated CodeQL workflow for Python, JavaScript/TypeScript and GitHub Actions. CodeQL runs on GitHub-hosted runners without installing AI engines or downloading models. It uploads findings to the Security tab; its existence is not a claim of a clean scan. It runs separately from native packaging and is not currently a release-blocking security gate.
+
+After pushing, the repository owner should enable **Private vulnerability reporting**, **Dependabot alerts** and **Dependabot security updates** under Settings → Advanced Security (or Code security, depending on the current UI). Keep secret scanning enabled and enable push protection where available. These repository settings cannot be activated by adding a YAML file. Use the checked-in advanced CodeQL workflow; do not enable a second default setup alongside it. Inspect the first CodeQL run and resolve findings before relying on its results. Dependency update PRs require review; no automatic merge is configured.
+
+Do not publish vulnerability details, credentials, or private media in public issues. The security policy deliberately does not invent a private contact address or promise a response deadline.

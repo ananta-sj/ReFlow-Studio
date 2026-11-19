@@ -1,0 +1,12 @@
+name: ReFlow source security analysis
+queries:
+  - uses: security-extended
+paths-ignore:
+  - runtime_profiles
+  - models
+  - outputs
+  - temp
+  - PRIVATE-RECOVERY
+  - release-assets
+  - frontend/node_modules
+  - frontend/dist

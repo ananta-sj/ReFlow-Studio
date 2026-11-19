@@ -52,26 +52,76 @@ export async function collectAssets(folder, sha, runId, attempt) {
   return assets
 }
 
-export function releaseBody(repository, sha, runId, changes = '') {
-  return `${MARKER}\n# ReFlow Studio - Desktop Preview\n\n` +
-    `Automatically built from [\`${sha.slice(0, 12)}\`](https://github.com/${repository}/commit/${sha}).\n` +
-    `[Build checks and dependency inventories](https://github.com/${repository}/actions/runs/${runId}).\n\n` +
+function plainText(value) {
+  return String(value).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[c])
+    .replace(/@/g, '&#64;').replace(/[\\`*_{}\[\]()#!|]/g, c => `\\${c}`).replace(/[\r\n]/g, ' ')
+}
+
+export function formatChanges(repository, commits, comparison = '') {
+  const groups = new Map()
+  for (const row of commits.slice(-30)) {
+    if (!/^[a-f0-9]{40}$/.test(row.sha)) throw new Error('Invalid change commit')
+    const subject = row.commit.message.split(/\r?\n/)[0].slice(0, 240)
+    const category = /^(security|sec)(?:[(:!]|\s)/i.test(subject) ? 'Security' :
+      /^fix(?:[(:!]|\s)/i.test(subject) ? 'Fixes' : /^feat(?:[(:!]|\s)/i.test(subject) ? 'Features' :
+      /^(docs|ci|build|test|chore)(?:[(:!]|\s)/i.test(subject) ? 'Maintenance and documentation' : 'Updates'
+    if (!groups.has(category)) groups.set(category, [])
+    groups.get(category).push(`- ${plainText(subject)} ([${row.sha.slice(0, 8)}](https://github.com/${repository}/commit/${row.sha}))`)
+  }
+  return '## What changed\n\n' + [...groups].map(([name, rows]) => `### ${name}\n\n${rows.join('\n')}\n`).join('\n') +
+    (comparison ? `\n[Full comparison](${comparison}).\n` : '\nInitial preview history; no earlier owned preview was found.\n') +
+    (commits.length > 30 ? '\nShowing the latest 30 returned commits; use the comparison for the complete history.\n' : '')
+}
+
+export async function changeNotes(api, repository, sha) {
+  const releases = await listRecords(api, '/releases')
+  const previous = releases.find(r => !r.draft && r.body?.includes(MARKER) &&
+    /^v0\.7\.[1-9]\d*-desktop-preview$/.test(r.tag_name) && r.target_commitish !== sha)
+  if (!previous) return formatChanges(repository, await api(`/commits?sha=${sha}&per_page=30`))
+  const base = encodeURIComponent(previous.tag_name)
+  const result = await api(`/compare/${base}...${sha}?per_page=100`)
+  if (!['ahead', 'identical'].includes(result.status)) throw new Error('Previous preview is not an ancestor of this build')
+  let commits = result.commits
+  if (result.total_commits > 100) {
+    const lastPage = Math.ceil(result.total_commits / 100)
+    commits = (await api(`/compare/${base}...${sha}?per_page=100&page=${lastPage}`)).commits
+    if (commits.length < 30) {
+      const preceding = await api(`/compare/${base}...${sha}?per_page=100&page=${lastPage - 1}`)
+      commits = [...preceding.commits, ...commits]
+    }
+  }
+  return formatChanges(repository, commits, `https://github.com/${repository}/compare/${base}...${sha}`) +
+    (result.total_commits > commits.length ? '\nThe comparison contains additional commits beyond this summary.\n' : '')
+}
+
+export function releaseBody(repository, sha, runId, changes = '', assets = [], tag = '') {
+  const labels = { 'windows-x64': 'Windows (x64)', 'linux-x64': 'Linux (x64)',
+    'macos-arm64': 'macOS (Apple Silicon)', 'macos-x64': 'macOS (Intel)', source: 'Source code' }
+  const downloads = assets.filter(row => labels[row.target]).map(row =>
+    `| ${labels[row.target]} | [Download](https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${encodeURIComponent(row.name)}) | ${(row.bytes / 1048576).toFixed(1)} MB |`).join('\n')
+  return `${MARKER}\n# ReFlow Studio · Desktop Preview\n\n` +
     '**Desktop Preview for volunteer testing. Published as a regular GitHub release.**\n\n' +
-    'Choose `windows-x64`, `linux-x64`, `macos-arm64` (Apple Silicon), or `macos-x64` (Intel). ' +
-    'Extract the entire package; keep its companion files together. The `source` ZIP contains source code.\n\n' +
-    '**Scope:** desktop application and Python only. AI engine environments, model weights, voices, ' +
-    'credentials and FFmpeg/FFprobe are not bundled. Windows requires WebView2/Visual C++ runtimes. ' +
-    'macOS builds are not Developer ID signed or notarized. Full engine/fresh-machine validation is ongoing.\n\n' +
-    'Original ReFlow code is AGPL-3.0-only. Download the matching source ZIP alongside these packages. ' +
-    'Third-party components and models retain their own terms. See LICENSING.md in the source/package.\n\n' +
-    'Reliable unattended multi-character episode/movie dubbing remains unvalidated. Build/smoke checks ' +
-    'do not verify translation meaning, natural acting or complete episode quality. Component licensing ' +
-    'review remains pending; these are development testing packages.\n\n' +
-    `${changes}\n**Current download set:** filenames containing \`${sha.slice(0, 12)}-r${runId}-\`. ` +
-    'Use the matching SHA256SUMS and manifest. During an upload, additional files from a pending build ' +
-    'may appear; use only the set identified here. Earlier preview releases and their downloads are preserved.\n\n' +
-    'Report your OS/architecture, filename, engine setup and reproduction steps in ' +
-    `[Issues](https://github.com/${repository}/issues), without credentials or private media.\n`
+    `${changes}\n## Downloads\n\n` +
+    (downloads ? `| Platform | Package | Size |\n| --- | --- | ---: |\n${downloads}\n\n` : 'Choose the package matching your operating system and architecture from Assets below.\n\n') +
+    '### Getting started\n\n' +
+    '1. Download the package for your platform and extract the **entire archive**. Keep companion files together.\n' +
+    '2. Follow the [setup guide](https://github.com/' + repository + '/blob/' + sha + '/docs/GITHUB_NATIVE_BUILDS.md) for launch instructions and prerequisites.\n' +
+    '3. Configure supported engines and models before attempting a dub. Start with a short clip.\n\n' +
+    '### Verify your download\n\nUse the matching `SHA256SUMS` and manifest in Assets to check package integrity and build identity.\n\n' +
+    '<details>\n<summary>Preview scope and known limitations</summary>\n\n' +
+    'AI engine environments, model weights, voices, credentials and FFmpeg/FFprobe are **not bundled**. ' +
+    'Windows requires WebView2/Visual C++ runtimes. macOS builds are not Developer ID signed or notarized. ' +
+    'Full engine/fresh-machine validation is ongoing. Reliable unattended multi-character episode/movie dubbing remains unvalidated. ' +
+    'Build/smoke checks do not verify translation meaning, natural acting or complete episode quality. ' +
+    'Component licensing review remains pending; these are development testing packages.\n\n' +
+    'Original ReFlow code is AGPL-3.0-only. Download the matching source ZIP. Third-party components and models retain their own terms; see LICENSING.md.\n\n</details>\n\n' +
+    '## Testing and feedback\n\nReport your OS, architecture, package filename, engine setup and reproduction steps in ' +
+    `[Issues](https://github.com/${repository}/issues). Do not upload credentials or private media. ` +
+    `[Security reporting policy](https://github.com/${repository}/blob/${sha}/.github/SECURITY.md).\n\n` +
+    `**Build:** [\`${sha.slice(0, 12)}\`](https://github.com/${repository}/commit/${sha}) · ` +
+    `[Checks and dependency inventories](https://github.com/${repository}/actions/runs/${runId}).\n\n` +
+    `**Current download set:** filenames containing \`${sha.slice(0, 12)}-r${runId}-\`. ` +
+    'Earlier preview releases and their downloads are preserved.\n'
 }
 
 export function validateExistingRelease(release) {
@@ -205,7 +255,7 @@ export async function publish({ api, repository, sha, runId, attempt = '1', asse
     const publication = { tag_name: tag,
       name: `ReFlow Studio ${tag.replace('-desktop-preview', '')} - Desktop Preview`, draft: false,
       prerelease: false, make_latest: 'true',
-      body: releaseBody(repository, sha, runId, changes).replace(MARKER, `${MARKER}\n${identity}`) }
+      body: releaseBody(repository, sha, runId, changes, assets, tag).replace(MARKER, `${MARKER}\n${identity}`) }
     try {
       await api(`/releases/${release.id}`, { method: 'PATCH', body: publication })
       promoted = true
@@ -260,11 +310,7 @@ async function main() {
   await writeFile(checksums, assets.map(row => `${row.sha256}  ${row.name}\n`).join(''))
   assets.push({ name: path.basename(checksums), file: checksums, bytes: (await lstat(checksums)).size, sha256: await hash(checksums) })
   const api = apiClient(repository, token)
-  const commits = await api(`/commits?sha=${sha}&per_page=10`)
-  const changes = '## Recent changes\n\n' + commits.map(commit => {
-    const subject = commit.commit.message.split(/\r?\n/)[0].replace(/[\r\n]/g, ' ')
-    return `- ${subject} ([${commit.sha.slice(0, 12)}](https://github.com/${repository}/commit/${commit.sha}))`
-  }).join('\n') + '\n'
+  const changes = await changeNotes(api, repository, sha)
   const result = await publish({ api, repository, sha, runId, attempt, assets, changes })
   console.log(JSON.stringify(result))
   if (process.env.GITHUB_STEP_SUMMARY) {
