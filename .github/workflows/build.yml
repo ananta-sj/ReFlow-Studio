@@ -51,7 +51,7 @@ jobs:
         run: |
           python -m unittest discover -s packaging/tests -v
           python packaging/create_source_archive.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ReflowStudio-source
           path: release-assets/ReflowStudio-source.zip*
@@ -121,7 +121,7 @@ jobs:
       - name: Assemble, run native smoke check, and archive
         run: python packaging/build_ci_candidate.py '${{ matrix.target }}'
       - name: Upload candidate downloads
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ReflowStudio-${{ matrix.target }}-desktop-preview
           path: release-assets/*
@@ -130,7 +130,7 @@ jobs:
           retention-days: 14
       - name: Retain checks and exact dependency inventory
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: checks-${{ matrix.target }}
           path: |
