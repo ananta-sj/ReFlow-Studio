@@ -27,7 +27,7 @@
     "clsx": "^2.1.1",
     "d3-array": "^3.2.4",
     "d3-shape": "^3.2.0",
-    "lucide-react": "^1.27.0",
+    "lucide-react": "^1.73.0",
     "motion": "^12.42.2",
     "radix-ui": "^1.6.7",
     "react": "^19.2.7",
