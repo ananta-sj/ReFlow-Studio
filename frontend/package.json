@@ -29,7 +29,7 @@
     "d3-shape": "^3.2.0",
     "lucide-react": "^1.27.0",
     "motion": "^12.42.2",
-    "radix-ui": "^1.6.7",
+    "radix-ui": "^1.8.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwind-merge": "^3.6.0"
