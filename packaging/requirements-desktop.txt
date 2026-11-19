@@ -4,7 +4,7 @@ filelock==3.20.3
 keyring==25.7.0
 numpy==2.5.4
 packaging==26.0
-pillow==12.3.0
+pillow==13.0.0
 psutil==7.2.2
 pydub==0.25.1
 pystray==0.19.5
