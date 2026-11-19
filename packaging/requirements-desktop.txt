@@ -1,6 +1,6 @@
 # Native desktop previews. Optional AI engine environments are separate.
 audioop-lts==0.2.2; python_version >= '3.13'
-filelock==3.20.3
+filelock==4.2.1
 keyring==25.7.0
 numpy==2.5.4
 packaging==26.0
