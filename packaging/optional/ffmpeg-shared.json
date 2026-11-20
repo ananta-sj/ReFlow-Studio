@@ -1,0 +1,44 @@
+{
+  "version": "9.0.2",
+  "source_url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-full_build-shared.7z",
+  "archive_bytes": 59758994,
+  "archive_sha256": "4d2060a8b34a940aa47d785142055bb92a63053781e55f2ace4546edd519a8f5",
+  "files": {
+    "bin/avcodec-63.dll": {
+      "bytes": 98216448,
+      "sha256": "4d458a276fda363709ed2ac4ad14aea122c536e61919feebd919d5f8490be7a9"
+    },
+    "bin/avdevice-63.dll": {
+      "bytes": 6561792,
+      "sha256": "3e74aa37e9e21debccfaf4aef24aa2a946854109ac066f78d8c1f984bc82b209"
+    },
+    "bin/avfilter-12.dll": {
+      "bytes": 106941952,
+      "sha256": "4ec6eb2db944740c364d93b29d91c9137beb38d09e923f6ed14f31aa039851de"
+    },
+    "bin/avformat-63.dll": {
+      "bytes": 22877696,
+      "sha256": "360e66109b2ce3f02d56cd940e625a6909304eea1f4d0fcbbbb2d40d74308ee0"
+    },
+    "bin/avutil-61.dll": {
+      "bytes": 3157504,
+      "sha256": "9230e42b6b8e1fa20ec83af1eb4c4b2ae90b0c8d7c29093369250eed562372df"
+    },
+    "bin/swresample-7.dll": {
+      "bytes": 484352,
+      "sha256": "1f2a0bdca315f1a05fe398e7a0d97db8d0e34ba2a86ec59303bf32bbd9430123"
+    },
+    "bin/swscale-10.dll": {
+      "bytes": 2423808,
+      "sha256": "af91db7f45644157469a110438a8c648314927ec83e334d4cacac3870d99fabe"
+    },
+    "LICENSE": {
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    "README.txt": {
+      "bytes": 45523,
+      "sha256": "cbcae33269014fc49e61fc81c24e3c7c69ae4c1c92f5a9e9ea0e9f90c95dbf11"
+    }
+  }
+}

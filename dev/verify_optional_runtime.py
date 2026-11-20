@@ -2,6 +2,8 @@
 import importlib
 from importlib import metadata
 import json
+import hashlib
+import re
 import os
 from pathlib import Path
 import sys
@@ -10,6 +12,25 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / 'core')]
+
+
+def locked_package_problems(lock, installed):
+    normalize = lambda name: re.sub(r'[-_.]+', '-', name).lower()
+    actual = {normalize(name): version for name, version in installed.items()}
+    expected = {}
+    for line in lock.read_text(encoding='utf-8').splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        match = re.match(r'^([A-Za-z0-9_.-]+)==([^\s;]+)(?:\s|$)', line)
+        if not match:
+            raise ValueError('Unsupported reviewed lock entry')
+        expected[normalize(match[1])] = match[2]
+    if not expected:
+        raise ValueError('Reviewed engine lock is empty')
+    problems = [f'Lock mismatch: {name} needs {version}, found {actual.get(name, "missing")}'
+                for name, version in expected.items() if actual.get(name) != version]
+    problems.extend(f'Unreviewed package: {name}' for name in actual if name not in expected and name != 'pip')
+    return problems
 
 
 def main():
@@ -33,6 +54,26 @@ def main():
                     problems.append(f'{distribution.metadata["Name"]}: {requirement} (installed {version})')
             except metadata.PackageNotFoundError:
                 problems.append(f'{distribution.metadata["Name"]}: missing {requirement}')
+    profile_path = directory/'profile.json'
+    profile_metadata = json.loads(profile_path.read_text(encoding='utf-8'))
+    if profile in {'musetalk', 'f5'}:
+        recipe = json.loads((ROOT/'packaging/optional/python-runtime.json').read_text(encoding='utf-8'))
+        actual_python = '.'.join(map(str, sys.version_info[:3]))
+        if (profile_metadata.get('profile') != profile
+                or profile_metadata.get('bootstrap_sha256') != recipe['sha256']
+                or actual_python != recipe['python']):
+            problems.append('Runtime does not match the reviewed Python bootstrap')
+        if not (sys.flags.isolated and sys.flags.ignore_environment and sys.flags.no_user_site):
+            problems.append('Runtime must use isolated Python startup')
+    lock = ROOT/'packaging/optional'/(profile+'.lock.txt')
+    if profile in {'musetalk', 'f5'}:
+        problems.extend(locked_package_problems(lock, {d.metadata['Name']: d.version for d in distributions}))
+    if profile == 'f5':
+        try:
+            from dev.optional_ffmpeg import verify_shared
+            verify_shared(ROOT, directory/'ffmpeg')
+        except (OSError, ValueError, RuntimeError) as exc:
+            problems.append('Shared decoder runtime: '+str(exc))
     handles = []
     imports = {
         'vision': ['numpy', 'cv2', 'onnxruntime', 'nudenet'],
@@ -42,9 +83,13 @@ def main():
     }
     for name in imports[profile]:
         try:
-            importlib.import_module(name)
-            if name == 'torch' and hasattr(os, 'add_dll_directory'):
-                handles.append(os.add_dll_directory(str(ROOT / 'ffmpeg' / 'shared_libs')))
+            if name == 'f5_tts.api':
+                from core.f5_imports import load_f5_api
+                load_f5_api()
+            else:
+                importlib.import_module(name)
+            if name == 'torch' and profile == 'f5' and hasattr(os, 'add_dll_directory') and (directory/'ffmpeg/bin').is_dir():
+                handles.append(os.add_dll_directory(str(directory/'ffmpeg/bin')))
         except Exception as exc:
             problems.append(f'Import {name}: {exc}')
     if not problems:
@@ -60,7 +105,7 @@ def main():
                 NudeDetector().detect(np.zeros((64, 64, 3), dtype=np.uint8))
             elif profile == 'f5':
                 from torchcodec.decoders import AudioDecoder
-                with tempfile.TemporaryDirectory(dir=ROOT / 'temp') as folder:
+                with tempfile.TemporaryDirectory(dir=directory) as folder:
                     audio = Path(folder) / 'verify.wav'
                     with wave.open(str(audio), 'wb') as stream:
                         stream.setparams((1, 2, 24000, 0, 'NONE', 'not compressed'))
@@ -80,11 +125,15 @@ def main():
               'checkpoint_render_verified': False,
               'bytes': sum(p.stat().st_size for p in directory.rglob('*') if p.is_file()),
               'real_model_inference_verified': profile == 'vision' and not problems}
-    destination = ROOT / 'docs' / 'validation' / f'2026-10-03-{profile}-runtime.json'
+    destination = directory / 'verification.json'
     destination.write_text(json.dumps(report, indent=2), encoding='utf-8')
-    (directory / 'profile.json').write_text(json.dumps({
-        'profile': profile, 'status': 'prepared' if problems else 'ready',
-        'python': '3.10.11', 'device': 'cpu'}), encoding='utf-8')
+    profile_path = directory/'profile.json'
+    profile_metadata = json.loads(profile_path.read_text(encoding='utf-8'))
+    profile_metadata.update(profile=profile, status='prepared' if problems else 'ready',
+                    python='.'.join(map(str, sys.version_info[:3])), device='cpu')
+    if profile in {'musetalk', 'f5'} and not problems:
+        profile_metadata['lock_sha256'] = hashlib.sha256(lock.read_bytes()).hexdigest()
+    profile_path.write_text(json.dumps(profile_metadata), encoding='utf-8')
     print(json.dumps({'profile': profile, 'problems': problems, 'bytes': report['bytes']}))
     raise SystemExit(1 if problems else 0)
 

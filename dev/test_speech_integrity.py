@@ -630,27 +630,28 @@ class RVCTests(SpeechFixture):
 class F5Tests(SpeechFixture):
     def setUp(self):
         super().setUp()
-        # These tests exercise the deliberately mocked in-process engine;
-        # separately installed optional runtimes must not change that fixture.
-        self.stack.enter_context(patch('core.optional_runtime.interpreter', return_value=None))
-        self.stack.enter_context(patch('core.feature_worker.prepare_f5_reference',
-                                      return_value=(str(self.reference), 'Reference speech.')))
+        self.stack.enter_context(patch('core.optional_runtime.interpreter', return_value='isolated-f5'))
+        self.stack.enter_context(patch('core.model_contract.local_contract', return_value={}))
+        self.worker = self.stack.enter_context(patch('core.optional_runtime.run_feature'))
+
+    def test_unavailable_isolated_runtime_never_runs_engine(self):
+        provider = f5tts_local.F5TTSVoiceProvider()
+        with patch('core.optional_runtime.interpreter', return_value=None):
+            with self.assertRaisesRegex(RuntimeError, 'security upgrade'):
+                provider.convert(None, str(self.output), 'Actor', text='Hello', reference_audio=str(self.reference))
+        self.worker.assert_not_called()
 
     def test_missing_engine_output_fails(self):
         provider = f5tts_local.F5TTSVoiceProvider()
-        provider._f5tts = Mock()
-        provider._f5tts.infer.return_value = (None, None, None)
         self.write_audio(self.output)
+        before = self.output.read_bytes()
         with self.assertRaisesRegex(RuntimeError, 'Missing or empty audio'):
             provider.convert(None, str(self.output), 'Actor', text='Hello', reference_audio=str(self.reference))
+        self.assertEqual(self.output.read_bytes(), before)
 
     def test_valid_mocked_engine_output_succeeds(self):
         provider = f5tts_local.F5TTSVoiceProvider()
-        provider._f5tts = Mock()
-        def infer(**kwargs):
-            self.write_audio(kwargs['file_wave'])
-            return None, None, None
-        provider._f5tts.infer.side_effect = infer
+        self.worker.side_effect = lambda profile, operation, params: self.write_audio(params['output_path'])
         self.assertEqual(provider.convert(None, str(self.output), 'Actor', text='Hello', reference_audio=str(self.reference)), str(self.output))
 
 

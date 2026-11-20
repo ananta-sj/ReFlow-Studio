@@ -165,7 +165,7 @@ Native GUI prerequisites apply. Linux desktop dependencies include the pywebview
 
 </details>
 
-This setup prepares the desktop interface. Engine/model setup follows the selected route. The root `requirements.txt` describes the legacy engine stack and is not a universal tested environment lock.
+This setup prepares the desktop interface. Engine/model setup follows the selected route. See the [isolated engine security setup](docs/OPTIONAL_RUNTIME_SECURITY.md) for the reviewed Windows CPU F5/MuseTalk recipes and their validation limits. The root `requirements.txt` describes the legacy engine stack and is not a universal tested environment lock.
 
 ### Development checks
 

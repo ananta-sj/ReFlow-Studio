@@ -1,5 +1,7 @@
 # IndicF5 evaluation paused at the user's request
 
+> Historical report: the unused `dev/vendor/IndicF5` executable source copy was removed in the 2026-11-20 security review. See its retained provenance README. This report does not qualify current dependencies.
+
 The user requested: “stop for now... i will ask u to continue later on”.
 No continuation or background monitoring is authorized until that request.
 The download session was interrupted and ended with exit code 1. The isolated

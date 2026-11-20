@@ -42,7 +42,7 @@ class FeatureSession:
     def _run(self):
         try:
             with bind_job(self.job), self.log.open('wb') as log:
-                run_process([self.executable, '-B', str(self.worker), str(self.request)],
+                run_process([self.executable, '-B', '-I', '-X', 'utf8', str(self.worker), str(self.request)],
                     check=True, stdout=log, stderr=subprocess.STDOUT, timeout=24 * 3600,
                     env={**os.environ, 'PYTHONIOENCODING': 'utf-8', 'TEMP': str(self.folder), 'TMP': str(self.folder),
                          'REFLOW_PARENT_PID': str(os.getpid()),
@@ -114,7 +114,7 @@ class FeatureSession:
             # Match the owned Popen by its exact session invocation; never use
             # a PID supplied by worker responses or stop unrelated job workers.
             from core.render_context import _stop_process
-            expected = [self.executable, '-B', str(self.worker), str(self.request)]
+            expected = [self.executable, '-B', '-I', '-X', 'utf8', str(self.worker), str(self.request)]
             with self.job.lock:
                 owned = [process for process in self.job.processes if process.args == expected]
             for process in owned:

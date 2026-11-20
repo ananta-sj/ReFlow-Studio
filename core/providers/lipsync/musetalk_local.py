@@ -38,6 +38,9 @@ class MuseTalkLocalProvider(LipSyncProvider):
         self.vae_type = "sd-vae"
 
     def execute(self, video_path, audio_path, output_path):
+        from core.optional_runtime import interpreter, run_feature
+        if not interpreter('musetalk'):
+            raise RuntimeError('Optional musetalk runtime is unavailable or needs its reviewed security upgrade')
         from core.model_assets import ensure_assets
         if not self.explicit_models:
             ensure_assets("musetalk")
@@ -102,17 +105,9 @@ class MuseTalkLocalProvider(LipSyncProvider):
             # (cp1252 on this machine), which can't decode real bytes
             # MuseTalk's own output produces - hit as a real
             # UnicodeDecodeError before this fix, not assumed.
-            from core.optional_runtime import interpreter, run_feature
-            if interpreter('musetalk'):
-                cmd[cmd.index('--device') + 1] = 'cpu'
-                run_feature('musetalk', 'musetalk', {'args': cmd[3:], 'device': 'cpu'})
-                process = subprocess.CompletedProcess(cmd, 0, stdout='')
-            else:
-                process = run_process(
-                cmd, cwd=_MUSETALK_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, encoding="utf-8", errors="replace", timeout=3600, check=True,
-                env={**os.environ, "PYTHONIOENCODING": "utf-8"},
-            )
+            cmd[cmd.index('--device') + 1] = 'cpu'
+            run_feature('musetalk', 'musetalk', {'args': cmd[3:], 'device': 'cpu'})
+            process = subprocess.CompletedProcess(cmd, 0, stdout='')
         except subprocess.TimeoutExpired:
             print("[MUSETALK] Execution timed out after 3600s")
             raise RuntimeError("MuseTalk timed out after 3600 seconds")

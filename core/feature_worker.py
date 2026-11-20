@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 
 def speech_setup():
     import torch
-    shared = ROOT / "ffmpeg" / "shared_libs"
+    shared = Path(sys.executable).resolve().parent / 'ffmpeg' / 'bin'
     if hasattr(os, "add_dll_directory") and shared.is_dir():
         return os.add_dll_directory(str(shared))
     return None

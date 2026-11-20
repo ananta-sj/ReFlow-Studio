@@ -120,6 +120,14 @@ class RuntimeProbeTests(unittest.TestCase):
                    'diffusers': SimpleNamespace(AutoencoderKL=Mock()), 'scripts.inference': workflow}
         return modules, engine, workflow
 
+    def test_f5_probe_registers_its_profile_decoder_directory(self):
+        modules,engine,_=self.optional_modules()
+        expected=Path(sys.executable).resolve().parent/'ffmpeg/bin'
+        with patch('os.add_dll_directory',create=True) as register, patch.object(Path,'is_dir',lambda path: path==expected), patch('core.f5_imports.load_f5_api',return_value=engine), patch.object(runtime_probe_worker.importlib,'import_module',side_effect=lambda name: modules.get(name,SimpleNamespace())), patch.object(sys,'path',list(sys.path)):
+            result=runtime_probe_worker.inspect('f5tts','cpu')
+        self.assertEqual(result['status'],'passed')
+        register.assert_called_once_with(str(expected))
+
     def test_f5_probe_requires_actual_synthesis_entry_points_without_constructing_engine(self):
         modules, engine, _ = self.optional_modules()
         for api, expected in ((modules['f5_tts.api'], 'passed'), (SimpleNamespace(F5TTS=object), 'failed')):

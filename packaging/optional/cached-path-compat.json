@@ -1,0 +1,14 @@
+{
+  "filename": "cached_path-1.8.10+reflow.1-py3-none-any.whl",
+  "sha256": "f735ba6eeb4ad67a426b9c4cc43e60ba894176e2009bfca1664ba17f7b99870f",
+  "upstream_sha256": "a7a80c4a77859e40080ed3450bc1ca5434a74fc51566361677a75fd2f5b8fea8",
+  "upstream_url": "https://files.pythonhosted.org/packages/7b/db/ccb08109c7056b0670384fc5042be5eacd1391eb12485188e92ca97ced21/cached_path-1.8.10-py3-none-any.whl",
+  "source": "https://pypi.org/project/cached-path/1.8.10/",
+  "changes": [
+    "Version local suffix",
+    "Require patched filelock4.2.12+",
+    "Allow reviewed HuggingFace Hub2.x"
+  ],
+  "code_and_licences_unchanged": true,
+  "upstream_bytes": 37932
+}

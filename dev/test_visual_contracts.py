@@ -191,8 +191,16 @@ class VisualContracts(unittest.TestCase):
         self.assertTrue(process.call_args.kwargs['check'])
         self.assertEqual(self.output.read_bytes(), b'prior output')
 
+    def test_unavailable_musetalk_never_downloads_or_runs_base_engine(self):
+        provider = musetalk_local.MuseTalkLocalProvider()
+        with patch('core.optional_runtime.interpreter', return_value=None), patch.object(model_assets, 'ensure_assets') as assets, patch.object(musetalk_local, 'run_process') as process:
+            with self.assertRaisesRegex(RuntimeError, 'security upgrade'):
+                provider.execute(str(self.source), 'unused.wav', str(self.output))
+        assets.assert_not_called()
+        process.assert_not_called()
+
     def test_musetalk_nonzero_exit_and_stale_result_cannot_publish(self):
-        self.stack.enter_context(patch('core.optional_runtime.interpreter', return_value=None))
+        self.stack.enter_context(patch('core.optional_runtime.interpreter', return_value='isolated-muse'))
         provider = musetalk_local.MuseTalkLocalProvider()
         provider.unet_model_path = str(self.root / 'checkpoint.pth')
         Path(provider.unet_model_path).write_bytes(b'fixture')
@@ -201,10 +209,10 @@ class VisualContracts(unittest.TestCase):
         stale.write_bytes(b'old result' * 200)
         with patch.object(musetalk_local.config, 'TEMP_PATH', str(self.root)), \
              patch.object(model_assets, 'ensure_assets'), \
-             patch.object(musetalk_local, 'run_process', side_effect=subprocess.CalledProcessError(1, ['fixture'])) as process:
+             patch('core.optional_runtime.run_feature', side_effect=subprocess.CalledProcessError(1, ['fixture'])) as process:
             with self.assertRaises(subprocess.CalledProcessError):
                 provider.execute(str(self.source), 'unused.wav', str(self.output))
-        self.assertTrue(process.call_args.kwargs['check'])
+        self.assertEqual(process.call_args.args[:2], ('musetalk', 'musetalk'))
         self.assertEqual(self.output.read_bytes(), b'prior output')
         self.assertTrue(stale.exists())
 

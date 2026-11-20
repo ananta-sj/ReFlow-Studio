@@ -1,5 +1,7 @@
 # IndicF5 isolated evaluation — October 6, 2026
 
+> Historical report: the unused `dev/vendor/IndicF5` executable source copy was removed in the 2026-11-20 security review. See its retained provenance README. This report does not qualify current dependencies.
+
 ## Outcome and acceptance boundary
 
 The first trained-model inference completed successfully and produced a

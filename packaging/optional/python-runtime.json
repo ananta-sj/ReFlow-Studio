@@ -1,0 +1,9 @@
+{
+  "python": "3.11.18",
+  "release": "20261110",
+  "platform": "windows-x64",
+  "filename": "cpython-3.11.18-windows.tar.gz",
+  "bytes": 25470122,
+  "sha256": "f31751f4a8483f5ac7cd77ad83f8dfb80d9f2a7245bff1585e27516c777fb46f",
+  "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.11.18%2B20261110-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+}

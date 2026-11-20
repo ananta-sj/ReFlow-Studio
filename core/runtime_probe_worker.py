@@ -149,7 +149,7 @@ def inspect(adapter, device, progress=None):
                     raise RuntimeError('Wav2Lip face-detection cascade is missing')
             if adapter == 'f5tts':
                 import os
-                shared = ROOT / 'ffmpeg/shared_libs'
+                shared = Path(sys.executable).resolve().parent / 'ffmpeg/bin'
                 if hasattr(os, 'add_dll_directory') and shared.is_dir():
                     handles.append(os.add_dll_directory(str(shared)))
             for name in imports[adapter]:

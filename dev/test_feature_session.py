@@ -29,7 +29,7 @@ while not (folder/'stop').exists():
   if sequence<=last: continue
   call=read_json(path)
   time.sleep(call.get('sleep',0))
-  result={'ok':not call.get('fail'), 'error':'fixture failure','pid':os.getpid(),'sequence':sequence}
+  result={'ok':not call.get('fail'), 'error':'fixture failure','pid':os.getpid(),'sequence':sequence,'isolated':sys.flags.isolated,'utf8':sys.flags.utf8_mode}
   if call.get('invalid'): result=[]
   pending=path.with_suffix('.response.tmp')
   pending.write_text(json.dumps(result),encoding='utf-8')
@@ -48,6 +48,11 @@ class FeatureSessionTests(unittest.TestCase):
         worker = self.job.workspace / 'fixture_worker.py'
         worker.write_text(WORKER, encoding='utf-8')
         self.session = FeatureSession(self.job, sys.executable, {}, worker=worker)
+
+    def test_worker_uses_isolated_startup_and_utf8_logs(self):
+        result=self.session.call({})
+        self.assertEqual(result['isolated'],1)
+        self.assertEqual(result['utf8'],1)
 
     def test_requests_reuse_one_process_and_cleanup_stops_it(self):
         first, second = self.session.call({}), self.session.call({})

@@ -1,0 +1,38 @@
+name: Pull request checks
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Check publisher and packaging contracts
+        run: |
+          node --test packaging/tests/test_development_preview.mjs packaging/tests/test_preview_versions.mjs
+          python -m unittest discover -s packaging/tests -v
+      - name: Check interface and dependency advisories
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          npm run test:ui
+          npm run build
+# No publishing, write token, AI runtimes, model downloads or application secrets.

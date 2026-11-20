@@ -54,15 +54,13 @@ class IntegrityDoctor:
         }
 
     def install_package(self, package_name):
-        print(f"   [+] Installing missing library: {package_name}...")
-        try:
-            if package_name == "basicsr":
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "setuptools<70.0.0", "wheel"])
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "basicsr==1.4.2", "--no-build-isolation"])
-            else:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
-        except Exception as e:
-            print(f"   [X] Failed to install {package_name}: {e}")
+        """Explicit desktop repair never installs shared, unreviewed AI dependencies."""
+        if package_name not in self.critical_libs.values():
+            raise ValueError('Optional engines require a reviewed isolated runtime')
+        manifest = os.path.join(self.root_dir, 'packaging', 'requirements-desktop.txt')
+        if not os.path.isfile(manifest):
+            raise RuntimeError('Reviewed desktop dependency manifest is missing')
+        subprocess.check_call([sys.executable, '-I', '-m', 'pip', 'install', '-r', manifest])
 
     def download_file(self, url, dest_path):
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)

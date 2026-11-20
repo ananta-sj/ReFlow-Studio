@@ -1,8 +1,15 @@
-librosa==0.7.0
-numpy==1.17.1
-opencv-contrib-python>=4.2.0.34
-opencv-python==4.1.0.25
-torch==1.1.0
-torchvision==0.3.0
-tqdm==4.45.0
-numba==0.48
+# Reviewed CPython3.11 / Windows x64 CPU compatibility set.
+# Use an isolated engine environment, not the desktop or XTTS runtime.
+# Synthetic feature/forward checks passed; real checkpoints/GPU are separate gates.
+--extra-index-url https://download.pytorch.org/whl/cpu
+librosa==0.11.0
+numpy==1.26.4
+opencv-python==4.11.0.86
+torch==2.15.0+cpu
+torchvision==0.29.2
+tqdm==4.70.1
+numba==0.68.1
+scipy==1.17.1
+soundfile==0.13.1
+pillow==13.0.0
+filelock==4.2.12

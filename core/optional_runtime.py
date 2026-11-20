@@ -1,5 +1,6 @@
 """Explicit isolated feature workers; no installation during a render."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import tempfile
@@ -16,6 +17,12 @@ def interpreter(profile):
     executable = ROOT / "runtime_profiles" / profile / "python.exe"
     try:
         metadata = json.loads((executable.parent / "profile.json").read_text(encoding="utf-8"))
+        if not isinstance(metadata, dict) or metadata.get("profile") != profile:
+            return None
+        if profile in {"musetalk", "f5"}:
+            lock = ROOT/"packaging/optional"/(profile+".lock.txt")
+            if metadata.get("lock_sha256") != hashlib.sha256(lock.read_bytes()).hexdigest():
+                return None
     except (OSError, ValueError):
         return None
     return str(executable) if executable.is_file() and metadata.get("status") == "ready" else None
@@ -24,7 +31,7 @@ def interpreter(profile):
 def run_feature(profile, operation, params, timeout=3600):
     executable = interpreter(profile)
     if not executable:
-        raise RuntimeError(f"Optional {profile} runtime is not installed")
+        raise RuntimeError(f"Optional {profile} runtime is unavailable or needs its reviewed security upgrade")
     if profile == 'f5' and operation == 'f5_speech' and not params.get('reference_text', '').strip():
         from core.model_assets import ensure_assets
         ensure_assets('f5_asr')
@@ -39,7 +46,7 @@ def run_feature(profile, operation, params, timeout=3600):
         log = Path(folder) / "worker.log"
         try:
             with log.open("w", encoding="utf-8") as stream:
-                run_process([executable, "-B", str(ROOT / "core" / "feature_worker.py"),
+                run_process([executable, "-I", "-X", "utf8", "-B", str(ROOT / "core" / "feature_worker.py"),
                              str(request)], timeout=timeout, check=True,
                             stdout=stream, stderr=stream,
                             env={**os.environ, "PYTHONIOENCODING": "utf-8", "TEMP": folder,
