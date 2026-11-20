@@ -34,7 +34,7 @@ def include(name):
     if path.suffix.lower() in DENY_SUFFIXES or path.name in DENY_NAMES or path.name.startswith('.env'):
         return False
     if name in ROOT_FILES or name in LOCKS or name in {'docs/GITHUB_NATIVE_BUILDS.md','docs/GITHUB_UPLOAD_GUIDE.md','docs/RC2_PLATFORM_RELEASES.md',
-            'docs/ROADMAP.md','docs/NEXT_CHAT_HANDOFF.md','docs/PR_REVIEW_2026-11-20.md',
+            'docs/ROADMAP.md','docs/NEXT_CHAT_HANDOFF.md',
             'docs/DEVELOPMENT_CHECKOUT.md','docs/REVIEW_WORKFLOW_2026-11-15.md','docs/DISPOSABLE_CLEANUP.md',
             'docs/CHARACTER_MATCHING_2026-11-15.md','docs/QWEN35_DIALOGUE_TRIAL_2026-11-15.md',
             'docs/OPTIONAL_RUNTIME_SECURITY.md','docs/SECURITY_REMEDIATION_2026-11-20.md','docs/TIMING_ADVICE.md','docs/PROJECT_DIRECTION.md','docs/DEVELOPMENT_PREVIEW.md','docs/AUDIT_2026-11-18.md'}:

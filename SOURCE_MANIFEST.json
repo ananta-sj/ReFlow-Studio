@@ -72,8 +72,8 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 2290,
-      "sha256": "dc0d2a459c8419c8a353c4e8ebfb8e556c726db26b965e31012e170d2decc176"
+      "bytes": 2427,
+      "sha256": "949d4d1ec62be2f96be3b95d130f55baefd3e16cf93232184e08a993c8a8e3d7"
     },
     {
       "path": "CODE_OF_CONDUCT.md",
@@ -112,8 +112,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 14348,
-      "sha256": "6000e10249f045c0faa81789a01924d0966dd1d64cc3702a6aaab148bf67713b"
+      "bytes": 14289,
+      "sha256": "fb844f2a32ae0e76faae724f3a45e532069d2577212df6cfebeaca0e2aaead8c"
     },
     {
       "path": "README.txt",
@@ -3497,8 +3497,8 @@
     },
     {
       "path": "docs/NEXT_CHAT_HANDOFF.md",
-      "bytes": 7287,
-      "sha256": "1ba196041b6cfe02ccd86f51bf18cae77a3430edd316149167ed460050ffd342"
+      "bytes": 1027,
+      "sha256": "e90914388db03b77706b40931c5da3c558ff4727111da9a0f915b28ff9490620"
     },
     {
       "path": "docs/OPTIONAL_RUNTIME_SECURITY.md",
@@ -3509,11 +3509,6 @@
       "path": "docs/PROJECT_DIRECTION.md",
       "bytes": 4437,
       "sha256": "8577f32841670faa52ae588a94e2d7f38f79b8c5dca06d3a91e03491dd56a0c4"
-    },
-    {
-      "path": "docs/PR_REVIEW_2026-11-20.md",
-      "bytes": 6163,
-      "sha256": "ebd263572175f834ab65bf76b695cc43082a8dde704e0659221ca19cde9d1131"
     },
     {
       "path": "docs/QWEN35_DIALOGUE_TRIAL_2026-11-15.md",
@@ -3532,8 +3527,8 @@
     },
     {
       "path": "docs/ROADMAP.md",
-      "bytes": 8997,
-      "sha256": "f72b79146eb54c409131ffe1082a04e3ff3a8e7e33722cd491a2fb4c0ea2d919"
+      "bytes": 1695,
+      "sha256": "7ed23e17d7c8a1651572e0dceba0dc880378761cc08df9baa10b5d471f13722d"
     },
     {
       "path": "docs/SECURITY_REMEDIATION_2026-11-20.md",
@@ -4527,8 +4522,8 @@
     },
     {
       "path": "packaging/create_source_archive.py",
-      "bytes": 7301,
-      "sha256": "7d256ab5230cd4e394e941b49b48c7d0bf390bf3ad5b3d46d2f180e57df34ea4"
+      "bytes": 7270,
+      "sha256": "dd882deab22fd36e3a14e320dddbe8714e03eb0d4cb31918a787a23ad6793f07"
     },
     {
       "path": "packaging/finalize_executable_candidate.py",
@@ -4637,8 +4632,8 @@
     },
     {
       "path": "packaging/tests/test_native_packaging.py",
-      "bytes": 11607,
-      "sha256": "a32f20f03c16a5c425c32a8eb9045cc99c946cb07e628a47ba93d0c521b61a10"
+      "bytes": 11963,
+      "sha256": "674457c78af2c0a79dc1f52b3b33592797ed71dc67a5c52e1654bb423dc1113a"
     },
     {
       "path": "packaging/tests/test_optional_bootstrap.py",

@@ -211,7 +211,7 @@ Share confirmed, sanitized reports with your exact download filename, OS/archite
 
 [Contribution guide](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Accessibility](ACCESSIBILITY.md) · [Current roadmap](docs/ROADMAP.md)
 
-Maintainers and the next testing chat can start with the [native-testing handoff](docs/NEXT_CHAT_HANDOFF.md). [Current PR decisions](docs/PR_REVIEW_2026-11-20.md) distinguish adopted changes from deferred migrations; an open update proposal is not itself a security finding.
+Development follows issue discovery, interactive testing, focused fixes and security review before pipeline and multi-character improvements. See the [testing overview](docs/NEXT_CHAT_HANDOFF.md) for the next stage.
 
 ## License and components
 
