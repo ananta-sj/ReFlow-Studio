@@ -1,9 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile, readFile, rename } from 'node:fs/promises'
 import os from 'node:os'
+import { execFileSync } from 'node:child_process'
 import path from 'node:path'
-import { PACKAGES, MARKER, releaseBody, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease, formatChanges, changeNotes } from '../publish_development_preview.mjs'
+import { PACKAGES, MARKER, openRegularFile, apiClient, releaseBody, collectAssets, findPreviewRelease, hash, publish, validateExistingRelease, formatChanges, changeNotes } from '../publish_development_preview.mjs'
 const SHA='a'.repeat(40), OTHER='b'.repeat(40)
 async function fixture(run) {
   const folder=await mkdtemp(path.join(os.tmpdir(),'reflow-preview-'))
@@ -241,3 +242,48 @@ test('large release comparisons include the newest commits beyond page one',asyn
  }
  assert.match(await changeNotes(api,'owner/repo',SHA),/newest page/)
 })
+
+
+test('oversized checksum sidecars are rejected before unbounded reads',()=>fixture(async folder=>{
+  await writeFile(path.join(folder,`${PACKAGES.source}.sha256`),'a'.repeat(4096))
+  await assert.rejects(collectAssets(folder,SHA,'123','1'),/Invalid package or checksum/)
+}))
+
+
+test('validated descriptor keeps original bytes after its pathname is replaced',()=>fixture(async folder=>{
+  const file=path.join(folder,PACKAGES.source)
+  const handle=await openRegularFile(file)
+  try {
+    const original=await readFile(file,'utf8')
+    await rename(file,`${file}.old`)
+    await writeFile(file,'replacement bytes')
+    assert.equal(await handle.readFile('utf8'),original)
+  } finally { await handle.close() }
+}))
+
+
+test('upload length and stream retain the opened file when its pathname is replaced',t=>fixture(async folder=>{
+  const file=path.join(folder,PACKAGES.source)
+  const original=await readFile(file)
+  t.mock.method(globalThis,'fetch',async (_url,options)=>{
+    await rename(file,`${file}.old`)
+    await writeFile(file,'unverified replacement')
+    const chunks=[]
+    for await (const chunk of options.body) chunks.push(chunk)
+    assert.deepEqual(Buffer.concat(chunks),original)
+    assert.equal(Number(options.headers['Content-Length']),original.length)
+    return new Response(JSON.stringify({id:123}),{status:201})
+  })
+  const api=apiClient('owner/repo','fixture-token')
+  assert.deepEqual(await api('https://uploads.github.com/release/1/assets',{method:'POST',file}),{id:123})
+}))
+
+
+test('nonregular FIFO package fails instead of hanging the Linux publisher',{skip:process.platform==='win32'},()=>fixture(async folder=>{
+  const file=path.join(folder,PACKAGES.source)
+  await rm(file)
+  execFileSync('mkfifo',[file])
+  const moduleUrl=new URL('../publish_development_preview.mjs',import.meta.url).href
+  const script=`import {openRegularFile} from ${JSON.stringify(moduleUrl)}; try { await openRegularFile(${JSON.stringify(file)}); process.exitCode=1 } catch(error) { if(!error.message.includes('Invalid package or checksum')) throw error }`
+  execFileSync(process.execPath,['--input-type=module','-e',script],{timeout:5000})
+}))

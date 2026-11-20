@@ -3482,8 +3482,8 @@
     },
     {
       "path": "docs/SECURITY_REMEDIATION_2026-11-20.md",
-      "bytes": 5153,
-      "sha256": "2a96e209d1da5e7db43a522f05698f12d301785455afa0a7d91137e6d5fc38a4"
+      "bytes": 6839,
+      "sha256": "4563a756497eab99372cc1c64ffeb074a9edc4691ace41d2d172d18b1d2c36cb"
     },
     {
       "path": "docs/TIMING_ADVICE.md",
@@ -4537,8 +4537,8 @@
     },
     {
       "path": "packaging/publish_development_preview.mjs",
-      "bytes": 18096,
-      "sha256": "77d0cf92d282f70c653f3b09300ea78e00df27839d01d43bbe6fffdce9f94ea4"
+      "bytes": 19606,
+      "sha256": "501ef3d3466eb975aff1de2ba7b465322f255734ceb89b58cc293141c7a58b79"
     },
     {
       "path": "packaging/reflow.spec",
@@ -4577,8 +4577,8 @@
     },
     {
       "path": "packaging/tests/test_development_preview.mjs",
-      "bytes": 15685,
-      "sha256": "9a4e7be38cf4888bcd3ac1f81ae2f68df244056c77bf6c76d37c7d5f6ee0c53e"
+      "bytes": 17968,
+      "sha256": "b3f4848bda340038661c767f7fd3b48ac5f62f102bfa4c45cdfda10edfcc01bf"
     },
     {
       "path": "packaging/tests/test_native_packaging.py",

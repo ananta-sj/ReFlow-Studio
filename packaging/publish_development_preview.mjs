@@ -1,7 +1,7 @@
 /** Publish only verified desktop candidates; no third-party Node dependencies. */
 import { createHash } from 'node:crypto'
-import { createReadStream } from 'node:fs'
-import { lstat, readdir, readFile, writeFile } from 'node:fs/promises'
+import { constants } from 'node:fs'
+import { lstat, open, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -15,10 +15,34 @@ export const PACKAGES = Object.freeze({
   source: 'ReflowStudio-source.zip',
 })
 
-export async function hash(file) {
+export async function openRegularFile(file, maximumBytes = 2 * 1024 ** 3) {
+  const handle = await open(file, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0))
+  try {
+    // Validate the opened object, then read that same descriptor. The path is
+    // checked afterward only to reject links on platforms without O_NOFOLLOW.
+    const stat = await handle.stat()
+    const entry = await lstat(file)
+    if (!stat.isFile() || !entry.isFile() || entry.isSymbolicLink() ||
+        entry.dev !== stat.dev || entry.ino !== stat.ino ||
+        !stat.size || stat.size >= maximumBytes) {
+      throw new Error(`Invalid package or checksum: ${path.basename(file)}`)
+    }
+    return handle
+  } catch (error) {
+    await handle.close()
+    throw error
+  }
+}
+
+async function hashHandle(handle) {
   const digest = createHash('sha256')
-  for await (const block of createReadStream(file)) digest.update(block)
+  for await (const block of handle.createReadStream({ autoClose: false })) digest.update(block)
   return digest.digest('hex')
+}
+
+export async function hash(file) {
+  const handle = await openRegularFile(file)
+  try { return await hashHandle(handle) } finally { await handle.close() }
 }
 
 export async function collectAssets(folder, sha, runId, attempt) {
@@ -33,15 +57,22 @@ export async function collectAssets(folder, sha, runId, attempt) {
   const assets = []
   for (const [target, original] of Object.entries(PACKAGES)) {
     const file = path.join(folder, original)
-    const stat = await lstat(file)
     const sidecar = path.join(folder, `${original}.sha256`)
-    if (!stat.isFile() || stat.isSymbolicLink() || !stat.size || stat.size >= 2 * 1024 ** 3 ||
-        !(await lstat(sidecar)).isFile() || (await lstat(sidecar)).isSymbolicLink()) {
-      throw new Error(`Invalid package or checksum: ${original}`)
-    }
-    const checksum = (await readFile(sidecar, 'utf8')).trim()
+    const packageHandle = await openRegularFile(file)
+    let stat, digest, checksum
+    try {
+      stat = await packageHandle.stat()
+      const checksumHandle = await openRegularFile(sidecar, 1024)
+      try {
+        const buffer = Buffer.alloc(1024)
+        const { bytesRead } = await checksumHandle.read(buffer, 0, buffer.length, 0)
+        if (bytesRead === buffer.length) throw new Error(`Invalid package or checksum: ${original}`)
+        checksum = buffer.subarray(0, bytesRead).toString('utf8').trim()
+      }
+      finally { await checksumHandle.close() }
+      digest = await hashHandle(packageHandle)
+    } finally { await packageHandle.close() }
     const match = checksum.match(/^([a-f0-9]{64}) {2}([^\r\n]+)$/)
-    const digest = await hash(file)
     if (!match || match[2] !== original || match[1] !== digest) {
       throw new Error(`Checksum mismatch: ${original}`)
     }
@@ -141,16 +172,22 @@ export function apiClient(repository, token) {
     const url = upload ? route : `https://api.github.com/repos/${repository}${route}`
     const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'ReFlow-development-preview' }
-    let data
-    if (file) {
-      headers['Content-Type'] = 'application/octet-stream'
-      headers['Content-Length'] = String((await lstat(file)).size)
-      data = createReadStream(file)
-    } else if (body !== undefined) {
-      headers['Content-Type'] = 'application/json'; data = JSON.stringify(body)
+    let data, uploadHandle, response
+    try {
+      if (file) {
+        headers['Content-Type'] = 'application/octet-stream'
+        uploadHandle = await openRegularFile(file)
+        headers['Content-Length'] = String((await uploadHandle.stat()).size)
+        data = uploadHandle.createReadStream({ autoClose: false })
+      } else if (body !== undefined) {
+        headers['Content-Type'] = 'application/json'; data = JSON.stringify(body)
+      }
+      response = await fetch(url, { method, headers, body: data,
+        ...(file ? { duplex: 'half' } : {}), signal: AbortSignal.timeout(file ? 600_000 : 60_000) })
+    } finally {
+      if (data?.destroy) data.destroy()
+      if (uploadHandle) await uploadHandle.close()
     }
-    const response = await fetch(url, { method, headers, body: data,
-      ...(file ? { duplex: 'half' } : {}), signal: AbortSignal.timeout(file ? 600_000 : 60_000) })
     if (!response.ok) {
       // Do not print response bodies or request headers containing account data.
       throw new GitHubError(response.status, `GitHub ${method} failed: HTTP ${response.status}`)

@@ -30,3 +30,14 @@ The owner disabled CodeQL Default setup and enabled the checked-in **CodeQL secu
 **Do not bulk-approve the existing dependency PRs.** The separate Torch/TorchVision proposals are superseded by coordinated profile updates after this source is pushed. Frontend and Actions major-version proposals require their own compatibility checks; the zero-vulnerability frontend audit does not make a major-version update automatically safe. No PR was approved, merged or closed, and no branch was deleted by this work.
 
 These changes reduce identified risks. They are not a guarantee of vulnerability-free software, trained dubbing quality, GPU qualification or release readiness.
+
+
+## Follow-up after the first security push
+
+Commit `79792a3` completed both the main-branch CodeQL workflow and desktop build successfully. The owner then supplied one new CodeQL finding, #42, concerning a filesystem check/read race in the release publisher. The publisher now opens package/checksum files first, validates the opened descriptors, and reads/hashes those same descriptors. Upload size and stream also use one descriptor. Checksum reads are bounded, descriptor cleanup covers failures, and nonblocking open prevents a FIFO input hanging the Linux publisher.
+
+The follow-up publisher/version tests passed 32 cases on Windows. One additional FIFO regression applies only to POSIX platforms and is deferred to Linux CI, rather than reported as a local pass. A new hosted CodeQL scan must confirm resolution of #42 after this follow-up is pushed.
+
+GitHub's exported dependency graph already contains the updated package versions. Public GitHub advisory queries for Pillow 13.0.0, Torch 2.15.0 and OpenCV 4.11.0.86 returned no matches. The owner-provided details for Dependabot #89 state affected Pillow versions `>=11.0.0,<13.0.0` and patched version `13.0.0`, which is already committed on main. That particular alert is inconsistent with the current source requirement and should be rechecked after dependency-graph refresh. This does not establish the status of all remaining alerts; none were manually dismissed.
+
+The public PR list currently contains 13 open proposals. Five obsolete coordinated-stack update PRs were closed without merging after the preceding source update. This follow-up does not approve, merge, close or delete any further PR or branch.
