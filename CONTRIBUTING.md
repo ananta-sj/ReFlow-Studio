@@ -1,0 +1,49 @@
+# Contributing to ReFlow Studio
+
+ReFlow coordinates media editing and dubbing tools. Start with the [project purpose and limits](docs/PROJECT_DIRECTION.md), [roadmap](docs/ROADMAP.md) and [code of conduct](CODE_OF_CONDUCT.md). Desktop Preview builds are for volunteer testing; a green build does not establish episode quality.
+
+## Report a problem
+
+Use the repository's bug-report form. Include the source commit or exact download filename, OS/architecture, workflow, selected engines/device, reproduction steps and expected/observed results. Use synthetic or permitted short media. Describe a voice/timing problem with a cue or timestamp; do not upload copyrighted episodes, private recordings or unredacted logs.
+
+For vulnerabilities, follow [SECURITY.md](.github/SECURITY.md) instead of opening a public issue. Never include API keys, tokens or credential files. Accessibility barriers can use the same bug form; see [ACCESSIBILITY.md](ACCESSIBILITY.md).
+
+## Set up and change the source
+
+Follow the [README setup](README.md) for the desktop environment. Optional AI engines use separate environments; see [isolated engine setup](docs/OPTIONAL_RUNTIME_SECURITY.md). The root requirements.txt is a historical broad engine description, not a universal tested install recipe.
+
+Keep each change focused. Reproduce a bug with the smallest useful regression, fix its cause, and preserve saved work and output integrity. Avoid unrelated redesigns, forced dependency upgrades, new models or framework replacements. Discuss additions and resource requirements before introducing them. Preserve third-party notices and check the licence of any reused code/model.
+
+External contributors should submit a focused branch/PR. The maintainer's local workflow may use main; do not create or publish branches on their behalf without a request. Do not merge your own change solely because an automated check is green.
+
+## Relevant checks
+
+From the repository root, using your existing compatible desktop interpreter:
+
+```powershell
+.\.venv\Scripts\python.exe -B -m unittest discover -s packaging/tests -v
+.\.venv\Scripts\python.exe -B dev/test_cloud_boundary_regressions.py
+node --test packaging/tests/test_development_preview.mjs packaging/tests/test_preview_versions.mjs
+```
+
+For frontend changes, run these from frontend:
+
+```sh
+npm run test:ui
+npm run lint
+npm run build
+```
+
+Use the corresponding .venv/bin/python commands on Linux/macOS. Backend tests under dev have different optional dependencies. Name the exact environment, checks passed, failures, skips and untested paths. Do not install an AI stack merely to make an unrelated documentation change pass.
+
+Native interaction, real model inference and continuous-scene listening require separate evidence. For dependency changes, review the actual lockfile diff and upstream notes, audit the resulting graph, and validate compatibility. Never use --no-deps or a forced audit fix to conceal a conflict.
+
+## Source and privacy
+
+Do not commit models, runtime environments, private media, settings, credentials, recovery archives, logs or built executables. Inspect your diff and staged file list. When source inventory changes, refresh it with:
+
+```powershell
+.\.venv\Scripts\python.exe -B packaging/create_source_archive.py --manifest-only
+```
+
+Use the PR template to explain the problem, behaviour change, validation and limits. AI-assisted contributions follow the same standard; disclose their use and verify every claimed result. Maintainers may defer changes that broaden scope before the existing app is qualified.

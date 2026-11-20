@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible app, installation, accessibility or dubbing problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "For vulnerabilities, use the Security tab's private reporting instead. Never post tokens, credentials, private recordings, full episodes or unredacted logs."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Exact release filename or source commit; include the workflow used.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and selected engines
+      description: OS/architecture, CPU/GPU/RAM, source/target language, engines and actual device if known. For accessibility, include input method or assistive technology.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Small numbered steps with a synthetic or permitted sample; include a cue/timestamp for audio problems.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: Expected and observed behaviour
+      description: Include exact safe error text and whether progress was retained. Do not claim GPU use unless measured.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence (optional)
+      description: Relevant short logs/screenshots only. Remove keys, private dialogue and personal paths before posting.

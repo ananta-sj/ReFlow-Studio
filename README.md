@@ -191,7 +191,7 @@ Backend tests under `dev/` have individual dependency requirements. Some use syn
 
 Application/build changes pushed to `main` trigger the native build workflow. After source checks and all four platform builds succeed, the publisher creates a new **Desktop Preview** regular release and marks it **Latest**. Earlier releases retain their downloads.
 
-Notes include the ten most recent commit summaries, source commit, build link, package scope and checksum guidance. Write clear commit messages to make the automated notes useful. Tags advance as `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, and so on. Numbering checks existing tags and releases to avoid reusing a version. This preview build number does not declare a stable product milestone or rewrite source version constants.
+Notes include up to 30 recent commit summaries, source commit, build link, package scope and checksum guidance. Write clear commit messages to make the automated notes useful. Tags advance as `v0.7.1-desktop-preview`, `v0.7.2-desktop-preview`, and so on. Numbering checks existing tags and releases to avoid reusing a version. This preview build number does not declare a stable product milestone or rewrite source version constants.
 
 Documentation-only pushes normally skip builds. Use **Actions → Build native desktop candidates → Run workflow** on `main` to rebuild manually. Failed or superseded builds cannot promote their packages through the normal publication checks.
 
@@ -206,6 +206,12 @@ Volunteer testers on Windows, Linux and both Mac architectures are welcome. Chec
 Share confirmed, sanitized reports with your exact download filename, OS/architecture, CPU/GPU, selected engines, reproduction steps and expected/observed behavior. Review logs for credentials and private dialogue before sharing.
 
 [Report an issue](https://github.com/ananta-sj/ReFlow-Studio/issues) · [Review known limits](docs/PROJECT_DIRECTION.md)
+
+## Contributing and next steps
+
+[Contribution guide](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Accessibility](ACCESSIBILITY.md) · [Current roadmap](docs/ROADMAP.md)
+
+Maintainers and the next testing chat can start with the [native-testing handoff](docs/NEXT_CHAT_HANDOFF.md). [Current PR decisions](docs/PR_REVIEW_2026-11-20.md) distinguish adopted changes from deferred migrations; an open update proposal is not itself a security finding.
 
 ## License and components
 

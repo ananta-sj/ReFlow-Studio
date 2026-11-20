@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a vulnerability privately
+    url: https://github.com/ananta-sj/ReFlow-Studio/security/advisories/new
+    about: Use private reporting for security flaws. Never publish exploit details or secrets in an issue.

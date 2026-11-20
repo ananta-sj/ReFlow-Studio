@@ -1,0 +1,23 @@
+name: Feature request
+description: Explain a user problem and a focused proposed improvement.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who is affected, what are they trying to do, and what happens today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome and alternatives
+      description: Describe observable success, existing workarounds and the smallest useful improvement.
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and costs (optional)
+      description: Hardware, languages, accessibility, licences, model downloads, privacy or paid API needs. Do not include credentials.

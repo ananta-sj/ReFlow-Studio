@@ -1,0 +1,11 @@
+# Working on ReFlow Studio
+
+- The repository root containing this file is the active checkout. Inspect git status and preserve existing user changes. The maintainer works on main and pushes through GitHub Desktop; do not create branches, commit, push, merge, close PRs/issues or change remote settings without a request authorizing those actions.
+- Before continuing planned work, read docs/ROADMAP.md. Before native testing or a new-chat handoff, read docs/NEXT_CHAT_HANDOFF.md. Historical reports may reference deleted paths, former runtimes or outdated branches; verify current state rather than executing old instructions.
+- The purpose is family-friendly editing and natural, context-aware dubbing; see docs/PROJECT_DIRECTION.md. Preserve the existing app before expanding it. Do not promise indistinguishable speech, universal hardware support or episode readiness without measured acceptance.
+- Ask before adding software, dependencies, models or paid services. Existing bounded trial authorizations are not unlimited download permission. Never expose credentials or upload private media. Use synthetic/permitted fixtures for public reports.
+- Preserve source media, saved jobs, accepted takes, imported models and unrelated environments. Preview ownership before deletion. A retry must not silently publish partial or original-language output as a completed dub.
+- Keep optional engines isolated. Do not bypass dependency conflicts, hashes, readiness checks or isolated-worker boundaries. Read docs/OPTIONAL_RUNTIME_SECURITY.md when changing engine setup.
+- Reproduce bugs, make small changes and run relevant checks from CONTRIBUTING.md. Distinguish source/simulated checks, native interaction, actual inference and listening acceptance. State failures, skips and blockers honestly.
+- Read the installed Computer Use skill and discover available tools before controlling an app. A browser tab or installed skill alone is not evidence that node_repl exists. Do not bypass a missing controller by launching helper executables or inventing a protocol.
+- Keep models, environments, logs, credentials, personal samples and executable archives out of Git. Refresh SOURCE_MANIFEST.json with packaging/create_source_archive.py --manifest-only when exported source files change.

@@ -128,6 +128,13 @@ class RuntimeDownloadTests(unittest.TestCase):
 
 
 class SourceExportTests(unittest.TestCase):
+    def test_contributor_and_testing_handoff_files_are_in_source_export(self):
+        for name in ('CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'ACCESSIBILITY.md', 'AGENTS.md',
+                     'docs/ROADMAP.md', 'docs/NEXT_CHAT_HANDOFF.md', 'docs/PR_REVIEW_2026-11-20.md'):
+            with self.subTest(name=name):
+                self.assertTrue(source_export.include(name))
+
+
     def test_project_and_python_licences_are_included_in_source_and_native_payloads(self):
         inventory = load('build_portable')
         for name in ('LICENSE', 'LICENSING.md', 'LICENSE.txt'):
