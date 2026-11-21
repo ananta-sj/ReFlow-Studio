@@ -1,0 +1,26 @@
+{
+  "repo_id": "Falconsai/nsfw_image_detection",
+  "revision": "96cb0d0342c7afb80cab76ecc58b265fa44da256",
+  "files": {
+    "README.md": {
+      "bytes": 10640,
+      "sha256": "2e6e2cd12fbe7d70e992ef649eae85e6d72d87c9cfc31b4cecd36de0d5facadc",
+      "blob_id": "7c6302bd8e127bce91ae821cadde834ca5f3c893"
+    },
+    "config.json": {
+      "bytes": 724,
+      "sha256": "cd8c0a19566f199b5c64da402f1d6a9daf80d094fe6536befb060a2cc59449c2",
+      "blob_id": "a6e72f635e5bc26ed10f507ccd7ef3df1fad850a"
+    },
+    "model.safetensors": {
+      "bytes": 343223968,
+      "sha256": "97b2ce64ec146884b37f98ee7944ca4891aa72f6827dc0cb10684a1cbecd5830",
+      "lfs": true
+    },
+    "preprocessor_config.json": {
+      "bytes": 325,
+      "sha256": "a34861a24e781942424ad790b82bc99348404a2e64ea882de88c40905851698d",
+      "blob_id": "273d24924a8bd10227b532d603484f165dcb0b5d"
+    }
+  }
+}

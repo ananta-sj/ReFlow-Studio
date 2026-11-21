@@ -48,7 +48,7 @@ def assemble(target):
         shutil.copy2(source,dest)
     shutil.copytree(ROOT/'build/ci-runtime/python',payload/'python',symlinks=True,
                     ignore=shutil.ignore_patterns('__pycache__','*.pyc','*.pyo','direct_url.json'))
-    (payload/'packaging').mkdir()
+    (payload/'packaging').mkdir(exist_ok=True)
     shutil.copy2(ROOT/'packaging/verify_payload.py',payload/'packaging/verify_payload.py')
     shutil.copy2(ROOT/'dev/verify_portable_desktop.py',payload/'packaging/desktop_smoke.py')
     status=('REFLOW STUDIO - DESKTOP PREVIEW\n\n'

@@ -75,7 +75,25 @@ def _dir_size(path):
     return total
 
 
-def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revision=None):
+def require_hub_transport() -> None:
+    import importlib.util
+    from core.download_failures import DownloadTransportUnavailable, MESSAGES
+    try:
+        if sys.modules.get('huggingface_hub') is None and importlib.util.find_spec('huggingface_hub') is None:
+            raise ImportError()
+        from huggingface_hub import HfApi, snapshot_download
+        interpreter = worker_python()
+        completed = subprocess.run([interpreter, '-B', '-c', 'from huggingface_hub import HfApi, snapshot_download'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        if completed.returncode:
+            raise ImportError()
+    except Exception:
+        raise DownloadTransportUnavailable(MESSAGES['missing_transport']) from None
+
+
+
+def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revision=None, expected_files=None):
     """An owned process performs HF transfer; progress counts finished files.
 
     File caches can be preallocated before transfer, so their length must not
@@ -85,28 +103,37 @@ def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revisio
     """
     if os.environ.get("REFLOW_OFFLINE") == "1":
         raise RuntimeError("Offline mode: model downloads are disabled")
+    require_hub_transport()
     from huggingface_hub import HfApi
 
     os.makedirs(dest_dir, exist_ok=True)
 
     total = None
+    info = None
     try:
         info = HfApi().model_info(repo_id, files_metadata=True, revision=revision, timeout=10)
         sizes = [f.size for f in (info.siblings or []) if f.size and
                  (not allow_patterns or any(fnmatch(f.rfilename, pattern) for pattern in allow_patterns))]
         total = sum(sizes) if sizes else None
     except Exception:
+        if expected_files:
+            raise
         total = None  # repo metadata lookup failing isn't fatal - the
         # download itself still proceeds, just without a percent/ETA.
+
+    if expected_files:
+        from core.download_recipes import validate_snapshot_metadata
+        validate_snapshot_metadata(info, revision, expected_files)
 
     result = {}
     parent_job = current_job()
     job = parent_job or RenderContext(project_root() / 'temp')
     request = job.workspace / ('hf-transfer-' + uuid.uuid4().hex + '.json')
     log_path = request.with_suffix('.log')
+    failure_path = request.with_suffix('.failure.json')
     request.write_text(json.dumps({'repo_id': repo_id, 'dest_dir': dest_dir,
         'cache_dir': os.path.join(os.path.dirname(dest_dir), '.hf-cache'),
-        'allow_patterns': allow_patterns, 'revision': revision}), encoding='utf-8')
+        'allow_patterns': allow_patterns, 'revision': revision, 'failure_path': str(failure_path)}), encoding='utf-8')
 
     def _run():
         try:
@@ -115,12 +142,15 @@ def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revisio
                             check=True, timeout=3600, stdout=log, stderr=subprocess.STDOUT,
                             env={**os.environ, 'PYTHONIOENCODING': 'utf-8'})
             result['path'] = dest_dir
-        except subprocess.CalledProcessError as exc:
-            with log_path.open('rb') as log:
-                log.seek(0, os.SEEK_END)
-                log.seek(max(0, log.tell() - 6000))
-                detail = log.read().decode('utf-8', errors='replace')
-            result['error'] = RuntimeError(f'Repository transfer failed: {detail}')
+        except subprocess.CalledProcessError:
+            from core.download_failures import DownloadTransferFailure
+            code = 'transfer_failed'
+            try:
+                if failure_path.stat().st_size <= 2048:
+                    code = json.loads(failure_path.read_text(encoding='utf-8')).get('code')
+            except (OSError, ValueError, AttributeError):
+                pass
+            result['error'] = DownloadTransferFailure(code)
         except Exception as e:
             result["error"] = e
 
@@ -157,7 +187,7 @@ def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revisio
     }
 
 
-def _download_hf_snapshot(repo_id, dest_dir, allow_patterns=None, revision=None):
+def _download_hf_snapshot(repo_id, dest_dir, allow_patterns=None, revision=None, expected_files=None):
     destination = os.path.abspath(dest_dir)
     os.makedirs(os.path.dirname(destination), exist_ok=True)
     with FileLock(destination + '.lock', timeout=30):
@@ -166,7 +196,8 @@ def _download_hf_snapshot(repo_id, dest_dir, allow_patterns=None, revision=None)
         with tempfile.TemporaryDirectory(prefix='.repo-download-', dir=os.path.dirname(destination)) as directory:
             staging = os.path.join(directory, 'snapshot')
             done = None
-            producer = (_snapshot_progress(repo_id, staging, allow_patterns=allow_patterns, revision=revision)
+            producer = (_snapshot_progress(repo_id, staging, allow_patterns=allow_patterns, revision=revision, expected_files=expected_files)
+                        if expected_files else _snapshot_progress(repo_id, staging, allow_patterns=allow_patterns, revision=revision)
                         if allow_patterns or revision else _snapshot_progress(repo_id, staging))
             try:
                 for progress in producer:
@@ -180,12 +211,15 @@ def _download_hf_snapshot(repo_id, dest_dir, allow_patterns=None, revision=None)
                      if path.is_file() and '.cache' not in path.relative_to(staging).parts]
             if not files or not any(path.stat().st_size for path in files):
                 raise RuntimeError('Repository contains no nonempty model artifacts')
+            if expected_files:
+                from core.download_recipes import validate_snapshot_files
+                validate_snapshot_files(staging, expected_files)
             check_cancelled()
             os.replace(staging, destination)
             yield done
 
 
-def download_with_progress(url: str, dest_path: str, chunk_size: int = 256 * 1024, *, allow_patterns=None, revision=None, expected_size=None, expected_sha256=None):
+def download_with_progress(url: str, dest_path: str, chunk_size: int = 256 * 1024, *, allow_patterns=None, revision=None, expected_size=None, expected_sha256=None, expected_files=None):
     """Generator yielding progress dicts as the download proceeds:
     {"phase": "downloading"|"done", "downloaded": int, "total": int|None,
      "percent": float|None, "speed_bps": float, "eta_seconds": float|None}
@@ -202,7 +236,7 @@ def download_with_progress(url: str, dest_path: str, chunk_size: int = 256 * 102
         if expected_size is not None or expected_sha256 is not None:
             raise ValueError('File size/checksum validation requires a single-file URL')
         if allow_patterns or revision:
-            yield from _download_hf_snapshot(repo_id, dest_path, allow_patterns, revision)
+            yield from _download_hf_snapshot(repo_id, dest_path, allow_patterns, revision, expected_files)
         else:
             yield from _download_hf_snapshot(repo_id, dest_path)
         return

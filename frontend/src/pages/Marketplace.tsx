@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Cloud, Cpu, Download, HardDrive, Server, Sparkles, Star, Trash2, Wand2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { HelpTooltip } from "@/components/shared/HelpTooltip"
 import { CueAudioPlayer } from "@/components/shared/CueAudioPlayer"
+import { readDownloadFailure } from "@/lib/download-failure"
 import { useMarketplace } from "@/lib/use-marketplace"
 import { cn } from "@/lib/utils"
 import { safeExternalUrl } from "@/lib/external-url"
@@ -173,6 +174,37 @@ function AddModelDialog({
   const [error, setError] = useState<string | null>(null)
   const [source, setSource] = useState<"local" | "cloud" | "localapi" | "airllm">("local")
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const fieldRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({})
+  const submitting = useRef(false)
+  function fieldProps(key: string, label: string) {
+    return { 'aria-label': label, 'aria-invalid': Boolean(fieldErrors[key]),
+      'aria-describedby': fieldErrors[key] ? `model-field-error-${key}` : undefined,
+      ref: (element: HTMLInputElement | HTMLTextAreaElement | null) => { fieldRefs.current[key] = element } }
+  }
+  function fieldError(key: string) {
+    return fieldErrors[key] ? <p id={`model-field-error-${key}`} className="text-xs text-destructive">{fieldErrors[key]}</p> : null
+  }
+  function required(fields: [string, string, string][]) {
+    const errors: Record<string, string> = {}
+    for (const [key, value, label] of fields) if (!value.trim()) errors[key] = `Enter ${label}.`
+    setFieldErrors(errors)
+    const first = Object.keys(errors)[0]
+    if (first) { setError(errors[first]); fieldRefs.current[first]?.focus(); return false }
+    setError(null)
+    return true
+  }
+  async function submit(operation: () => Promise<{ ok: boolean; message?: string }>, fallback: string) {
+    if (submitting.current) return
+    submitting.current = true; setBusy(true); setError(null)
+    try {
+      const result = await operation()
+      if (result.ok) resetAndClose()
+      else setError(fallback)
+    } catch { setError(fallback) }
+    finally { submitting.current = false; setBusy(false) }
+  }
+
   const [localName, setLocalName] = useState("")
   const [localUrl, setLocalUrl] = useState("")
   const [localPreset, setLocalPreset] = useState<string | null>(null)
@@ -188,13 +220,19 @@ function AddModelDialog({
   const [apiUrl, setApiUrl] = useState("")
   const [apiConfig, setApiConfig] = useState("{}")
 
-  function parseServiceConfig(raw: string): Record<string, unknown> | null {
+  function parseServiceConfig(raw: string, key: string): Record<string, unknown> | null {
     try {
       const value: unknown = JSON.parse(raw)
       if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error()
       return value as Record<string, unknown>
     } catch {
-      setError("Service configuration must be a JSON object.")
+      const message = "Service configuration must be a JSON object."
+      setError(message)
+      setFieldErrors(previous => ({ ...previous, [key]: message }))
+      const element = fieldRefs.current[key]
+      const details = element?.closest('details')
+      if (details) details.open = true
+      element?.focus()
       return null
     }
   }
@@ -226,56 +264,39 @@ function AddModelDialog({
     setApiConfig("{}")
     setAirllmName(""); setAirllmModelId(""); setAirllmCompression("4bit")
     setError(null)
+    setFieldErrors({})
     setOpen(false)
   }
 
   async function submitLocal() {
-    if (!localUrl.trim() || !localName.trim()) return
-    setBusy(true); setError(null)
-    const result = await mp.addLocal(localUrl.trim(), localName.trim(), localPreset)
-    setBusy(false)
-    if (result.ok) resetAndClose()
-    else setError(result.message ?? "Failed to start download.")
+    if (!required([['localName', localName, 'a display name'], ['localUrl', localUrl, 'a model URL']])) return
+    await submit(() => mp.addLocal(localUrl.trim(), localName.trim(), localPreset), 'Failed to start download.')
   }
-
   async function submitCloud() {
-    if (!cloudUrl.trim() || !cloudName.trim() || !cloudKey.trim()) return
-    const config = parseServiceConfig(cloudConfig)
+    if (!required([['cloudName', cloudName, 'a display name'], ['cloudUrl', cloudUrl, 'an API base URL'], ['cloudKey', cloudKey, 'an API key'],
+      ...(cloudPreset.startsWith('elevenlabs_') ? [['serviceVoiceId', serviceVoiceId, 'the service voice ID'] as [string, string, string]] : [])])) return
+    const config = parseServiceConfig(cloudConfig, "cloudConfig")
     if (!config) return
-    if (cloudPreset.startsWith("elevenlabs_") && !serviceVoiceId.trim()) {
-      setError("Enter the voice ID supplied by ElevenLabs.")
-      return
-    }
-    setBusy(true); setError(null)
-    const result = await mp.addCloud(cloudName.trim(), cloudUrl.trim(), cloudKey.trim(), cloudPreset,
-      { ...config, ...(serviceVoiceId.trim() ? { voice_id: serviceVoiceId.trim() } : {}) })
-    setBusy(false)
-    if (result.ok) resetAndClose()
-    else setError(result.message ?? "Failed to add cloud model.")
+    await submit(() => mp.addCloud(cloudName.trim(), cloudUrl.trim(), cloudKey, cloudPreset,
+      { ...config, ...(serviceVoiceId.trim() ? { voice_id: serviceVoiceId.trim() } : {}) }), 'Failed to add cloud model.')
   }
-
   async function submitLocalApi() {
-    if (!apiUrl.trim() || !apiName.trim()) return
-    const config = parseServiceConfig(apiConfig)
+    if (!required([['apiName', apiName, 'a display name'], ['apiUrl', apiUrl, 'a service base URL']])) return
+    const config = parseServiceConfig(apiConfig, "apiConfig")
     if (!config) return
-    setBusy(true); setError(null)
-    const result = await mp.addLocalApi(apiName.trim(), apiUrl.trim(), "custom", config)
-    setBusy(false)
-    if (result.ok) resetAndClose()
-    else setError(result.message ?? "Failed to add local service.")
+    await submit(() => mp.addLocalApi(apiName.trim(), apiUrl.trim(), 'custom', config), 'Failed to add local service.')
   }
-
   async function submitAirllm() {
-    if (!airllmModelId.trim() || !airllmName.trim()) return
-    setBusy(true); setError(null)
-    const result = await bridge.addAirllmModel(airllmName.trim(), airllmModelId.trim(), airllmCompression)
-    setBusy(false)
-    if (result.ok) { await mp.refresh(); resetAndClose() }
-    else setError(result.message ?? "Failed to add AirLLM model.")
+    if (!required([['airllmName', airllmName, 'a display name'], ['airllmModelId', airllmModelId, 'a model ID']])) return
+    await submit(async () => {
+      const result = await bridge.addAirllmModel(airllmName.trim(), airllmModelId.trim(), airllmCompression)
+      if (result.ok) await mp.refresh()
+      return result
+    }, 'Failed to add AirLLM model.')
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(next) => { if (submitting.current) return; setError(null); setFieldErrors({}); setOpen(next) }}>
       {!hideTrigger && (
         <DialogTrigger asChild>
           <Button size="sm" variant="outline"><Download className="mr-1 h-3.5 w-3.5" /> Add Model</Button>
@@ -306,19 +327,24 @@ function AddModelDialog({
               stageType={stageType}
               onPick={(name, url) => { setLocalName(name); setLocalUrl(url) }}
             />
-            <Input placeholder="Display name" value={localName} onChange={(e) => setLocalName(e.target.value)} />
+            <Input placeholder="Display name" {...fieldProps("localName", "Display name")} value={localName} onChange={(e) => setLocalName(e.target.value)} />
+            {fieldError("localName")}
             <Input
               placeholder="Model URL (Hugging Face link, .zip, .pth, etc.)"
-              value={localUrl}
+              {...fieldProps("localUrl", "Model URL")} value={localUrl}
               onChange={(e) => setLocalUrl(e.target.value)}
             />
+            {fieldError("localUrl")}
             <Button onClick={submitLocal} disabled={busy}>{busy ? "Starting…" : "Download & Install"}</Button>
           </TabsContent>
 
           <TabsContent value="cloud" className="flex flex-col gap-3 pt-2">
-            <Input placeholder="Display name" value={cloudName} onChange={(e) => setCloudName(e.target.value)} />
-            <Input placeholder="API base URL (e.g. https://api.openai.com)" value={cloudUrl} onChange={(e) => setCloudUrl(e.target.value)} />
-            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" value={cloudKey} onChange={(e) => setCloudKey(e.target.value)} />
+            <Input placeholder="Display name" {...fieldProps("cloudName", "Display name")} value={cloudName} onChange={(e) => setCloudName(e.target.value)} />
+            {fieldError("cloudName")}
+            <Input placeholder="API base URL (e.g. https://api.openai.com)" {...fieldProps("cloudUrl", "API base URL")} value={cloudUrl} onChange={(e) => setCloudUrl(e.target.value)} />
+            {fieldError("cloudUrl")}
+            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" {...fieldProps("cloudKey", "API key")} value={cloudKey} onChange={(e) => setCloudKey(e.target.value)} />
+            {fieldError("cloudKey")}
             <Select value={cloudPreset} onValueChange={setCloudPreset}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -327,13 +353,15 @@ function AddModelDialog({
                 ))}
               </SelectContent>
             </Select>
-            {cloudPreset.startsWith("elevenlabs_") && (
-              <Input aria-label="Service voice ID" placeholder="ElevenLabs voice ID" value={serviceVoiceId} onChange={(e) => setServiceVoiceId(e.target.value)} />
-            )}
-            <details className="text-xs text-muted-foreground">
+            {cloudPreset.startsWith("elevenlabs_") && (<>
+              <Input placeholder="ElevenLabs voice ID" {...fieldProps("serviceVoiceId", "Service voice ID")} value={serviceVoiceId} onChange={(e) => setServiceVoiceId(e.target.value)} />
+            {fieldError("serviceVoiceId")}
+            </>)}
+            <details open={Boolean(fieldErrors.cloudConfig)} className="text-xs text-muted-foreground">
               <summary>Advanced service configuration</summary>
               <p className="py-2">Optional model, endpoint and response settings as JSON. Keep API keys in the password field above.</p>
-              <Textarea aria-label="Cloud service configuration" value={cloudConfig} onChange={(e) => setCloudConfig(e.target.value)} />
+              {fieldError("cloudConfig")}
+              <Textarea {...fieldProps("cloudConfig", "Cloud service configuration")} value={cloudConfig} onChange={(e) => setCloudConfig(e.target.value)} />
             </details>
             <p className="text-[11px] text-muted-foreground">
               The API key is stored in your OS credential manager, never in a plain settings file.
@@ -342,20 +370,23 @@ function AddModelDialog({
           </TabsContent>
 
           <TabsContent value="localapi" className="flex flex-col gap-3 pt-2">
-            <Input placeholder="Display name" value={apiName} onChange={(e) => setApiName(e.target.value)} />
+            <Input placeholder="Display name" {...fieldProps("apiName", "Display name")} value={apiName} onChange={(e) => setApiName(e.target.value)} />
+            {fieldError("apiName")}
             <Input
               placeholder="Base URL (e.g. http://localhost:11434)"
-              value={apiUrl}
+              {...fieldProps("apiUrl", "Service base URL")} value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
             />
+            {fieldError("apiUrl")}
             <p className="text-[11px] text-muted-foreground">
               For self-hosted / local network services that need no API key (Ollama-style).
             </p>
             <Button onClick={submitLocalApi} disabled={busy}>{busy ? "Adding…" : "Add Local Service"}</Button>
-            <details className="text-xs text-muted-foreground">
+            <details open={Boolean(fieldErrors.apiConfig)} className="text-xs text-muted-foreground">
               <summary>Advanced service configuration</summary>
               <p className="py-2">Optional endpoint and response settings as JSON.</p>
-              <Textarea aria-label="Local service configuration" value={apiConfig} onChange={(e) => setApiConfig(e.target.value)} />
+              {fieldError("apiConfig")}
+              <Textarea {...fieldProps("apiConfig", "Local service configuration")} value={apiConfig} onChange={(e) => setApiConfig(e.target.value)} />
             </details>
           </TabsContent>
 
@@ -366,12 +397,14 @@ function AddModelDialog({
                 slower than the default translator, but works on hardware too small to load
                 the model normally. Never used unless you add one here and set it Active.
               </p>
-              <Input placeholder="Display name" value={airllmName} onChange={(e) => setAirllmName(e.target.value)} />
+              <Input placeholder="Display name" {...fieldProps("airllmName", "Display name")} value={airllmName} onChange={(e) => setAirllmName(e.target.value)} />
+            {fieldError("airllmName")}
               <Input
                 placeholder="Hugging Face model id (e.g. meta-llama/Meta-Llama-3-8B)"
-                value={airllmModelId}
+                {...fieldProps("airllmModelId", "Model ID")} value={airllmModelId}
                 onChange={(e) => setAirllmModelId(e.target.value)}
               />
+            {fieldError("airllmModelId")}
               <Select value={airllmCompression} onValueChange={setAirllmCompression}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -384,7 +417,7 @@ function AddModelDialog({
             </TabsContent>
           )}
         </Tabs>
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
       </DialogContent>
     </Dialog>
   )
@@ -643,6 +676,8 @@ function ModelCard({ model, isActive, mp }: { model: ModelEntry; isActive: boole
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {model.kind === 'local_file' && (model.status === 'error' || model.status === 'not_downloaded') && <Button size="sm" variant="outline"
+              disabled={mp.retrying?.includes(model.id)} onClick={() => mp.retry(model.id)}>Retry download</Button>}
             {model.status === 'downloading' && <Button size="sm" variant="outline"
               disabled={Boolean(model.meta?.cancel_requested)} onClick={() => mp.cancel(model.id)}>
               {model.meta?.cancel_requested ? 'Stopping…' : 'Stop download'}
@@ -661,6 +696,10 @@ function ModelCard({ model, isActive, mp }: { model: ModelEntry; isActive: boole
             </Button>
           </div>
         </div>
+
+        {model.status === 'error' && <p role="alert" className="text-xs text-destructive">
+          {readDownloadFailure(model.meta?.download_error).message}
+        </p>}
 
         {model.status === "downloading" && dl && (
           <div className="flex flex-col gap-1">
@@ -893,7 +932,8 @@ function StageTabContent({ stageType }: { stageType: StageType }) {
           prefill={recPrefill}
         />
       </div>
-      {mp.models.length === 0 ? (
+      {mp.loadError && <p role="alert" className="text-sm text-destructive">{mp.loadError}</p>}
+      {!mp.loadError && mp.models.length === 0 ? (
         <div className="rounded-md border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
           No models connected for this stage yet.
         </div>

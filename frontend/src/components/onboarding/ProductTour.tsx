@@ -3,10 +3,11 @@
 // than a clip-path mask) around the target element, plus a positioned
 // callout with Back/Next/Skip. See lib/use-tour.ts for the step data and
 // state machine.
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { endTour, nextTourStep, prevTourStep, useTour } from "@/lib/use-tour"
+import { computeTourCallout } from "@/lib/tour-layout"
 import type { PageId } from "@/components/shell/PrimaryNav"
 
 interface ProductTourProps {
@@ -17,6 +18,36 @@ interface ProductTourProps {
 export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
   const { active, stepIndex, step, totalSteps } = useTour()
   const [rect, setRect] = useState<DOMRect | null>(null)
+  const calloutRef = useRef<HTMLDivElement>(null)
+  const returnFocus = useRef<HTMLElement | null>(null)
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const [size, setSize] = useState({ width: 320, height: 240 })
+  function restoreFocus() {
+    const el = returnFocus.current
+    returnFocus.current = null
+    if (el?.isConnected) el.focus()
+  }
+  function dismiss() { endTour(); restoreFocus() }
+  useEffect(() => {
+    if (!active) return
+    returnFocus.current = document.activeElement as HTMLElement | null
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); endTour(); restoreFocus() }
+      if (event.key === 'Tab') {
+        const buttons = Array.from(calloutRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? [])
+        const first = buttons[0], last = buttons.at(-1)
+        if (!first || !last) return
+        if (event.shiftKey && (document.activeElement === first || !buttons.includes(document.activeElement as HTMLButtonElement))) {
+          event.preventDefault(); last.focus()
+        } else if (!event.shiftKey && (document.activeElement === last || !buttons.includes(document.activeElement as HTMLButtonElement))) {
+          event.preventDefault(); first.focus()
+        }
+      }
+    }
+    window.addEventListener('keydown', keydown, true)
+    return () => { window.removeEventListener('keydown', keydown, true); restoreFocus() }
+  }, [active])
+
 
   useEffect(() => {
     if (!active || !step) return
@@ -27,27 +58,41 @@ export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
   }, [active, stepIndex])
 
   useEffect(() => {
-    if (!active || !step?.target) {
-      setRect(null)
-      return
-    }
-    // A page switch (or the very first render of a step) needs a beat for
-    // the target's page to actually mount before it can be measured.
-    let raf = 0
+    if (!active || !step) { setRect(null); return }
+    let cancelled = false, raf = 0
+    const target = step.target ? document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`) : null
+    let observedTarget = target
     const measure = () => {
-      const el = document.querySelector(`[data-tour="${step.target}"]`)
-      setRect(el ? el.getBoundingClientRect() : null)
+      if (cancelled) return
+      const el = step.target ? document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`) : null
+      if (el && el !== observedTarget) {
+        observedTarget = el
+        el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+        observer?.observe(el)
+      }
+      const next = el?.getBoundingClientRect() ?? null
+      setRect(prev => prev?.left === next?.left && prev?.top === next?.top && prev?.width === next?.width && prev?.height === next?.height ? prev : next)
+      setViewport(prev => prev.width === window.innerWidth && prev.height === window.innerHeight ? prev : { width: window.innerWidth, height: window.innerHeight })
+      const panel = calloutRef.current?.getBoundingClientRect()
+      if (panel) setSize(prev => prev.width === panel.width && prev.height === panel.height ? prev : { width: panel.width, height: panel.height })
     }
-    const timeout = setTimeout(() => {
-      measure()
-      raf = requestAnimationFrame(measure)
+    const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure) }
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule)
+    if (target) { target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' }); observer?.observe(target) }
+    if (calloutRef.current) observer?.observe(calloutRef.current)
+    const timer = setTimeout(() => {
+      const late = step.target ? document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`) : null
+      late?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })
+      if (late && late !== target) observer?.observe(late)
+      measure(); schedule()
+      calloutRef.current?.querySelector<HTMLButtonElement>('button')?.focus()
     }, 80)
-    window.addEventListener("resize", measure)
-    return () => {
-      clearTimeout(timeout)
-      cancelAnimationFrame(raf)
-      window.removeEventListener("resize", measure)
-    }
+    measure()
+    const mutations = typeof MutationObserver === 'undefined' ? null : new MutationObserver(schedule)
+    mutations?.observe(document.documentElement, { childList: true, subtree: true })
+    window.addEventListener('resize', schedule)
+    window.addEventListener('scroll', schedule, true)
+    return () => { cancelled = true; clearTimeout(timer); cancelAnimationFrame(raf); observer?.disconnect(); mutations?.disconnect(); window.removeEventListener('resize', schedule); window.removeEventListener('scroll', schedule, true) }
   }, [active, stepIndex, step, currentPage])
 
   if (!active || !step) return null
@@ -76,26 +121,14 @@ export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
 
   // Callout: centered if there's no target, otherwise anchored just below
   // (or above, if there's no room below) the spotlighted rect.
-  const calloutStyle: React.CSSProperties = rect
-    ? {
-        position: "fixed",
-        left: Math.min(Math.max(16, rect.left), window.innerWidth - 336),
-        top:
-          rect.bottom + pad + 220 < window.innerHeight
-            ? rect.bottom + pad + 12
-            : Math.max(16, rect.top - pad - 12 - 200),
-        zIndex: 101,
-      }
-    : {
-        position: "fixed",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 101,
-      }
+  const calloutStyle: React.CSSProperties = {
+    position: 'fixed', ...computeTourCallout(rect, viewport, size), zIndex: 101,
+    width: 'min(320px, calc(100vw - 32px))',
+  }
 
   return (
     <AnimatePresence>
+      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 99 }} />
       <motion.div
         key={stepIndex}
         style={spotlightStyle}
@@ -105,26 +138,30 @@ export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
       />
       <motion.div
         key={`callout-${stepIndex}`}
+        ref={calloutRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Product tour"
         style={calloutStyle}
-        className="w-80 rounded-lg border border-border bg-card p-4 shadow-2xl"
+        className="flex flex-col overflow-hidden rounded-lg border border-border bg-card p-4 shadow-2xl"
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.2 }}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex shrink-0 items-center justify-between">
           <span className="text-xs text-muted-foreground">
             Step {stepIndex + 1} / {totalSteps}
           </span>
-          <button type="button" onClick={endTour} className="text-xs text-muted-foreground hover:text-foreground">
+          <button type="button" onClick={dismiss} className="text-xs text-muted-foreground hover:text-foreground">
             Skip
           </button>
         </div>
-        <h3 className="mb-1 text-sm font-bold" style={{ fontFamily: "var(--font-display)" }}>
+        <h3 className="mb-1 shrink-0 text-sm font-bold" style={{ fontFamily: "var(--font-display)" }}>
           {step.title}
         </h3>
-        <p className="mb-4 text-xs text-muted-foreground">{step.description}</p>
-        <div className="flex items-center justify-between">
+        <p className="mb-4 min-h-0 overflow-y-auto text-xs text-muted-foreground">{step.description}</p>
+        <div className="flex shrink-0 items-center justify-between">
           {stepIndex > 0 ? (
             <Button variant="outline" size="sm" onClick={prevTourStep}>Back</Button>
           ) : (

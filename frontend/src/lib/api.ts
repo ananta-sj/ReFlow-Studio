@@ -98,6 +98,8 @@ export type DeviceEtaMap = Record<string, JobEstimate>
 
 export type StageType = "stt" | "translation" | "tts" | "voice" | "enhancer" | "filter" | "lipsync" | "profanity_filter"
 export type ModelKind = "local_file" | "local_api" | "cloud_api"
+export interface DownloadFailure { code: string; message: string }
+
 export type ModelStatus = "installed" | "downloading" | "error" | "not_downloaded"
 
 export interface ModelEntry {
@@ -157,6 +159,7 @@ export interface ModelActionResult {
 }
 
 export interface ModelDownloadProgress {
+  attemptId?: string
   modelId: string
   phase: "downloading" | "done"
   downloaded: number
@@ -485,6 +488,7 @@ declare global {
         get_interrupted_render: () => Promise<InterruptedRender | null>
         resume_interrupted_render: (recoveryToken: string, resumeBatch?: boolean) => Promise<{ ok: boolean; message?: string }>
         cancel_model_download: (modelId: string) => Promise<{ ok: boolean; message?: string }>
+        retry_model_download: (modelId: string) => Promise<{ ok: boolean; message?: string; model?: ModelEntry }>
         discard_interrupted_render: (recoveryToken: string) => Promise<{ ok: boolean; message?: string }>
         get_session_state: () => Promise<SessionSnapshot>
         add_queue_drafts: (paths: string[]) => Promise<JobActionResult>
@@ -625,6 +629,7 @@ export const bridge = {
   getInterruptedRender: async () => (await api()).get_interrupted_render(),
   resumeInterruptedRender: async (recoveryToken: string, resumeBatch = false) => (await api()).resume_interrupted_render(recoveryToken, resumeBatch),
   cancelModelDownload: async (modelId: string) => (await api()).cancel_model_download(modelId),
+  retryModelDownload: async (modelId: string) => (await api()).retry_model_download(modelId),
   discardInterruptedRender: async (recoveryToken: string) => (await api()).discard_interrupted_render(recoveryToken),
   getSessionState: async () => (await api()).get_session_state(),
   addQueueDrafts: async (paths: string[]) => (await api()).add_queue_drafts(paths),

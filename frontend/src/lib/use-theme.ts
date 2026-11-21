@@ -1,3 +1,4 @@
+import { applyAccentForTheme } from "./use-accent-color"
 import { preferenceStorage } from "./preference-storage"
 import { useEffect, useState } from "react"
 
@@ -8,6 +9,7 @@ function applyTheme(theme: Theme) {
   const root = document.documentElement
   root.classList.remove("dark", "light")
   root.classList.add(theme)
+  applyAccentForTheme(theme)
 }
 
 function getInitialTheme(): Theme {

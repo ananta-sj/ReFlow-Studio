@@ -147,7 +147,7 @@ export function ColorPicker({ value, onChange, onReset }: ColorPickerProps) {
       </div>
 
       {onReset && (
-        <Button variant="outline" size="sm" onClick={onReset}>
+        <Button variant="outline" size="sm" onClick={() => { setDraft({ value, text: value }); onReset?.() }}>
           Reset to Default
         </Button>
       )}

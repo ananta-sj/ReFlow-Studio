@@ -177,7 +177,7 @@ class ArchitectureContracts(unittest.TestCase):
         def transfer():
             with bind_job(job):
                 return list(downloader._snapshot_progress('fixture/repo', str(self.root / 'snapshot')))
-        with patch.dict(sys.modules, {'huggingface_hub': SimpleNamespace(HfApi=lambda: metadata)}), \
+        with patch.dict(sys.modules, {'huggingface_hub': SimpleNamespace(HfApi=lambda: metadata, snapshot_download=lambda **kwargs: None)}), \
                 patch.object(downloader, 'run_process', side_effect=fixture_process), ThreadPoolExecutor(1) as pool:
             future = pool.submit(transfer)
             try:

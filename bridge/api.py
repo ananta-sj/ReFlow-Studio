@@ -23,7 +23,8 @@ import webview
 import config
 from core import marketplace, model_detect, recommended_models, render_state, web_search
 from core.credential_store import CredentialError, delete_credential, get_credential, set_credential
-from core.downloader import download_with_progress
+from core.downloader import download_with_progress, hf_repo_id_for_url, require_hub_transport
+from core.download_failures import describe_download_failure
 from core.hardware_monitor import AIRLLM_TRANSLATE_COST, AIRLLM_TRANSLATE_VRAM_MB, HardwareMonitor, _DEVICE_SPEEDUP
 from core.hardware_profile import HardwareProfileStore
 from core.languages import LANGUAGES
@@ -1135,9 +1136,12 @@ class PythonBridge:
                 api_base_url=api_base_url, credential_ref=credential_ref,
                 request_preset=request_preset, status="installed", meta=meta,
             )
-        except Exception as exc:
-            delete_credential(credential_ref)
-            return {'ok': False, 'message': str(exc)}
+        except Exception:
+            try:
+                delete_credential(credential_ref)
+            except Exception:
+                pass  # Credential remains in the OS vault; never expose its details.
+            return {'ok': False, 'message': 'The model connection could not be saved. Review local storage permissions and retry.'}
         push.emit("model_installed", {"modelId": entry["id"], "stageType": stage_type})
         return {"ok": True, "model": entry}
 
@@ -1191,56 +1195,110 @@ class PythonBridge:
         resolve_*() should use for a downloaded repo (e.g. "image_classifier"
         for the Filter stage - see core/providers/resolve.py) - optional
         since most stages only ever have one local_file shape today."""
+        repo_id = hf_repo_id_for_url(source_url)
         match = next((item for item in recommended_models.RECOMMENDED_MODELS.get(stage_type, [])
-                      if item.get('source_url', '').rstrip('/') == source_url.rstrip('/')), None)
+                      if item.get('source_url', '').rstrip('/') == source_url.rstrip('/') or
+                      repo_id is not None and hf_repo_id_for_url(item.get('source_url', '')) == repo_id), None)
         if match and match['kind'] == 'reference':
             return {'ok': False, 'message': 'This project is listed as a reference. Its download has no compatible one-click adapter.'}
         if match and not request_preset:
             request_preset = match.get('request_preset')
+        if hf_repo_id_for_url(source_url):
+            try:
+                require_hub_transport()
+            except Exception as exc:
+                failure = describe_download_failure(exc)
+                return {'ok': False, **failure}
+        rejection = self._start_rejection()
+        if rejection or getattr(self, '_active_job', None):
+            return {'ok': False, 'message': rejection or 'Wait for the current render to finish before adding a download.'}
         entry = self.registry.add(
             stage_type, "local_file", display_name,
             source_url=source_url, status="downloading", request_preset=request_preset,
         )
+        return self._start_local_download_idle(entry)
+
+    def _start_local_download_idle(self, entry):
+        """Caller holds _render_lock; attempts share identity, never artifact paths."""
+        model_id = entry['id']
+        attempt_id = str(uuid.uuid4())
+        meta = dict(entry.get('meta') or {})
+        meta.pop('download_error', None)
+        meta.pop('cancel_requested', None)
+        meta['download_attempt_id'] = attempt_id
+        if not hasattr(self, '_download_contexts'):
+            self._download_contexts = {}
         if not hasattr(self, '_active_downloads'):
             self._active_downloads = set()
-        self._active_downloads.add(entry['id'])
         try:
-            if not hasattr(self, '_download_contexts'):
-                self._download_contexts = {}
-            self._download_contexts[entry['id']] = RenderContext(config.TEMP_PATH)
-            thread = threading.Thread(
-                target=self._download_tracked, args=(entry["id"], stage_type, source_url), daemon=True
-            )
-            thread.start()
+            entry = self.registry.update(model_id, status='downloading', meta=meta)
+            job = RenderContext(config.TEMP_PATH)
+            job._download_attempt_id = attempt_id
+            self._download_contexts[model_id] = job
+            self._active_downloads.add(model_id)
+            threading.Thread(target=self._download_tracked,
+                args=(model_id, entry['stage_type'], entry['source_url'], attempt_id), daemon=True).start()
         except Exception as exc:
-            self._active_downloads.discard(entry['id'])
-            job = getattr(self, '_download_contexts', {}).pop(entry['id'], None)
-            if job:
-                job.cleanup()
-            try:
-                entry = self.registry.update(entry['id'], status='error')
-            except (ValueError, OSError) as save_error:
-                return {'ok': False, 'message': f'{exc}; could not save model error status: {save_error}', 'model': entry}
-            return {'ok': False, 'message': str(exc), 'model': entry}
-        return {"ok": True, "model": entry}
-
-    def _download_tracked(self, model_id, stage_type, source_url):
-        try:
-            with bind_job(getattr(self, '_download_contexts', {}).get(model_id)):
-                self._run_local_download(model_id, stage_type, source_url)
-        finally:
-            with self._render_lock:
-                self._active_downloads.discard(model_id)
-                job = getattr(self, '_download_contexts', {}).pop(model_id, None)
+            self._active_downloads.discard(model_id)
+            job = self._download_contexts.pop(model_id, None)
             if job:
                 try:
                     job.cleanup()
-                except Exception as exc:
-                    push.emit('log', {'level': 'warning', 'message': f'Download workspace retained: {exc}'})
+                except Exception:
+                    push.emit('log', {'level': 'warning', 'message': 'Download workspace retained after startup failure.'})
+            failure = describe_download_failure(exc)
+            meta['download_error'] = failure
             try:
-                push.emit('model_download_finished', {'modelId': model_id})
+                entry = self.registry.update(model_id, status='error', meta=meta)
+            except (ValueError, OSError):
+                return {'ok': False, 'message': 'The download could not start or save its state. Review local setup before retrying.'}
+            return {'ok': False, **failure, 'model': entry}
+        return {'ok': True, 'model': entry}
+
+    def retry_model_download(self, model_id):
+        with self._render_lock:
+            try:
+                if str(uuid.UUID(model_id)) != model_id:
+                    raise ValueError('Invalid model identity')
+            except (ValueError, TypeError, AttributeError):
+                return {'ok': False, 'message': 'That model connection is unavailable.'}
+            entry = self.registry.get(model_id)
+            if not entry or entry.get('kind') != 'local_file' or entry.get('status') not in ('error', 'not_downloaded') or not entry.get('source_url'):
+                return {'ok': False, 'message': 'Only a failed or stopped local download can be retried.'}
+            if model_id in getattr(self, '_active_downloads', set()) or model_id in getattr(self, '_download_contexts', {}):
+                return {'ok': False, 'message': 'The previous transfer is still stopping. Wait before retrying.'}
+            rejection = self._start_rejection()
+            if rejection or getattr(self, '_active_job', None):
+                return {'ok': False, 'message': rejection or 'Wait for the current render to finish before retrying.'}
+            if hf_repo_id_for_url(entry['source_url']):
+                try:
+                    require_hub_transport()
+                except Exception as exc:
+                    failure = describe_download_failure(exc)
+                    meta = dict(entry.get('meta') or {}); meta['download_error'] = failure
+                    self.registry.update(model_id, status='error', meta=meta)
+                    return {'ok': False, **failure}
+            return self._start_local_download_idle(entry)
+
+    def _download_tracked(self, model_id, stage_type, source_url, attempt_id=None):
+        job = getattr(self, '_download_contexts', {}).get(model_id)
+        try:
+            with bind_job(job):
+                self._run_local_download(model_id, stage_type, source_url)
+        finally:
+            if job:
+                try:
+                    job.cleanup()
+                except Exception:
+                    push.emit('log', {'level': 'warning', 'message': 'Download workspace retained; review local diagnostics before cleanup.'})
+            with self._render_lock:
+                if not job or not job.processes:
+                    self._active_downloads.discard(model_id)
+                    if job and getattr(self, '_download_contexts', {}).get(model_id) is job:
+                        self._download_contexts.pop(model_id, None)
+            try:
+                push.emit('model_download_finished', {'modelId': model_id, **({'attemptId': attempt_id} if attempt_id else {})})
             except Exception:
-                # Delivery cannot undo completed cleanup or keep ownership held.
                 pass
 
     def cancel_model_download(self, model_id):
@@ -1249,17 +1307,28 @@ class PythonBridge:
             entry = self.registry.get(model_id)
             if not job or not entry or entry.get('status') != 'downloading':
                 return {'ok': False, 'message': 'That download is no longer running.'}
+            meta = dict(entry.get('meta') or {})
             job.request_stop()
-            push.emit('model_download_stopping', {'modelId': model_id})
+            push.emit('model_download_stopping', {'modelId': model_id, 'attemptId': meta.get('download_attempt_id')})
             return {'ok': True, 'message': 'Stopping; files remain protected until the transfer exits.'}
 
     def _run_local_download(self, model_id, stage_type, source_url):
+        job = current_job()
+        attempt_id = getattr(job, '_download_attempt_id', None)
         dest_dir = os.path.join(config.MODELS_DIR, "_downloads", model_id)
+        if attempt_id:
+            dest_dir = os.path.join(dest_dir, attempt_id)
+        event_identity = {'modelId': model_id, **({'attemptId': attempt_id} if attempt_id else {})}
         filename = _safe_download_filename(source_url)
         dest_path = os.path.join(dest_dir, filename)
         try:
             selected = self.registry.get(model_id)
-            if (selected or {}).get('request_preset') == 'f5tts' and source_url.rstrip('/') == 'https://huggingface.co/SWivid/F5-TTS':
+            from core.download_recipes import repository_download_recipe
+            recipe = repository_download_recipe(stage_type, source_url, (selected or {}).get('request_preset'))
+            if recipe:
+                producer = download_with_progress(source_url, dest_path, allow_patterns=list(recipe['files']),
+                    revision=recipe['revision'], expected_files=recipe['files'])
+            elif (selected or {}).get('request_preset') == 'f5tts' and source_url.rstrip('/') == 'https://huggingface.co/SWivid/F5-TTS':
                 producer = download_with_progress(source_url, dest_path,
                     allow_patterns=['F5TTS_v1_Base/model_1250000.safetensors', 'F5TTS_v1_Base/vocab.txt', 'LICENSE*', 'README.md'],
                     revision='84e5a410d9cead4de2f847e7c9369a6440bdfaca')
@@ -1269,7 +1338,7 @@ class PythonBridge:
                 for progress in producer:
                     if not self.registry.get(model_id):
                         continue
-                    push.emit("model_download_progress", {"modelId": model_id, **progress})
+                    push.emit("model_download_progress", {**event_identity, **progress})
             finally:
                 # A yielded repository download can still own an internal
                 # worker. Drain it even if notification/registry code fails,
@@ -1327,10 +1396,20 @@ class PythonBridge:
                     self.registry.update(model_id, local_path=local_path, status="installed", meta=meta)
             else:
                 self.registry.update(model_id, local_path=local_path, status="installed", meta=meta)
-            push.emit("model_installed", {"modelId": model_id, "stageType": stage_type})
+            push.emit("model_installed", {**event_identity, "stageType": stage_type})
         except Exception as e:
-            self.registry.update(model_id, status="not_downloaded" if isinstance(e, RenderCancelled) else "error")
-            push.emit("model_download_error", {"modelId": model_id, "message": str(e)})
+            entry = self.registry.get(model_id)
+            if entry:
+                meta = dict(entry.get('meta') or {})
+                if isinstance(e, RenderCancelled):
+                    meta.pop('download_error', None)
+                    meta.pop('cancel_requested', None)
+                    self.registry.update(model_id, status='not_downloaded', meta=meta)
+                else:
+                    failure = describe_download_failure(e)
+                    meta['download_error'] = failure
+                    self.registry.update(model_id, status='error', meta=meta)
+                    push.emit('model_download_error', {**event_identity, **failure})
         # Unregistered leftovers are retained for verified removal, not swept
         # using a registry-derived path outside the preview/ownership boundary.
 

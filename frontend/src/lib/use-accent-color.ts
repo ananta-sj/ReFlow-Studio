@@ -1,3 +1,4 @@
+import { resolveAccentTokens } from "./accent-contrast"
 import { preferenceStorage } from "./preference-storage"
 // Custom accent color override - a purely cosmetic frontend preference
 // (localStorage, same split as theme/experience-level - see
@@ -59,29 +60,27 @@ export function hexToHsv(hex: string): HSV | null {
   return { h, s, v }
 }
 
-// Foreground text sitting on top of --primary needs to flip between near-
-// black and near-white depending on the chosen color's perceived
-// brightness, or a dark pick (e.g. deep blue) would render invisible text.
-function bestForegroundFor(hex: string): string {
-  const hsv = hexToHsv(hex)
-  if (!hsv) return "#08090a"
-  const { h, s, v } = hsv
-  // Relative luminance approximation via the same HSV->RGB path.
-  const [r, g, b] = (() => {
-    const hex2 = hsvToHex({ h, s, v })
-    const int = parseInt(hex2.slice(1), 16)
-    return [(int >> 16) & 255, (int >> 8) & 255, int & 255]
-  })()
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.6 ? "#08090a" : "#f5f6f3"
-}
-
-function apply(hex: string) {
+function apply(hex: string, theme?: 'dark' | 'light') {
   const root = document.documentElement
-  root.style.setProperty("--primary", hex)
-  root.style.setProperty("--primary-foreground", bestForegroundFor(hex))
-  root.style.setProperty("--ring", hex)
-  root.style.setProperty("--accent-foreground", hex)
+  const mode = theme ?? (root.classList.contains('light') ? 'light' : 'dark')
+  const style = getComputedStyle(root)
+  const surface = (name: string, fallback: string) => {
+    const value = style.getPropertyValue(name).trim()
+    return /^#[a-f0-9]{6}$/i.test(value) ? value : fallback
+  }
+  const tokens = resolveAccentTokens(hex, mode, {
+    background: surface('--background', mode === 'light' ? '#f2f3ee' : '#08090a'),
+    card: surface('--card', mode === 'light' ? '#ffffff' : '#101214'),
+    accent: surface('--accent', mode === 'light' ? '#e7e8e2' : '#1b1d20'),
+  })
+  root.style.setProperty('--primary', tokens.primary)
+  root.style.setProperty('--primary-foreground', tokens.primaryForeground)
+  root.style.setProperty('--ring', tokens.ring)
+  root.style.setProperty('--accent-foreground', tokens.accentForeground)
+}
+export function applyAccentForTheme(theme: 'dark' | 'light') {
+  load()
+  apply(current, theme)
 }
 
 let current = DEFAULT_HEX
@@ -93,7 +92,7 @@ function load() {
   loaded = true
   try {
     const stored = preferenceStorage.getItem(STORAGE_KEY)
-    if (stored && hexToHsv(stored)) current = stored
+    if (stored && hexToHsv(stored)) current = hsvToHex(hexToHsv(stored)!)
   } catch {
     // default stands
   }
@@ -107,10 +106,10 @@ function notify() {
 export function setAccentColor(hex: string) {
   load()
   if (!hexToHsv(hex)) return
-  current = hex
-  apply(hex)
+  current = hsvToHex(hexToHsv(hex)!)
+  apply(current)
   try {
-    preferenceStorage.setItem(STORAGE_KEY, hex)
+    preferenceStorage.setItem(STORAGE_KEY, current)
   } catch {
     // non-fatal - just won't survive a restart
   }
