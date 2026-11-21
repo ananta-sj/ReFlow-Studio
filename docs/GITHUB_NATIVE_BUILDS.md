@@ -101,3 +101,24 @@ was not modified. Developer ID signing/notarization remain separate work.
 **Testing status:** installer source and contract tests are locally checked on
 Windows. Actual native installer builds and acceptance require Actions on the
 matching OS; these source checks do not establish that those future gates passed.
+
+## Runner startup prerequisites and shutdown checks
+
+The Ubuntu build runner explicitly installs the Qt/OpenGL/XCB and WebEngine
+system libraries required by the existing desktop backend, plus Xvfb/Xauth for
+hidden startup testing. This approved setup affects disposable runners only;
+Linux users still need equivalent distribution-native libraries. The runner's
+system package inventory is retained with its check artifacts. FFmpeg remains a
+separate media-processing prerequisite; its absence is not the GUI failure.
+
+Windows acceptance waits, with a fixed timeout, for Inno's final uninstaller
+process to release its log before checking removal and cleaning its temporary
+installation. A stuck uninstaller still fails the gate.
+
+macOS uses an explicitly stopped loopback interface server with bounded idle
+connections so browser preconnect sockets cannot hold the process open after
+window close. The normal app and hidden test share that lifecycle. Hidden Mac
+startup also reports remaining threads; a lingering process emits diagnostic
+stacks and fails after a short shutdown deadline. Interface acceptance alone
+never overrides a failed process-exit check. These fixes require a fresh native
+Actions run; earlier logs established UI startup, not successful shutdown.

@@ -202,7 +202,8 @@ def main():
         bridge.close_window()
         return False
     window.events.closing += closing
-    webview.start(icon=_application_icon_path())
+    from core.desktop_server import start_desktop
+    start_desktop(webview, icon=_application_icon_path())
 
 
 if __name__ == "__main__":

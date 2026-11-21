@@ -49,3 +49,33 @@ class InstallerTests(unittest.TestCase):
         for name in ('packaging/windows/desktop-preview.iss', 'packaging/build_windows_installer.py',
                      'packaging/verify_windows_installer.py'):
             self.assertTrue(export.include(name), name)
+
+
+class UninstallerCompletionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec=importlib.util.spec_from_file_location('windows_verify_test',ROOT/'packaging/verify_windows_installer.py')
+        cls.verify=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.verify)
+
+    def test_waits_for_clone_to_release_log(self):
+        from unittest.mock import patch
+        with patch.object(self.verify,'log_is_released',side_effect=[False,False,True]) as probe, patch.object(self.verify.time,'sleep'):
+            self.verify.wait_for_uninstaller(Path('fixture.log'))
+        self.assertEqual(probe.call_count,3)
+
+    def test_stuck_uninstaller_fails_instead_of_ignoring_cleanup(self):
+        from unittest.mock import patch
+        with patch.object(self.verify,'log_is_released',return_value=False),patch.object(self.verify.time,'monotonic',side_effect=[0,61]):
+            with self.assertRaisesRegex(TimeoutError,'uninstaller'):
+                self.verify.wait_for_uninstaller(Path('fixture.log'),timeout=60)
+
+    def test_windows_real_open_log_is_detected_and_then_released(self):
+        import os
+        if os.name!='nt':
+            self.skipTest('Windows file sharing semantics')
+        with tempfile.TemporaryDirectory() as folder:
+            file=Path(folder)/'uninstall.log'
+            with file.open('w') as stream:
+                stream.write('fixture');stream.flush()
+                self.assertFalse(self.verify.log_is_released(file))
+            self.assertTrue(self.verify.log_is_released(file))

@@ -47,8 +47,8 @@
     },
     {
       "path": ".github/workflows/build.yml",
-      "bytes": 6386,
-      "sha256": "c9df609987e126c29f32b42d1a08e37749226d392bc2b68d673377ec0b4f5465"
+      "bytes": 7099,
+      "sha256": "88eb879b4c65ac118e88aaea0dd2366d86e1bf28d87217ef93faded896ed5def"
     },
     {
       "path": ".github/workflows/codeql.yml",
@@ -584,6 +584,11 @@
       "path": "core/deletion_plan.py",
       "bytes": 6349,
       "sha256": "90c27abe27290801172f32c2a19caea85f14d8e28b96e2d64d5dfb6b60c232a2"
+    },
+    {
+      "path": "core/desktop_server.py",
+      "bytes": 5511,
+      "sha256": "6b10f011a148c73a0dbacff46b9c2c2c7e31a3f0be8bb00f25b9b75957261a0a"
     },
     {
       "path": "core/dialogue_adaptation.py",
@@ -3277,8 +3282,8 @@
     },
     {
       "path": "dev/verify_portable_desktop.py",
-      "bytes": 14772,
-      "sha256": "909ac6dbb27d35327d404993052528163d09562d0dd2fbfabf4e45a361e50cd2"
+      "bytes": 15328,
+      "sha256": "facc6dd30988e4ab2e369d0d97ccccf9261d64a9f81c83eb63980345886bebc5"
     },
     {
       "path": "dev/verify_preference_graph.cjs",
@@ -3512,8 +3517,8 @@
     },
     {
       "path": "docs/GITHUB_NATIVE_BUILDS.md",
-      "bytes": 6495,
-      "sha256": "6cf4fac40a9e8be2d20fdedc24893639975346910aff02d4a6fac3e638b9878c"
+      "bytes": 7790,
+      "sha256": "9f8eeea3d1a6a28093a1de85c6b2a766655fcc008f54c05ac7186fdddba57ea1"
     },
     {
       "path": "docs/GITHUB_UPLOAD_GUIDE.md",
@@ -4532,8 +4537,8 @@
     },
     {
       "path": "main.py",
-      "bytes": 9016,
-      "sha256": "eadae40f3c24f085e8926c0d7365c7946dce216ed2b0f98c533b6e0aa24ceb3f"
+      "bytes": 9076,
+      "sha256": "bcfcad778fceaae6bc155e78677576d8bf903529058b33c5a57fc4ff310806f8"
     },
     {
       "path": "packaging/README.md",
@@ -4706,6 +4711,11 @@
       "sha256": "0c43b23624c42e707b3cb35340b73a7e8d330e6d1e45336cd07af2eb7a8b78d3"
     },
     {
+      "path": "packaging/tests/test_desktop_server.py",
+      "bytes": 4350,
+      "sha256": "e096123401aa49745740681b3caac3095dcd8ca458d231462a944b8859398280"
+    },
+    {
       "path": "packaging/tests/test_development_preview.mjs",
       "bytes": 18284,
       "sha256": "d9077e422d5de6f4c3856ab96f4ea371e8db9852a31e30739be23eaf8538d815"
@@ -4742,8 +4752,8 @@
     },
     {
       "path": "packaging/tests/test_windows_installer.py",
-      "bytes": 2879,
-      "sha256": "08f145bfddfed9bca6ac801ed657ae6afb99f799a0fd69f9a416ef079f869c6b"
+      "bytes": 4468,
+      "sha256": "d2c2e3459767ea737728894ea8eb6aa1ea73ca72fe1e4f593e0c37042699549f"
     },
     {
       "path": "packaging/verify_payload.py",
@@ -4757,8 +4767,8 @@
     },
     {
       "path": "packaging/verify_windows_installer.py",
-      "bytes": 3815,
-      "sha256": "54610ec72defaca9f625999f2a8a686da7d6c27c08fe43d6fc67f5c5a2d173ac"
+      "bytes": 4976,
+      "sha256": "51efae020c96285cde489ebb3f9c7ac076ce1f5ee3fb85b48f0ef6ae04e1c179"
     },
     {
       "path": "packaging/windows/desktop-preview.iss",

@@ -21,6 +21,7 @@ def main():
     os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
     import webview
     from bridge.api import PythonBridge
+    from core.desktop_server import start_desktop
     report = {'acceptance': False, 'application': str(root), 'python': sys.executable,
               'visual_layout_reviewed': False}
     ready, response_ready = threading.Event(), threading.Event()
@@ -205,12 +206,19 @@ def main():
             window.destroy()
 
     try:
-        webview.start(inspect, gui='edgechromium' if sys.platform == 'win32' else 'cocoa' if sys.platform == 'darwin' else 'qt')
+        start_desktop(webview, inspect, gui='edgechromium' if sys.platform == 'win32' else 'cocoa' if sys.platform == 'darwin' else 'qt')
     except Exception as exc:
         report['error'] = str(exc)
     finally:
         report['elapsed_seconds'] = round(time.monotonic() - started, 3)
         args.report.write_text(json.dumps(report, indent=2), encoding='utf-8')
+    report['remaining_threads'] = [dict(name=t.name, daemon=t.daemon) for t in threading.enumerate() if t is not threading.main_thread()]
+    args.report.write_text(json.dumps(report, indent=2), encoding='utf-8')
+    if sys.platform == 'darwin':
+        # A lingering native/worker thread is a failed process-exit check.
+        # Emit its stack and fail, rather than waiting for the outer 240s timeout.
+        import faulthandler
+        faulthandler.dump_traceback_later(20, exit=True)
     print(json.dumps(report))
     return 0 if report['acceptance'] else 1
 

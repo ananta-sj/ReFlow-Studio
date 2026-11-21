@@ -94,6 +94,18 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Install Linux Qt desktop prerequisites on disposable runner
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            libegl1 libgl1 libgbm1 libdrm2 libdbus-1-3 libnss3 libasound2 \
+            libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 \
+            libatk-bridge2.0-0 libatk1.0-0 libxcomposite1 libxdamage1 \
+            libxrandr2 libxss1 libxtst6 xvfb xauth
+          mkdir -p build
+          dpkg-query -W > build/linux-desktop-installed.txt
       - name: Build interface from locked dependencies
         working-directory: frontend
         run: |
@@ -148,6 +160,7 @@ jobs:
           path: |
             build/ci-*-smoke.json
             build/desktop-installed.txt
+            build/linux-desktop-installed.txt
           if-no-files-found: ignore
           retention-days: 14
   publish:
