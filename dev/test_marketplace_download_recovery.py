@@ -10,6 +10,36 @@ from core.model_registry import ModelRegistry
 class MarketplaceRecoveryTests(unittest.TestCase):
     setUp = fixtures.DeletionSafetyTests.setUp
 
+    def test_startup_makes_interrupted_download_retryable_without_touching_files(self):
+        entry=self.bridge.registry.add('stt','local_file','Interrupted',source_url='https://example.test/model.bin',status='downloading',custom_instructions='keep',meta={'download_attempt_id':'old','cancel_requested':True})
+        artifact=self.root/'models/_downloads'/entry['id']/'old/keep.bin'
+        artifact.parent.mkdir(parents=True);artifact.write_bytes(b'preserve')
+        with patch.object(api,'HardwareMonitor'), patch.object(api,'Settings'), patch.object(api,'HardwareProfileStore'):
+            restarted=api.PythonBridge(recover_downloads=True)
+        saved=restarted.registry.get(entry['id'])
+        self.assertEqual(saved['status'],'error')
+        self.assertEqual(saved['meta']['download_error']['code'],'interrupted')
+        self.assertNotIn('cancel_requested',saved['meta'])
+        self.assertEqual(saved['custom_instructions'],'keep');self.assertEqual(artifact.read_bytes(),b'preserve')
+        with patch.object(api.threading,'Thread'):
+            result=restarted.retry_model_download(entry['id'])
+        self.assertTrue(result['ok']);self.assertEqual(result['model']['id'],entry['id'])
+        for job in restarted._download_contexts.values():job.cleanup()
+
+    def test_startup_preserves_ready_and_existing_failed_connections(self):
+        ready=self.bridge.registry.add('stt','local_file','Ready',status='installed',meta={'adapter':'keep'})
+        failed=self.bridge.registry.add('translation','local_file','Failed',status='error',meta={'download_error':{'code':'network_error'}})
+        with patch.object(api,'HardwareMonitor'), patch.object(api,'Settings'), patch.object(api,'HardwareProfileStore'):
+            restarted=api.PythonBridge(recover_downloads=True)
+        self.assertEqual(restarted.registry.get(ready['id']),ready)
+        self.assertEqual(restarted.registry.get(failed['id']),failed)
+
+    def test_secondary_bridge_does_not_reclassify_a_running_transfer(self):
+        entry=self.bridge.registry.add('stt','local_file','Running',status='downloading')
+        with patch.object(api,'HardwareMonitor'), patch.object(api,'Settings'), patch.object(api,'HardwareProfileStore'):
+            secondary=api.PythonBridge()
+        self.assertEqual(secondary.registry.get(entry['id'])['status'],'downloading')
+
     def test_missing_hub_creates_no_registry_entry_or_job(self):
         with patch('importlib.util.find_spec', return_value=None), patch.object(api.threading, 'Thread') as thread:
             result = self.bridge.add_local_model('stt', 'https://huggingface.co/example/repo', 'Fixture')

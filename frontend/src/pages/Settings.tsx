@@ -181,7 +181,7 @@ export function SettingsPage({ level }: SettingsPageProps) {
                 <span className="text-sm">Product tour</span>
                 <HelpTooltip text='Replays the spotlight walkthrough shown after first-run setup - same tour, run again anytime ("demo mode").' />
               </div>
-              <Button variant="outline" size="sm" onClick={startTour}>Replay Tour</Button>
+              <Button data-tour="replay-tour" variant="outline" size="sm" onClick={startTour}>Replay Tour</Button>
             </div>
           </div>
           <div className="flex flex-col items-center gap-2 md:border-l md:border-border md:pl-6">

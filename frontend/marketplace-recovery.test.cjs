@@ -17,7 +17,7 @@ function dialogFixture() {
  const h=harness('pages/Marketplace.tsx',{'@/lib/api':{bridge:{addAirllmModel:operation}}},{},['AddModelDialog'])
  return {render:()=>h.render('AddModelDialog',{stageType:'translation',mp,open:true,onOpenChange(){}}),calls:()=>calls,reject(){reject=true}}
 }
-test('all Quick Add tabs report blank required fields without bridge calls',async()=>{
+test('all category Add Model tabs report blank required fields without bridge calls',async()=>{
  for(const label of ['Download & Install','Add Cloud Model','Add Local Service','Add AirLLM Model']) {
   const f=dialogFixture();let tree=f.render();await button(tree,label).props.onClick();tree=f.render()
   assert.match(text(tree),/Enter a display name/);assert.equal(f.calls(),0)
@@ -88,4 +88,47 @@ test('invalid service JSON opens and focuses the configuration field',async()=>{
  await button(f.render(),'Add Local Service').props.onClick();tree=f.render()
  assert.equal(nodes(tree).find(n=>n.props?.['aria-label']==='Local service configuration').props['aria-invalid'],true)
  assert.equal(focused,1);assert.ok(nodes(tree).some(n=>n.type==='details'&&n.props.open));assert.equal(f.calls(),0)
+})
+
+function quickFixture(){
+ let calls=0,reject=false
+ const operation=async()=>{calls++;if(reject)throw Error('SENTINEL');return {ok:false,message:'SENTINEL'}}
+ const h=harness('pages/Marketplace.tsx',{'@/lib/api':{bridge:{addLocalModel:operation,addCloudModel:operation,addLocalApiModel:operation,detectModelType:async()=>{throw Error('SENTINEL')}}}},{},['QuickAddDialog'])
+ const render=()=>h.render('QuickAddDialog')
+ return {h,render,calls:()=>calls,reject(){reject=true},source(value){nodes(render()).find(n=>n.type==='Tabs').props.onValueChange(value)},fill(placeholder,value){nodes(render()).find(n=>n.props?.placeholder===placeholder).props.onChange({target:{value}})}}
+}
+test('actual auto-detect Quick Add validates each required-field boundary',async()=>{
+ for(const source of ['local','cloud','localapi']){
+  const f=quickFixture();f.source(source);await button(f.render(),'Add Model').props.onClick()
+  assert.match(text(f.render()),/Enter a display name/)
+  f.fill('Display name','Fixture');await button(f.render(),'Add Model').props.onClick()
+  assert.match(text(f.render()),source==='local'?/Enter a model URL/:/Enter an API base URL/)
+  assert.equal(f.calls(),0)
+ }
+})
+test('actual Quick Add invalid JSON opens and focuses configuration',async()=>{
+ for(const invalid of ['[]','{']){
+  const f=quickFixture();f.source('localapi');f.fill('Display name','Fixture');f.fill('Base URL (e.g. http://localhost:11434)','http://localhost:11434')
+  let tree=f.render(),focus=0;const input=nodes(tree).find(n=>n.props?.['aria-label']==='Quick Add service configuration')
+  input.props.onChange({target:{value:invalid}});input.props.ref?.({focus(){focus++},closest(){return {open:false}}})
+  await button(f.render(),'Add Model').props.onClick();tree=f.render()
+  assert.equal(nodes(tree).find(n=>n.props?.['aria-label']==='Quick Add service configuration').props['aria-invalid'],true)
+  assert.ok(nodes(tree).some(n=>n.type==='details'&&n.props.open));assert.equal(focus,1);assert.equal(f.calls(),0)
+ }
+})
+test('actual Quick Add rejected request clears busy and hides provider details',async()=>{
+ const f=quickFixture();f.fill('Display name','Fixture');f.fill('Model URL (Hugging Face link, .zip, .pth, etc.)','https://example.test/model');f.reject()
+ try{await button(f.render(),'Add Model').props.onClick()}catch{}
+ assert.equal(button(f.render(),'Add Model')?.props.disabled,false);assert.match(text(f.render()),/could not be added/);assert.doesNotMatch(text(f.render()),/SENTINEL/)
+})
+
+test('actual Quick Add detection rejection releases Detect button',async()=>{
+ const f=quickFixture();f.fill('Model URL (Hugging Face link, .zip, .pth, etc.)','https://example.test/model')
+ try{await button(f.render(),'Detect').props.onClick()}catch{}
+ assert.equal(button(f.render(),'Detect')?.props.disabled,false);assert.match(text(f.render()),/choose the stage manually/);assert.doesNotMatch(text(f.render()),/SENTINEL/)
+})
+
+test('interrupted transfer card explains restart and offers retry',()=>{
+ const tree=card({download_error:{code:'interrupted'}})
+ assert.match(text(tree),/interrupted/);assert.ok(button(tree,'Retry download'))
 })

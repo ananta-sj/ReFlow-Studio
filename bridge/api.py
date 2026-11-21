@@ -200,7 +200,7 @@ def _fits_device(approx_vram_gb, profile):
 
 
 class PythonBridge:
-    def __init__(self):
+    def __init__(self, *, recover_downloads=False):
         self._persistence_warnings = []
         self._persistence_warning_lock = threading.Lock()
         self.monitor = HardwareMonitor()
@@ -233,6 +233,11 @@ class PythonBridge:
         self._active_job = None
         self._active_downloads = set()
         self._download_contexts = {}
+        if recover_downloads:
+            try:
+                self.registry._recover_interrupted_downloads()
+            except OSError:
+                self._queue_persistence_warning('Interrupted model downloads could not be updated. Check local storage permissions before retrying.')
         self._deletion_previews = {}
         self._session = SessionState()
         self._render_busy = False

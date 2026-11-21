@@ -61,14 +61,27 @@ flowchart LR
 
 ## Choose your download
 
-The latest [Desktop Preview release](https://github.com/ananta-sj/ReFlow-Studio/releases/latest) contains one package for each target plus a clean source archive and checksums.
+> [!WARNING]
+> **Installers: testing required on every platform.** Windows setup, Linux per-user installation and both macOS disk images are new preview automation. Native package creation and installation have not been verified locally. Publication requires the hosted installation, upgrade, startup and uninstall checks to pass on all four targets. Fresh-machine and volunteer testing are still needed afterward; a successful build does not guarantee compatibility or complete dubbing readiness. Back up important settings and media before testing preview updates.
+
+**Windows:** choose the `windows-x64-setup` EXE for installation and shortcuts, or the ZIP for portable use. The installer needs no administrator access and stores the app in your user folder. Close ReFlow, including its tray icon, before updating. Uninstall keeps generated settings, downloaded models and outputs; it does not remove an existing portable copy. WebView2 and Visual C++ runtime prerequisites are not downloaded automatically. Packages are currently unsigned.
+
+**Linux:** download the `linux-x64-setup` `.run` and run `sh ./<downloaded-filename>.run` as your normal user, without `sudo`. This installs into `~/.local/share/ReflowStudio` and adds an application-menu entry. Run the same file with `--uninstall` to remove unchanged program files while retaining user data. Portable tar.gz packages remain available.
+
+**macOS:** choose the Apple Silicon or Intel `setup.dmg`, mount it, then open **Install Reflow Studio.command**. After installation, launch `~/Applications/ReflowStudio.app`; do not launch the app directly from the disk image or drag it into `/Applications`. Its writable runtime and data live in `~/Library/Application Support/ReflowStudio/runtime`. The image also includes **Uninstall Reflow Studio.command**. These previews are not Developer ID signed or notarized. AI engines and model weights require separate setup on every platform.
+
+The [Desktop Preview releases](https://github.com/ananta-sj/ReFlow-Studio/releases) provide portable packages, source archives and checksums. New releases will also include Windows and Linux installers plus both macOS disk images once all native builds and automated checks pass. Older releases may contain portable packages only; check the assets and notes for your chosen release.
 
 | Your computer | Package target | Archive |
 | --- | --- | --- |
-| Windows, Intel/AMD 64-bit | `windows-x64` | `.zip` |
-| Linux, Intel/AMD 64-bit | `linux-x64` | `.tar.gz` |
-| Mac with Apple Silicon | `macos-arm64` | `.tar.gz` |
-| Mac with Intel processor | `macos-x64` | `.tar.gz` |
+| Windows, Intel/AMD 64-bit — installer (testing required) | `windows-x64-setup` | `.exe` |
+| Windows, Intel/AMD 64-bit — portable | `windows-x64` | `.zip` |
+| Linux, Intel/AMD 64-bit — installer (testing required) | `linux-x64-setup` | `.run` |
+| Linux, Intel/AMD 64-bit — portable | `linux-x64` | `.tar.gz` |
+| Mac with Apple Silicon — installer (testing required) | `macos-arm64-setup` | `.dmg` |
+| Mac with Apple Silicon — portable | `macos-arm64` | `.tar.gz` |
+| Mac with Intel processor — installer (testing required) | `macos-x64-setup` | `.dmg` |
+| Mac with Intel processor — portable | `macos-x64` | `.tar.gz` |
 
 Choose the commit/run set identified in the release notes. Extract the entire archive and keep its companion files together. Preserve executable permissions and links when extracting Linux/Mac packages on their target system.
 

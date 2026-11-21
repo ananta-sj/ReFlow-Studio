@@ -13,6 +13,13 @@ import sys
 def payload_root():
     executable = Path(sys.executable).resolve()
     if sys.platform == 'darwin' and executable.parent.name == 'MacOS':
+        # Installed Mac bundles stay unchanged: runtime and state are user-local.
+        application = Path.home()/'Applications/ReflowStudio.app'
+        runtime = Path.home()/'Library/Application Support/ReflowStudio/runtime'
+        if executable == (application/'Contents/MacOS/ReflowStudio').resolve():
+            if not (runtime/'.installation.json').is_file():
+                raise RuntimeError('Complete the per-user installation from the disk image first.')
+            return runtime
         return executable.parent.parent/'Resources'/'ReflowStudio'
     return executable.parent
 

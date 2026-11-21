@@ -1,5 +1,7 @@
 import os
 import gc
+import math
+from numbers import Real
 from faster_whisper import WhisperModel
 from core.transcription import TranscriptionResult, require_media_bounds
 
@@ -48,14 +50,17 @@ class STTHandler:
         if hint is not None and hint not in self.model.supported_languages:
             raise ValueError(f'This Whisper model does not support source language {source_language!r}.')
         # Beam size 5 gives better accuracy
-        segments, info = self.model.transcribe(audio_path, beam_size=5, vad_filter=vad_filter,
+        segments, info = self.model.transcribe(audio_path, beam_size=5, vad_filter=vad_filter, word_timestamps=True,
                                                **({'language': hint} if hint else {}))
         
         result = []
         for segment in segments:
+            if any(isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value)
+                   for value in (segment.start, segment.end)):
+                raise ValueError('Whisper returned invalid segment timestamps')
             result.append({
-                "start": segment.start,
-                "end": segment.end,
+                "start": float(segment.start),
+                "end": float(segment.end),
                 "text": segment.text
             })
         

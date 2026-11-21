@@ -8,6 +8,8 @@ from core.download_failures import describe_download_failure
 
 
 def main():
+    from core.worker_lifetime import watch_parent
+    watch_parent()
     params = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
     try:
         from huggingface_hub import snapshot_download

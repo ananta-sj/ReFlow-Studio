@@ -50,6 +50,16 @@ class MarketplaceRecipeTests(unittest.TestCase):
                 self.assertEqual(describe_download_failure(caught.exception)['code'],code)
                 self.assertNotIn('SENTINEL',str(caught.exception))
 
+    def test_repository_worker_registers_parent_guard_before_transfer(self):
+        import json, runpy, sys
+        from unittest.mock import patch
+        calls=[]
+        with tempfile.TemporaryDirectory() as folder:
+            request=Path(folder)/'request.json';request.write_text(json.dumps(dict(repo_id='fixture/repo',dest_dir=folder,cache_dir=folder,allow_patterns=None,revision=None)))
+            with patch('core.worker_lifetime.watch_parent',side_effect=lambda:calls.append('guard')), patch.dict(sys.modules,{'huggingface_hub':SimpleNamespace(snapshot_download=lambda **kwargs:calls.append('transfer'))}), patch.object(sys,'argv',['worker',str(request)]):
+                runpy.run_path('core/run_hf_download.py',run_name='__main__')
+        self.assertEqual(calls,['guard','transfer'])
+
     def test_missing_required_metadata_aborts(self):
         from core.download_recipes import validate_snapshot_metadata
         with self.assertRaisesRegex(RuntimeError,'metadata'):

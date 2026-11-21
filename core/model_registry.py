@@ -118,6 +118,24 @@ class ModelRegistry:
             return entry
         return self._mutate(change)
 
+    def _recover_interrupted_downloads(self):
+        """Called once by the locked application startup, before workers exist."""
+        from core.download_failures import MESSAGES
+        if not any(entry.get('kind') == 'local_file' and entry.get('status') == 'downloading' for entry in self.list()):
+            return 0
+        def change(data):
+            count = 0
+            for entry in data['entries']:
+                if entry.get('kind') != 'local_file' or entry.get('status') != 'downloading':
+                    continue
+                meta = dict(entry.get('meta') or {})
+                meta.pop('cancel_requested', None)
+                meta['download_error'] = {'code': 'interrupted', 'message': MESSAGES['interrupted']}
+                entry.update(status='error', meta=meta)
+                count += 1
+            return count
+        return self._mutate(change)
+
     def remove(self, model_id):
         def change(data):
             data['entries'] = [e for e in data['entries'] if e['id'] != model_id]

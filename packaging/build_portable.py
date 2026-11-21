@@ -62,7 +62,9 @@ def entries(profiles=(), trees=None):
     if RECOGNITION_PROFILE in profiles:
         sys.path.insert(0, str(ROOT))
         from core.recognition_runtime import validate
-        validate(ROOT)
+        route = validate(ROOT)
+        if route.get('portable') is False:
+            raise RuntimeError('This recognition environment is local-only; qualify a standalone runtime for portable packaging.')
         yield ROOT / RECOGNITION_LOCK, RECOGNITION_LOCK, RECOGNITION_PROFILE
     if XTTS_PROFILE in profiles:
         sys.path.insert(0, str(ROOT))

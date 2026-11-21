@@ -137,10 +137,13 @@ def _snapshot_progress(repo_id: str, dest_dir: str, allow_patterns=None, revisio
 
     def _run():
         try:
+            import psutil
             with bind_job(job), log_path.open('wb') as log:
                 run_process([worker_python(), '-B', str(project_root() / 'core/run_hf_download.py'), str(request)],
                             check=True, timeout=3600, stdout=log, stderr=subprocess.STDOUT,
-                            env={**os.environ, 'PYTHONIOENCODING': 'utf-8'})
+                            env={**os.environ, 'PYTHONIOENCODING': 'utf-8',
+                                 'REFLOW_PARENT_PID': str(os.getpid()),
+                                 'REFLOW_PARENT_CREATED': str(psutil.Process().create_time())})
             result['path'] = dest_dir
         except subprocess.CalledProcessError:
             from core.download_failures import DownloadTransferFailure

@@ -440,57 +440,87 @@ function QuickAddDialog() {
   const [serviceConfig, setServiceConfig] = useState("{}")
   const [serviceVoiceId, setServiceVoiceId] = useState("")
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const fields = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({})
+  const submitting = useRef(false)
+  function fieldProps(key: string, label: string) {
+    return { 'aria-label': label, 'aria-invalid': Boolean(fieldErrors[key]),
+      'aria-describedby': fieldErrors[key] ? `quick-add-error-${key}` : undefined,
+      ref: (element: HTMLInputElement | HTMLTextAreaElement | null) => { fields.current[key] = element } }
+  }
+  function fieldError(key: string) {
+    return fieldErrors[key] ? <p id={`quick-add-error-${key}`} className="text-xs text-destructive">{fieldErrors[key]}</p> : null
+  }
+  function invalid(errors: Record<string, string>) {
+    setFieldErrors(errors)
+    const first = Object.keys(errors)[0]
+    setError(first ? errors[first] : null)
+    const element = fields.current[first]
+    const details = element?.closest('details')
+    if (details) details.open = true
+    element?.focus()
+  }
   function reset() {
     setName(""); setUrl(""); setApiUrl(""); setApiKey(""); setPreset("custom")
     setServiceConfig("{}"); setServiceVoiceId("")
-    setDetection(null); setError(null); setOpen(false)
+    setDetection(null); setError(null); setFieldErrors({}); setOpen(false)
   }
 
   async function runDetection() {
     const link = source === "local" ? url.trim() : apiUrl.trim()
     if (!link) return
     setDetecting(true)
-    const result = await bridge.detectModelType(link, source === "local" ? "url" : "api_base_url")
-    setDetecting(false)
-    setDetection(result)
-    if (result.stage_type) setStageType(result.stage_type)
+    try {
+      const result = await bridge.detectModelType(link, source === "local" ? "url" : "api_base_url")
+      setDetection(result)
+      if (result.stage_type) setStageType(result.stage_type)
+    } catch {
+      setError('Model type detection could not finish. You can choose the stage manually.')
+    } finally {
+      setDetecting(false)
+    }
   }
 
   async function submit() {
-    if (!name.trim()) return
-    setBusy(true); setError(null)
+    if (submitting.current) return
+    const errors: Record<string, string> = {}
+    if (!name.trim()) errors.name = 'Enter a display name.'
+    if (source === 'local' && !url.trim()) errors.url = 'Enter a model URL.'
+    if (source !== 'local' && !apiUrl.trim()) errors.apiUrl = 'Enter an API base URL.'
+    if (source === 'cloud' && !apiKey.trim()) errors.apiKey = 'Enter an API key.'
+    if (source === 'cloud' && preset.startsWith('elevenlabs_') && !serviceVoiceId.trim()) errors.serviceVoiceId = 'Enter the service voice ID.'
+    invalid(errors)
+    if (Object.keys(errors).length) return
     let config: Record<string, unknown> = {}
-    if (source !== "local") {
+    if (source !== 'local') {
       try {
         const parsed: unknown = JSON.parse(serviceConfig)
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error()
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error()
         config = parsed as Record<string, unknown>
       } catch {
-        setError("Service configuration must be a JSON object."); setBusy(false); return
-      }
-      if (source === "cloud" && preset.startsWith("elevenlabs_") && !serviceVoiceId.trim()) {
-        setError("Enter the ElevenLabs voice ID for this connection."); setBusy(false); return
+        invalid({ serviceConfig: 'Service configuration must be a JSON object.' })
+        return
       }
       if (serviceVoiceId.trim()) config.voice_id = serviceVoiceId.trim()
     }
-    let result
-    if (source === "local") {
-      if (!url.trim()) { setBusy(false); return }
-      result = await bridge.addLocalModel(stageType, url.trim(), name.trim())
-    } else if (source === "cloud") {
-      if (!apiUrl.trim() || !apiKey.trim()) { setBusy(false); return }
-      result = await bridge.addCloudModel(stageType, name.trim(), apiUrl.trim(), apiKey.trim(), preset, config)
-    } else {
-      if (!apiUrl.trim()) { setBusy(false); return }
-      result = await bridge.addLocalApiModel(stageType, name.trim(), apiUrl.trim(), "custom", config)
+    submitting.current = true; setBusy(true)
+    try {
+      const result = source === 'local'
+        ? await bridge.addLocalModel(stageType, url.trim(), name.trim())
+        : source === 'cloud'
+          ? await bridge.addCloudModel(stageType, name.trim(), apiUrl.trim(), apiKey.trim(), preset, config)
+          : await bridge.addLocalApiModel(stageType, name.trim(), apiUrl.trim(), 'custom', config)
+      if (result.ok) reset()
+      else setError('The model connection could not be added. Check the setup and try again.')
+    } catch {
+      setError('The model connection could not be added. Check the setup and try again.')
+    } finally {
+      submitting.current = false; setBusy(false)
     }
-    setBusy(false)
-    if (result.ok) reset()
-    else setError(result.message ?? "Failed to add model.")
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset() }}>
+    <Dialog open={open} onOpenChange={(v) => { if (submitting.current) return; setOpen(v); if (!v) reset() }}>
       <DialogTrigger asChild>
         <Button size="sm"><Sparkles className="mr-1 h-3.5 w-3.5" /> Quick Add (Auto-detect)</Button>
       </DialogTrigger>
@@ -512,11 +542,12 @@ function QuickAddDialog() {
                 setDetection({ stage_type: stageType, confidence: "high", reason: "From Auto-pick" })
               }}
             />
-            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} {...fieldProps("name", "Display name")} />
+            {fieldError("name")}
             <div className="flex gap-2">
               <Input
                 placeholder="Model URL (Hugging Face link, .zip, .pth, etc.)"
-                value={url}
+                value={url} {...fieldProps("url", "Model URL")}
                 onChange={(e) => { setUrl(e.target.value); setDetection(null) }}
                 onBlur={runDetection}
               />
@@ -524,14 +555,16 @@ function QuickAddDialog() {
                 {detecting ? "…" : "Detect"}
               </Button>
             </div>
+            {fieldError(source === "local" ? "url" : "apiUrl")}
           </TabsContent>
 
           <TabsContent value="cloud" className="flex flex-col gap-3 pt-2">
-            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} {...fieldProps("name", "Display name")} />
+            {fieldError("name")}
             <div className="flex gap-2">
               <Input
                 placeholder="API base URL (e.g. https://api.openai.com)"
-                value={apiUrl}
+                value={apiUrl} {...fieldProps("apiUrl", "API base URL")}
                 onChange={(e) => { setApiUrl(e.target.value); setDetection(null) }}
                 onBlur={runDetection}
               />
@@ -539,7 +572,8 @@ function QuickAddDialog() {
                 {detecting ? "…" : "Detect"}
               </Button>
             </div>
-            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+            <Input placeholder="API key" type="password" autoComplete="off" spellCheck={false} autoCapitalize="none" value={apiKey} {...fieldProps("apiKey", "API key")} onChange={(e) => setApiKey(e.target.value)} />
+            {fieldError("apiKey")}
             <Select value={preset} onValueChange={setPreset}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -554,11 +588,12 @@ function QuickAddDialog() {
           </TabsContent>
 
           <TabsContent value="localapi" className="flex flex-col gap-3 pt-2">
-            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input placeholder="Display name" value={name} onChange={(e) => setName(e.target.value)} {...fieldProps("name", "Display name")} />
+            {fieldError("name")}
             <div className="flex gap-2">
               <Input
                 placeholder="Base URL (e.g. http://localhost:11434)"
-                value={apiUrl}
+                value={apiUrl} {...fieldProps("apiUrl", "API base URL")}
                 onChange={(e) => { setApiUrl(e.target.value); setDetection(null) }}
                 onBlur={runDetection}
               />
@@ -566,17 +601,20 @@ function QuickAddDialog() {
                 {detecting ? "…" : "Detect"}
               </Button>
             </div>
+            {fieldError(source === "local" ? "url" : "apiUrl")}
           </TabsContent>
         </Tabs>
 
         {source === "cloud" && preset.startsWith("elevenlabs_") && (
-          <Input aria-label="Quick Add service voice ID" placeholder="ElevenLabs voice ID"
+          <Input {...fieldProps("serviceVoiceId", "Quick Add service voice ID")} placeholder="ElevenLabs voice ID"
             value={serviceVoiceId} onChange={(event) => setServiceVoiceId(event.target.value)} />
         )}
+        {fieldError("serviceVoiceId")}
         {source !== "local" && (
-          <details className="text-xs">
+          <details open={Boolean(fieldErrors.serviceConfig)} className="text-xs">
             <summary>Advanced service configuration</summary>
-            <Textarea aria-label="Quick Add service configuration" value={serviceConfig}
+            {fieldError("serviceConfig")}
+            <Textarea {...fieldProps("serviceConfig", "Quick Add service configuration")} value={serviceConfig}
               onChange={(event) => setServiceConfig(event.target.value)} className="mt-2 font-mono" />
           </details>
         )}
@@ -602,7 +640,7 @@ function QuickAddDialog() {
         </div>
 
         <Button onClick={submit} disabled={busy}>{busy ? "Adding…" : "Add Model"}</Button>
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
       </DialogContent>
     </Dialog>
   )

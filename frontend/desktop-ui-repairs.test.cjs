@@ -1,18 +1,19 @@
 const {test}=require('node:test'),assert=require('node:assert/strict')
 const {harness,nodes,text,button}=require('./dev/component-harness.cjs')
-function tourFixture({late=false}={}) {
- const handlers=new Map(),timers=new Map();let next=0,ended=0,focused=0,scrolled=0,ready=!late,mutation
+function tourFixture({late=false,origin="dashboard",last=false}={}) {
+ const handlers=new Map(),timers=new Map();let next=0,ended=0,focused=0,scrolled=0,ready=!late,mutation,active=true,page=origin
  const rect={left:300,top:1392,right:600,bottom:1492,width:300,height:100}
  const target={getBoundingClientRect:()=>rect,scrollIntoView(){scrolled++;rect.top=100;rect.bottom=200}}
  const trigger={focus(){focused++},isConnected:true}
  const window={innerWidth:1200,innerHeight:761,addEventListener(n,f){handlers.set(n,f)},removeEventListener(n,f){if(handlers.get(n)===f)handlers.delete(n)}}
- const document={activeElement:trigger,documentElement:{},querySelector:()=>ready?target:null,addEventListener:window.addEventListener,removeEventListener:window.removeEventListener}
+ const document={activeElement:trigger,documentElement:{},querySelector:selector=>selector==='[data-tour="replay-tour"]' ? (page==='settings'?{focus(){focused++}}:null) : ready?target:null,addEventListener:window.addEventListener,removeEventListener:window.removeEventListener}
  const step={target:'dashboard-estimate',title:'Estimate',description:'Fixture'}
- const h=harness('components/onboarding/ProductTour.tsx',{'@/lib/tour-layout':harness('lib/tour-layout.ts').exports,'@/lib/use-tour':{useTour:()=>({active:true,stepIndex:3,step,totalSteps:9}),endTour(){ended++},nextTourStep(){},prevTourStep(){}}},
+ const h=harness('components/onboarding/ProductTour.tsx',{'@/lib/tour-layout':harness('lib/tour-layout.ts').exports,'@/lib/use-tour':{useTour:()=>({active,stepIndex:last?8:3,step,totalSteps:9}),endTour(){ended++;active=false},nextTourStep(){ended++;active=false},prevTourStep(){}}},
   {window,document,MutationObserver:class{constructor(fn){mutation=fn}observe(){}disconnect(){mutation=null}},ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){const n=++next;timers.set(n,fn);return n},cancelAnimationFrame(n){timers.delete(n)},setTimeout(fn){const n=++next;timers.set(n,fn);return n},clearTimeout(n){timers.delete(n)}})
- const render=()=>h.render('ProductTour',{currentPage:'dashboard',onNavigate(){}})
+ const navigate=next=>{page=next}
+ const render=()=>h.render('ProductTour',{currentPage:page,onNavigate:navigate})
  let tree=render();h.effects();for(const [n,fn] of [...timers]){timers.delete(n);fn()}tree=render()
- return {h,render,tree,handlers,ended:()=>ended,focused:()=>focused,scrolled:()=>scrolled,showTarget(){ready=true;mutation?.([]);for(const [n,fn]of [...timers]){timers.delete(n);fn()}}}
+ return {h,render,tree,handlers,page:()=>page,changePage(next){page=next;trigger.isConnected=false},ended:()=>ended,focused:()=>focused,scrolled:()=>scrolled,showTarget(){ready=true;mutation?.([]);for(const [n,fn]of [...timers]){timers.delete(n);fn()}}}
 }
 test('offscreen tour target leaves callout controls inside viewport',()=>{
  const f=tourFixture();const callout=nodes(f.tree).find(x=>x.props?.className?.includes('shadow-2xl'))
@@ -75,4 +76,30 @@ test('accent foreground and focus ring cover real light hover surface',()=>{
  const tokens=resolveAccentTokens('#c8ff4d','light',{background:'#f2f3ee',card:'#ffffff',accent:'#e7e8e2'})
  assert.ok(contrastRatio(tokens.accentForeground,'#e7e8e2')>=4.5)
  const fs=require('node:fs');for(const name of ['button','badge','input','textarea','select','switch','tabs','scroll-area']) assert.doesNotMatch(fs.readFileSync(`src/components/ui/${name}.tsx`,'utf8'),/focus-visible:ring-ring\/50/,name)
+})
+
+test('pipeline readable zoom requests actual-size viewport without changing graph data',()=>{
+ const zooms=[]
+ const h=harness('components/panels/ReadableGraphZoom.tsx',{'@xyflow/react':{Panel:'Panel',useReactFlow:()=>({zoomTo:level=>{zooms.push(level);return Promise.resolve(true)}})}})
+ const tree=h.render('ReadableGraphZoom')
+ const action=button(tree,'Readable zoom (100%)');assert.ok(action)
+ action.props.onClick();assert.deepEqual(zooms,[1]);assert.equal(action.props.type,'button')
+ assert.match(action.props.title,/pan/i)
+})
+
+for(const action of ['Escape','Skip'])test(`tour ${action} restores Settings and focus after opener unmounts`,()=>{
+ const f=tourFixture({origin:'settings'});f.changePage('dashboard');f.render();f.h.effects()
+ if(action==='Escape')f.handlers.get('keydown')({key:'Escape',preventDefault(){},stopPropagation(){}})
+ else button(f.render(),'Skip').props.onClick()
+ f.render();f.h.effects();f.render();f.h.effects()
+ assert.equal(f.page(),'settings');assert.equal(f.focused(),1)
+ f.h.unmount();assert.equal(f.handlers.size,0)
+})
+
+test('finishing a tour restores the remounted opener and focus',()=>{
+ const f=tourFixture({origin:'settings',last:true});f.changePage('dashboard');f.render();f.h.effects()
+ button(f.render(),'Finish').props.onClick()
+ for(let i=0;i<3;i++){f.render();f.h.effects()}
+ assert.equal(f.page(),'settings');assert.equal(f.focused(),1);assert.equal(f.ended(),1)
+ f.h.unmount()
 })

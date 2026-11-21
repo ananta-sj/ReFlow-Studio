@@ -3,7 +3,7 @@
 // than a clip-path mask) around the target element, plus a positioned
 // callout with Back/Next/Skip. See lib/use-tour.ts for the step data and
 // state machine.
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { endTour, nextTourStep, prevTourStep, useTour } from "@/lib/use-tour"
@@ -22,15 +22,33 @@ export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
   const returnFocus = useRef<HTMLElement | null>(null)
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [size, setSize] = useState({ width: 320, height: 240 })
-  function restoreFocus() {
+  const currentPageRef = useRef(currentPage)
+  const returnPage = useRef(currentPage)
+  const [pendingFocusPage, setPendingFocusPage] = useState<PageId | null>(null)
+  useEffect(() => { currentPageRef.current = currentPage }, [currentPage])
+  const restoreFocus = useCallback(() => {
     const el = returnFocus.current
     returnFocus.current = null
-    if (el?.isConnected) el.focus()
-  }
+    if (!el) return
+    if (el.isConnected && el !== document.body) el.focus()
+    else {
+      onNavigate(returnPage.current)
+      setPendingFocusPage(returnPage.current)
+    }
+  }, [onNavigate])
+  useEffect(() => {
+    if (active || !pendingFocusPage || currentPage !== pendingFocusPage) return
+    const opener = pendingFocusPage === 'settings'
+      ? document.querySelector<HTMLElement>('[data-tour="replay-tour"]') : null
+    const destination = opener ?? document.querySelector<HTMLElement>(`[data-tour="nav-${pendingFocusPage}"]`)
+    destination?.focus()
+    setPendingFocusPage(null)
+  }, [active, currentPage, pendingFocusPage])
   function dismiss() { endTour(); restoreFocus() }
   useEffect(() => {
-    if (!active) return
+    if (!active) { restoreFocus(); return }
     returnFocus.current = document.activeElement as HTMLElement | null
+    returnPage.current = currentPageRef.current
     const keydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); endTour(); restoreFocus() }
       if (event.key === 'Tab') {
@@ -45,8 +63,8 @@ export function ProductTour({ currentPage, onNavigate }: ProductTourProps) {
       }
     }
     window.addEventListener('keydown', keydown, true)
-    return () => { window.removeEventListener('keydown', keydown, true); restoreFocus() }
-  }, [active])
+    return () => { window.removeEventListener('keydown', keydown, true) }
+  }, [active, restoreFocus])
 
 
   useEffect(() => {

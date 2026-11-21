@@ -40,6 +40,59 @@ class RecognitionRuntimeTests(unittest.TestCase):
             source_sha256={name: sha(self.root/name) for name in runtime.SOURCES}, lock_sha256=sha(self.lock))
         (self.folder/'routing-recipe.json').write_text(json.dumps(self.recipe))
 
+    def make_venv_recipe(self):
+        base=self.root/'build/ci-runtime/python'
+        paths=[base/'python.exe',base/'python313.dll',base/'Lib/os.py',base/'DLLs/_ssl.pyd',self.folder/'venv/Scripts/python.exe']
+        for path in paths:
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(path.name.encode())
+        cfg=self.folder/'venv/pyvenv.cfg'
+        cfg.write_text(f'home = {base}\ninclude-system-site-packages = false\nversion = 3.13.18\n')
+        paths.append(cfg)
+        target=self.folder/'venv/Lib/site-packages'/self.meta.parent.name/'METADATA'
+        target.parent.mkdir(parents=True);self.meta.rename(target);self.meta=target
+        self.recipe.update(schema='reflow.recognition-runtime.v2',python='3.13.18',bootstrap_sha256={p.relative_to(self.root).as_posix():sha(p) for p in paths})
+        (self.folder/'routing-recipe.json').write_text(json.dumps(self.recipe))
+        return base,cfg
+
+    def test_current_python_venv_route_is_qualified_without_legacy_bootstrap(self):
+        base,cfg=self.make_venv_recipe()
+        result=runtime.validate(self.root)
+        self.assertEqual(Path(result['executable']),self.folder/'venv/Scripts/python.exe')
+        self.assertEqual(result['device'],'cpu')
+        for path in (base/'Lib/os.py',base/'python313.dll',cfg,self.meta):
+            before=path.read_bytes();path.write_bytes(b'changed')
+            try:
+                with self.subTest(path=path),self.assertRaises(RuntimeError):runtime.validate(self.root)
+            finally:path.write_bytes(before)
+
+    def test_venv_cannot_enable_shared_packages_even_with_matching_hashes(self):
+        base,cfg=self.make_venv_recipe();cfg.write_text(cfg.read_text().replace('false','true'))
+        self.recipe['bootstrap_sha256'][cfg.relative_to(self.root).as_posix()]=sha(cfg)
+        (self.folder/'routing-recipe.json').write_text(json.dumps(self.recipe))
+        with self.assertRaisesRegex(RuntimeError,'isolat'):runtime.validate(self.root)
+
+    def test_venv_rejects_duplicate_isolation_keys_and_added_path_override(self):
+        base,cfg=self.make_venv_recipe();original=cfg.read_bytes()
+        cfg.write_text('include-system-site-packages = true\n'+cfg.read_text())
+        self.recipe['bootstrap_sha256'][cfg.relative_to(self.root).as_posix()]=sha(cfg)
+        (self.folder/'routing-recipe.json').write_text(json.dumps(self.recipe))
+        with self.assertRaisesRegex(RuntimeError,'Duplicate'):runtime.validate(self.root)
+        cfg.write_bytes(original)
+        self.recipe['bootstrap_sha256'][cfg.relative_to(self.root).as_posix()]=sha(cfg)
+        (self.folder/'routing-recipe.json').write_text(json.dumps(self.recipe))
+        (self.folder/'venv/Scripts/python313._pth').write_text('outside-packages')
+        with self.assertRaises(RuntimeError):runtime.validate(self.root)
+
+    def test_isolated_transcription_ignores_user_site_and_pythonpath(self):
+        from core.providers.stt import whisper_local
+        provider=whisper_local.WhisperLocalProvider(model_size='fixture-model',runtime='isolated')
+        def worker(args,**kwargs):
+            self.assertIn('-I',args)
+            script=next(i for i,arg in enumerate(args) if str(arg).endswith('run_stt.py'))
+            Path(args[script+2]).write_text('[]')
+        with patch.object(runtime,'resolve',return_value={'executable':'fixture-python','identity':'verified'}),patch.object(whisper_local,'run_process',side_effect=worker):
+            self.assertEqual(list(provider.transcribe('fixture.wav','ja')),[])
+
     def test_verified_route_has_stable_identity_and_remains_trial(self):
         self.assertEqual(runtime.validate(self.root), runtime.validate(self.root))
         self.assertEqual(runtime.readiness(self.root)['status'], 'ready-for-explicit-trial')
@@ -143,6 +196,14 @@ class RecognitionRuntimeTests(unittest.TestCase):
         self.assertEqual(row['status'], 'needs_setup')
         self.assertEqual(row['runtime']['selection'], 'isolated')
         self.assertEqual(result['status'], 'needs_setup')
+
+    def test_local_venv_profile_cannot_be_exported_as_a_portable_runtime(self):
+        self.make_venv_recipe()
+        spec=importlib.util.spec_from_file_location('recognition_local_portable',ROOT/'packaging/build_portable.py')
+        builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(builder)
+        with patch.object(builder,'ROOT',self.root),patch.object(builder,'ROOT_FILES',()),patch.object(builder,'TREES',()):
+            with self.assertRaisesRegex(RuntimeError,'local-only'):
+                list(builder.entries([runtime.PROFILE]))
 
     def test_portable_contains_recipe_lock_and_no_personal_settings(self):
         spec = importlib.util.spec_from_file_location('recognition_portable', ROOT/'packaging/build_portable.py')

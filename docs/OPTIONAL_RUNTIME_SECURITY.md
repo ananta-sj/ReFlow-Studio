@@ -48,3 +48,11 @@ F5 and MuseTalk stop with a setup error when their isolated profile is missing, 
 BasicSR has no patched upstream release for the distributed-training command-injection advisory. ReFlow's isolated face-enhancement worker disables those exact-source training launchers, blocks shell/network access and verifies its runtime/source recipe before use. That is an application mitigation, not a claim that upstream BasicSR 1.4.2 is patched. Shared automatic installation of optional engines through the desktop integrity helper is prohibited.
 
 Dependency updates require review and checks; no automatic PR merge is configured. Keep alerts visible until remediation or a documented reachability assessment is verified. No scan result guarantees that a project is vulnerability-free.
+
+## Local recognition using the existing Python base
+
+The Windows recognition validator also understands the local `reflow.recognition-runtime.v2` layout: an isolated Python 3.13.18 environment under `runtime_profiles/recognition-candidate/venv`. It checks the fixed source-checkout Python base, launcher/configuration, worker source hashes and exact reviewed package metadata. Shared site packages and duplicate environment configuration keys are rejected. Recognition workers and their import checks use isolated Python startup.
+
+This supports an explicitly qualified local CPU setup; it does not install anything, select a model or establish transcription accuracy by itself. A model artifact and real transcription test are separate gates. Existing v1 standalone recipes remain subject to their original bootstrap checks and source/lock revalidation.
+
+The v2 environment depends on its installed Python base and is **local-only**. Portable packaging refuses this layout; do not copy its absolute `pyvenv.cfg` to another computer. Desktop Preview archives continue to exclude local AI profiles/models unless a separately qualified portable recipe is selected. Installed-app engine provisioning and GPU qualification remain separate work.

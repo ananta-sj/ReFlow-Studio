@@ -1,90 +1,103 @@
-# Native builds and source downloads
+# Native builds, installers and source downloads
 
-The GitHub Actions workflow is `.github/workflows/build.yml`. It runs manually
-from **Actions → Build native desktop candidates → Run workflow**, or when a
-`v*` tag is pushed. It builds on native runners: Windows x64, Linux x64, Apple
-Silicon macOS and Intel macOS. A separate job exports the source archive.
+The workflow `.github/workflows/build.yml` builds from `main` pushes, supported
+version tags and manual runs. Successful eligible main builds publish a new
+numbered **Desktop Preview** release (for example `v0.7.3-desktop-preview`).
+Previous releases remain available. Only the publishing job can write releases.
 
-This change prepares workflow code only. No workflow was dispatched, repository
-pushed, tag created, source uploaded or release published from this chat.
+## Download choices
 
-## Downloads and current scope
+- **Windows x64 installer:** the `windows-x64-setup` EXE installs for the current
+  user, normally in `%LOCALAPPDATA%\Programs\ReflowStudio`, with a Start Menu
+  shortcut and optional desktop shortcut. No administrator access is requested.
+- **Windows x64 portable:** extract the entire ZIP into a writable folder and
+  open `ReflowStudio.exe`. Keep all companion files together.
+- **Linux x64 installer:** run `sh ./<downloaded-setup-filename>.run` as your
+  normal user, without sudo. It installs to `~/.local/share/ReflowStudio` and
+  adds an application-menu entry. Use the same file with `--uninstall` for removal.
+  The tar.gz remains available for portable use.
+- **macOS Apple Silicon / Intel:** mount the matching setup DMG and run
+  **Install Reflow Studio.command**. Open the installed app in `~/Applications`,
+  rather than launching from the image or dragging into `/Applications`. Use
+  **Uninstall Reflow Studio.command** from the image for removal. The tar.gz
+  remains a portable development option. Images are not notarized.
+- **Source:** `ReflowStudio-source.zip` contains application source, build inputs,
+  tests and reviewed recipes, excluding personal media, models, environments,
+  credentials, settings and logs.
 
-Each successful native job saves a candidate download and SHA-256 checksum in
-its Actions artifacts. Windows uses ZIP; Linux and macOS use tar.gz to retain
-executable permissions and links. Macs get an `.app` bundle. The source artifact
-is `ReflowStudio-source.zip`, with source files, build scripts, tests, interface
-inputs and the bound runtime recipe documents. Local media, downloaded models,
-working Python environments, credentials, settings and diagnostic logs are not
-exported. Real source directories such as `core/Wav2Lip/models` are retained.
+Python and desktop dependencies are bundled. **Local AI engines, model weights,
+voice references, credentials and FFmpeg/FFprobe are not bundled.** Windows also
+requires WebView2 and Visual C++ runtimes. The installer does not download or
+install those prerequisites. Windows packages are unsigned and may encounter
+Windows reputation checks; do not disable security protection to run them.
+Linux native Qt prerequisites and macOS installation/signing behaviour still
+need platform-specific volunteer testing. The installed Mac app keeps its writable
+Python/application runtime and generated data outside the `.app`, in
+`~/Library/Application Support/ReflowStudio/runtime`. This duplicates its bundled
+runtime on disk; it avoids writing into the installed application bundle. Existing
+portable settings/models are not automatically migrated.
 
-**CI outputs are desktop previews, not the full locally tested Windows engine
-bundle.** They include native relocatable Python and the desktop dependencies.
-Optional local AI engine environments, model weights, voice references and
-credentials require separate platform-specific setup and acceptance. FFmpeg and
-FFprobe must currently be available separately on PATH in those CI previews.
-The locally assembled Windows candidate additionally contains FFmpeg and eight
-prepared engine environments; it does not require system Python.
+## Windows updates and removal
 
-The executable is a PyInstaller launcher for the included Python application.
-It keeps inference in the existing separate runtimes and preserves the reviewed
-audio code. Keep all companion files; the EXE alone is not the application.
+Close ReFlow, including its tray icon, before updating or uninstalling. Setup
+checks the application's byte-range lock and refuses an active instance.
+Install over the same location to update program files. Generated settings,
+models and outputs are not installation payloads and are retained on uninstall;
+there is no broad recursive user-data cleanup. Portable copies are independent
+and are neither migrated nor deleted automatically. Keep a separate backup of
+important settings, accepted takes and media before testing preview updates.
 
-## What the workflow checks
+Installer metadata identifies the 0.7 preview series; the GitHub release tag and
+commit-bearing download filename identify each exact build. This is not a
+silent updater or a system-wide installation.
 
-- Interface dependencies are installed from the existing npm lockfile and built.
-- Packaging contracts check launcher behavior, source exclusion rules, checksum
-  rejection and protection against archive traversal.
-- A platform/architecture-specific Python archive is downloaded from the pinned
-  upstream release and checked against its recorded SHA-256 before extraction.
-- Desktop packages are installed in that bundled Python; `pip check` must pass.
-  The exact resulting versions are retained in a separate check artifact.
-- The native executable runs an offline, model-free check using its own included
-  Python. This checks core libraries, the interface files, relocated application
-  paths, worker selection, empty model connections and duplicate-launch locking.
-- Generated test state is removed before the candidate is archived. Archives
-  are read back and whole-download checksums are generated.
+## Linux/macOS updates and removal
 
-The workflow has read-only repository permissions and uploads Actions artifacts.
-It has no step that publishes or modifies a GitHub Release. Build tools and
-desktop dependencies are installed on disposable GitHub runners, not into the
-owner's working audio environments. The Python runtime source URLs and hashes
-are recorded in `packaging/ci_runtime_sources.json`.
+Run the same architecture's installer over its existing per-user installation.
+Only manifest-owned program files are replaced. Modified or unowned program files
+block an update rather than being overwritten. Close ReFlow before updating or
+removing it; installers use the same application lock as the running desktop.
+Removal deletes only unchanged recorded program files and empty program folders.
+Settings, downloaded models, outputs and modified files remain. Portable copies
+and system-wide installations are not migrated or deleted.
 
-## Validation still required before release
+Installation is not transactional across power loss or disk-full failures. If an
+interrupted installation cannot be retried because files appear unowned/modified,
+preserve the affected folder and seek recovery help rather than deleting user
+data. Fresh-machine, interruption recovery and interactive installation testing
+remain open acceptance work.
 
-The new workflow has been checked locally for Python/YAML syntax and packaging
-contracts, but has not run on GitHub. A successful future CI job is not a clean
-machine or complete media workflow certification. Test native GUI startup,
-model/reference setup, real inference, exports, long jobs, cancellation/recovery,
-GPU routes and distribution prerequisites on each supported target.
+## Automated gates
 
-Linux uses Qt for the preview; distribution-specific native dependencies still
-need acceptance. The macOS app is only ad-hoc signed for development, not
-Developer ID signed or notarized. Its writable application-data layout and
-signing/update behavior require further work before treating it as a public Mac
-release. Neither platform is promoted to release-ready by these build scripts.
+The workflow builds the locked interface and native PyInstaller launcher on
+Windows x64, Linux x64, Apple Silicon macOS and Intel macOS. It verifies pinned
+Python downloads, installs desktop dependencies, runs packaging contracts and
+an offline executable/package check, and verifies archive readback/checksums.
 
-The app's license choice and component/model distribution review remain pending.
-`LICENSE.txt` currently contains Python's license/history; this workflow does
-not select an application license or grant redistribution rights.
+On Windows, an existing Inno Setup compiler on the hosted runner creates setup
+from the exact candidate manifest. Missing compilers fail the build; no fallback
+compiler download is performed. Extra files, links and modified payloads are
+rejected. A disposable installation then checks overlay-upgrade preservation,
+installed package and hidden desktop/bridge startup, active-app upgrade blocking,
+and uninstall preservation of synthetic user files. Publication waits for all
+platform builds and all installer gates. Check reports are retained as
+Actions artifacts, including `ci-windows-installer-smoke.json`.
 
-GitHub documents a limit of **under 2 GiB per Release asset**. The local Windows
-engine bundle is larger, so it needs smaller parts or separately packaged
-optional engines before upload. Source files belong in the repository; generated
-runtime binaries belong in Release downloads, not regular Git history.
+These checks do not establish fresh-machine compatibility, visual/interactive
+acceptance, real inference or complete episode quality. Reliable unattended
+multi-character episode/movie dubbing remains unvalidated. Original ReFlow code
+is AGPL-3.0-only; see `LICENSING.md` for third-party terms and distribution limits.
 
-The local `dist/github-windows-download-RC2` folder prepares two verified parts of
-the Windows executable ZIP. Download both parts and `Assemble-ReflowStudio.cmd`
-into one folder, run that script, then extract its reconstructed ZIP. The script
-uses built-in Windows tools, checks each part and the complete ZIP, and refuses
-to overwrite an existing complete ZIP. This prepares files for future upload;
-it does not upload them.
+Linux uses standard shell/tar/checksum tools and the bundled Python; macOS uses
+`hdiutil` and bundled Python. No installer downloads additional tools or models.
+Hosted acceptance executes the actual `.run` or mounts the actual DMG, installs
+under an isolated home folder with spaces, checks upgrades and active-app locks,
+runs installed package/hidden desktop checks, and checks data-preserving removal.
+On Linux, the hidden desktop check uses the runner's existing `xvfb-run`; absence
+of prerequisites fails the gate instead of downloading them silently. On macOS,
+code-signature checks before and after startup verify that the installed `.app`
+was not modified. Developer ID signing/notarization remain separate work.
 
-## Upstream references
-
-- [PyInstaller platform build requirements](https://pyinstaller.org/en/latest/)
-- [Native Python release and asset hashes](https://github.com/astral-sh/python-build-standalone/releases/tag/20261026)
-- [GitHub runner architectures](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
-- [GitHub Release asset limits](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
-- [pywebview platform prerequisites](https://pywebview.flowrl.com/guide/installation.html)
+**Testing status:** installer source and contract tests are locally checked on
+Windows. Actual native installer builds and acceptance require Actions on the
+matching OS; these source checks do not establish that those future gates passed.

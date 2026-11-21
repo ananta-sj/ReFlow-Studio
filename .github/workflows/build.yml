@@ -120,6 +120,18 @@ jobs:
         run: python packaging/build_native_launcher.py --output build/ci-launcher --work build/ci-launcher-work
       - name: Assemble, run native smoke check, and archive
         run: python packaging/build_ci_candidate.py '${{ matrix.target }}'
+      - name: Compile per-user Windows Desktop Preview installer
+        if: runner.os == 'Windows'
+        run: python packaging/build_windows_installer.py
+      - name: Verify installed launch, upgrade and data-preserving uninstall
+        if: runner.os == 'Windows'
+        run: python packaging/verify_windows_installer.py
+      - name: Build native Linux or macOS installation package
+        if: runner.os != 'Windows'
+        run: python packaging/build_posix_installer.py '${{ matrix.target }}'
+      - name: Verify POSIX install, upgrade, launch and data-preserving uninstall
+        if: runner.os != 'Windows'
+        run: python packaging/verify_posix_installer.py '${{ matrix.target }}'
       - name: Upload candidate downloads
         uses: actions/upload-artifact@v4
         with:

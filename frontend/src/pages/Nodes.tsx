@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ReadableGraphZoom } from "@/components/panels/ReadableGraphZoom"
 import { RadialGauge } from "@/components/panels/RadialGauge"
 import { HelpTooltip } from "@/components/shared/HelpTooltip"
 import { bridge, type DeviceEtaMap, type DeviceInfo, type GraphDefinition, type Language } from "@/lib/api"
@@ -264,6 +265,7 @@ export function NodesPage({ selectedDeviceId, onDeviceSelected }: {
         >
           <Background gap={24} color="var(--border)" />
           <Controls showInteractive={false} />
+          <ReadableGraphZoom />
         </ReactFlow>
         </div>
 

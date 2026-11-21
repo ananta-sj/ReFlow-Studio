@@ -12,6 +12,10 @@ export const PACKAGES = Object.freeze({
   'linux-x64': 'ReflowStudio-linux-x64-desktop-preview.tar.gz',
   'macos-arm64': 'ReflowStudio-macos-arm64-desktop-preview.tar.gz',
   'macos-x64': 'ReflowStudio-macos-x64-desktop-preview.tar.gz',
+  'windows-x64-setup': 'ReflowStudio-windows-x64-desktop-preview-setup.exe',
+  'linux-x64-setup': 'ReflowStudio-linux-x64-desktop-preview-setup.run',
+  'macos-arm64-setup': 'ReflowStudio-macos-arm64-desktop-preview-setup.dmg',
+  'macos-x64-setup': 'ReflowStudio-macos-x64-desktop-preview-setup.dmg',
   source: 'ReflowStudio-source.zip',
 })
 
@@ -52,7 +56,7 @@ export async function collectAssets(folder, sha, runId, attempt) {
   const expected = Object.values(PACKAGES).flatMap(name => [name, `${name}.sha256`])
   const actual = await readdir(folder)
   if (actual.length !== expected.length || actual.some(name => !expected.includes(name))) {
-    throw new Error('Expected exactly four platform packages, source, and their checksums')
+    throw new Error('Expected exactly four platform packages, four installers, source, and their checksums')
   }
   const assets = []
   for (const [target, original] of Object.entries(PACKAGES)) {
@@ -76,7 +80,7 @@ export async function collectAssets(folder, sha, runId, attempt) {
     if (!match || match[2] !== original || match[1] !== digest) {
       throw new Error(`Checksum mismatch: ${original}`)
     }
-    const extension = original.endsWith('.tar.gz') ? '.tar.gz' : '.zip'
+    const extension = original.endsWith('.tar.gz') ? '.tar.gz' : path.extname(original)
     assets.push({ target, file, bytes: stat.size, sha256: digest,
       name: `ReflowStudio-dev-${target}-${sha.slice(0, 12)}-r${runId}-a${attempt}${extension}` })
   }
@@ -126,7 +130,7 @@ export async function changeNotes(api, repository, sha) {
 }
 
 export function releaseBody(repository, sha, runId, changes = '', assets = [], tag = '') {
-  const labels = { 'windows-x64': 'Windows (x64)', 'linux-x64': 'Linux (x64)',
+  const labels = { 'linux-x64-setup': 'Linux (x64) per-user installer', 'macos-arm64-setup': 'macOS (Apple Silicon) disk image', 'macos-x64-setup': 'macOS (Intel) disk image', 'windows-x64-setup': 'Windows (x64) installer', 'windows-x64': 'Windows (x64) portable', 'linux-x64': 'Linux (x64)',
     'macos-arm64': 'macOS (Apple Silicon)', 'macos-x64': 'macOS (Intel)', source: 'Source code' }
   const downloads = assets.filter(row => labels[row.target]).map(row =>
     `| ${labels[row.target]} | [Download](https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${encodeURIComponent(row.name)}) | ${(row.bytes / 1048576).toFixed(1)} MB |`).join('\n')
@@ -135,13 +139,13 @@ export function releaseBody(repository, sha, runId, changes = '', assets = [], t
     `${changes}\n## Downloads\n\n` +
     (downloads ? `| Platform | Package | Size |\n| --- | --- | ---: |\n${downloads}\n\n` : 'Choose the package matching your operating system and architecture from Assets below.\n\n') +
     '### Getting started\n\n' +
-    '1. Download the package for your platform and extract the **entire archive**. Keep companion files together.\n' +
+    '1. On Windows, run the **installer** for a per-user installation, or extract the **entire portable ZIP**. On Linux, use the `.run` per-user installer or portable archive. On macOS, mount the matching DMG and run **Install Reflow Studio.command**, then open the installed app in `~/Applications`. Keep portable companion files together.\n' +
     '2. Follow the [setup guide](https://github.com/' + repository + '/blob/' + sha + '/docs/GITHUB_NATIVE_BUILDS.md) for launch instructions and prerequisites.\n' +
     '3. Configure supported engines and models before attempting a dub. Start with a short clip.\n\n' +
     '### Verify your download\n\nUse the matching `SHA256SUMS` and manifest in Assets to check package integrity and build identity.\n\n' +
     '<details>\n<summary>Preview scope and known limitations</summary>\n\n' +
     'AI engine environments, model weights, voices, credentials and FFmpeg/FFprobe are **not bundled**. ' +
-    'Windows requires WebView2/Visual C++ runtimes. macOS builds are not Developer ID signed or notarized. ' +
+    'Windows requires WebView2/Visual C++ runtimes; the installer does not download prerequisites. Windows packages are unsigned and may trigger reputation warnings. Uninstall preserves generated settings, models and outputs. macOS builds are not Developer ID signed or notarized. ' +
     'Full engine/fresh-machine validation is ongoing. Reliable unattended multi-character episode/movie dubbing remains unvalidated. ' +
     'Build/smoke checks do not verify translation meaning, natural acting or complete episode quality. ' +
     'Component licensing review remains pending; these are development testing packages.\n\n' +

@@ -205,7 +205,7 @@ def main():
             window.destroy()
 
     try:
-        webview.start(inspect, gui='edgechromium')
+        webview.start(inspect, gui='edgechromium' if sys.platform == 'win32' else 'cocoa' if sys.platform == 'darwin' else 'qt')
     except Exception as exc:
         report['error'] = str(exc)
     finally:

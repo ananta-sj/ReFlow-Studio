@@ -12,7 +12,7 @@ Our focus is to strengthen the existing application before expanding its capabil
 | Dubbing quality | Improve translation, pronunciation, delivery, timing and preservation of background audio. |
 | Multi-character dubbing | Strengthen speaker identification, voice consistency and natural conversations. |
 | Longer media and batches | Validate complete episodes, longer videos and queued workloads. |
-| Release preparation | Check platform behaviour, documentation and packages with volunteer testers. |
+| Release preparation | Check platform behaviour, documentation, installer and portable packages, upgrades and data preservation with volunteer testers. |
 
 Security checks and regression testing continue throughout every phase. Later work depends on evidence from the earlier stages, and priorities may change as testing reveals problems.
 

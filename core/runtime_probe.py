@@ -29,7 +29,8 @@ def probe(adapter, executable, device):
                'TORCH_HOME': str(folder / 'torch'), 'XDG_CACHE_HOME': str(folder / 'cache'),
                'MPLCONFIGDIR': str(folder / 'matplotlib')}
         with bind_job(job), (folder / 'diagnostics.log').open('wb') as diagnostics:
-            run_process([str(executable), '-B', str(root / 'core/runtime_probe_worker.py'),
+            run_process([str(executable), '-B'] + (['-I'] if adapter == 'faster_whisper' else [])
+                        + [str(root / 'core/runtime_probe_worker.py'),
                          adapter, device, str(report_path)], timeout=timeout, check=True,
                         stdout=diagnostics, stderr=diagnostics, env=env,
                         **({'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}))

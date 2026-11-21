@@ -160,7 +160,7 @@ def main():
         )
 
     _set_windows_app_id()
-    bridge = PythonBridge()
+    bridge = PythonBridge(recover_downloads=True)
     bridge.get_code_update()
     from core.interface_watcher import InterfaceWatcher
     watcher = InterfaceWatcher(BASE_DIR)

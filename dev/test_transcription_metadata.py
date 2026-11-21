@@ -170,6 +170,26 @@ class ProviderTests(unittest.TestCase):
             with patch.object(cloud, 'request', return_value=response({'error': 'bad response'})), self.assertRaises(ValueError):
                 request('http://example.invalid', 'key', str(self.audio), {})
 
+    def test_whisper_uses_alignment_and_normalizes_native_scalar_timestamps(self):
+        import numpy as np
+        subject=handler.STTHandler.__new__(handler.STTHandler);subject.model=Mock()
+        subject.model.supported_languages=['ja']
+        def inference(*args,**kwargs):
+            aligned=kwargs.get('word_timestamps') is True
+            segment=SimpleNamespace(start=np.float64(17.91) if aligned else 13.0,end=np.float64(19.97) if aligned else 21.45,text='Japanese speech')
+            return iter([segment]),SimpleNamespace(duration=20.0,language='ja',language_probability=.95)
+        subject.model.transcribe.side_effect=inference
+        result=subject._transcribe(str(self.audio),'ja')
+        self.assertEqual(result[0]['start'],17.91);self.assertEqual(result[0]['end'],19.97)
+        self.assertIs(type(result[0]['end']),float)
+        self.assertTrue(subject.model.transcribe.call_args.kwargs['word_timestamps'])
+
+    def test_alignment_never_hides_invalid_or_genuinely_outside_timestamps(self):
+        for start,end in ((True,1.0),(0.0,float('nan')),(0.0,21.45),(-1.0,1.0),('1',2.0)):
+            subject=handler.STTHandler.__new__(handler.STTHandler);subject.model=Mock()
+            subject.model.transcribe.return_value=(iter([SimpleNamespace(start=start,end=end,text='speech')]),SimpleNamespace(duration=20.0))
+            with self.subTest(start=start,end=end),self.assertRaises(ValueError):subject._transcribe(str(self.audio),'auto')
+
     def test_actual_handler_collects_generator_metadata_without_loading_model(self):
         subject = handler.STTHandler.__new__(handler.STTHandler)
         subject.model = Mock()

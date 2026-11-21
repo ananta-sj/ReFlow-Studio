@@ -1,5 +1,6 @@
 import type { DownloadFailure } from './api'
 const messages: Record<string, string> = {
+  interrupted: 'The previous download was interrupted when ReFlow closed. Retry to start a new transfer; existing files are kept.',
   missing_transport: 'Repository downloads need the desktop Hub download client. Update the desktop setup, then retry.',
   access_denied: 'Repository access was denied. Check model access and your local sign-in before retrying.',
   network_error: 'The transfer could not reach the server. Check the connection and retry.',

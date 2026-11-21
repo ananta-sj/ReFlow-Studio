@@ -68,7 +68,7 @@ function server({staleAt=Infinity,failUpload=Infinity,failPromotion=false,lostPr
 async function execute(state,overrides={}){return publish({...state,repository:'owner/repo',sha:SHA,runId:'123',attempt:'1',...overrides})}
 
 test('complete packages require four platforms, source and matching checksums',()=>fixture(async folder=>{
-  const assets=await collectAssets(folder,SHA,'123','1');assert.equal(assets.length,5)
+  const assets=await collectAssets(folder,SHA,'123','1');assert.equal(assets.length,9);assert.ok(assets.find(r=>r.target==='linux-x64-setup').name.endsWith('.run'));assert.ok(assets.find(r=>r.target==='macos-arm64-setup').name.endsWith('.dmg'));assert.ok(assets.find(r=>r.target==='macos-x64-setup').name.endsWith('.dmg'));assert.ok(assets.find(r=>r.target==='windows-x64-setup').name.endsWith('.exe'))
   assert.ok(assets.every(r=>r.name.includes('aaaaaaaaaaaa-r123-a1')))
   await rm(path.join(folder,PACKAGES['macos-arm64']));await assert.rejects(collectAssets(folder,SHA,'123','1'),/exactly four/)
 }))

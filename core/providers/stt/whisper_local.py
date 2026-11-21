@@ -59,7 +59,8 @@ class WhisperLocalProvider(STTProvider):
             try:
                 with open(log_path, 'wb') as log:
                     run_process(
-                        [self.worker_interpreter, '-B', _WORKER_SCRIPT, audio_path, out_json, self.model_size]
+                        [self.worker_interpreter, '-B'] + (['-I'] if self.runtime == 'isolated' else [])
+                        + [_WORKER_SCRIPT, audio_path, out_json, self.model_size]
                         + ([selected, '--takes'] if takes else [selected] if selected != 'auto' else []),
                         check=True, timeout=3600, stdout=log, stderr=subprocess.STDOUT,
                         **({'env': {**os.environ, 'REFLOW_OFFLINE': '1', 'HF_HUB_OFFLINE': '1'}} if takes else {}),
