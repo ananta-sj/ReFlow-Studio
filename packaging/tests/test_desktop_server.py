@@ -59,7 +59,7 @@ class DesktopServerTests(unittest.TestCase):
             _,_,server=server_module.DesktopServer.start_server([file.as_uri()])
             module=ModuleType('webview');module.http=SimpleNamespace(global_server=server)
             gui=SimpleNamespace(start=Mock(side_effect=RuntimeError('desktop fixture error')))
-            with patch.object(server_module.sys,'platform','darwin'),patch.dict('sys.modules',{'webview':module}):
+            with patch.object(server_module,'install_cocoa_lifecycle'),patch.object(server_module.sys,'platform','darwin'),patch.dict('sys.modules',{'webview':module}):
                 with self.assertRaisesRegex(RuntimeError,'fixture error'):
                     server_module.start_desktop(gui)
             self.assertFalse(server.running)
@@ -72,3 +72,24 @@ class DesktopServerTests(unittest.TestCase):
         with patch.object(server_module.sys,'platform','win32'):
             self.assertEqual(server_module.start_desktop(gui,icon='fixture'),'normal desktop')
         gui.start.assert_called_once_with(icon='fixture')
+
+    def test_cocoa_callback_returns_when_window_closes(self):
+        from types import SimpleNamespace
+        closed=threading.Event()
+        native=SimpleNamespace(closed=closed,webview=object())
+        dispatched=[]
+        evaluate=server_module.cocoa_evaluator(lambda fn:dispatched.append(fn),timeout=1)
+        result=[]
+        worker=threading.Thread(target=lambda:result.append(evaluate(native,'fixture',True)),daemon=True)
+        worker.start();closed.set();worker.join(timeout=2)
+        self.assertFalse(worker.is_alive())
+        self.assertEqual(result,[None])
+
+    def test_cocoa_callback_retains_parsed_result(self):
+        from types import SimpleNamespace
+        class View:
+            def evaluateJavaScript_completionHandler_(self,script,handler):
+                handler('{"ok": true}',None)
+        native=SimpleNamespace(closed=threading.Event(),webview=View())
+        evaluate=server_module.cocoa_evaluator(lambda fn:fn(),timeout=1)
+        self.assertEqual(evaluate(native,'fixture',True),dict(ok=True))

@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from socketserver import ThreadingMixIn
 import threading
+import time
 from urllib.parse import unquote, urlparse
 from urllib.request import url2pathname
 import uuid
@@ -118,9 +119,57 @@ class DesktopServer:
             raise RuntimeError('Desktop UI server did not stop')
 
 
+def cocoa_evaluator(dispatch,timeout=15):
+    """Pinned Cocoa adapter: cancel JS return waits once their window is gone."""
+    def evaluate(native,script,parse_json):
+        done=threading.Event()
+        result={'value':None,'error':None}
+        def handler(value,error):
+            if parse_json and value:
+                try:
+                    value=json.loads(value)
+                except (ValueError,TypeError):
+                    pass
+            result['value']=value
+            done.set()
+        def invoke():
+            if native.closed.is_set() or native.webview is None:
+                done.set()
+                return
+            try:
+                native.webview.evaluateJavaScript_completionHandler_(script,handler)
+            except Exception as error:
+                result['error']=error
+                done.set()
+        if native.closed.is_set() or native.webview is None:
+            return None
+        dispatch(invoke)
+        deadline=time.monotonic()+timeout
+        while not done.wait(.05):
+            if native.closed.is_set() or native.webview is None:
+                return None
+            if time.monotonic()>=deadline:
+                raise TimeoutError('Cocoa JavaScript evaluation did not complete')
+        if result['error'] is not None:
+            raise result['error']
+        return result['value']
+    evaluate._reflow_close_aware=True
+    return evaluate
+
+
+def install_cocoa_lifecycle():
+    from importlib.metadata import version
+    if version('pywebview')!='6.2.1':
+        raise RuntimeError('Review the Cocoa lifecycle adapter for the installed pywebview version')
+    from webview.platforms import cocoa
+    if not getattr(cocoa.BrowserView.evaluate_js,'_reflow_close_aware',False):
+        cocoa.BrowserView.evaluate_js=cocoa_evaluator(cocoa.AppHelper.callAfter)
+
+
 def start_desktop(webview,*args,**kwargs):
     if sys.platform!='darwin':
         return webview.start(*args,**kwargs)
+    install_cocoa_lifecycle()
     from webview import http
     try:
         return webview.start(*args,server=DesktopServer,**kwargs)

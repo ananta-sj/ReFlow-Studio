@@ -47,8 +47,8 @@
     },
     {
       "path": ".github/workflows/build.yml",
-      "bytes": 7099,
-      "sha256": "88eb879b4c65ac118e88aaea0dd2366d86e1bf28d87217ef93faded896ed5def"
+      "bytes": 8032,
+      "sha256": "7562da859238647112af41de2045b88f9736fdc1145fa9dd18ed8a6b69493ef8"
     },
     {
       "path": ".github/workflows/codeql.yml",
@@ -587,8 +587,8 @@
     },
     {
       "path": "core/desktop_server.py",
-      "bytes": 5511,
-      "sha256": "6b10f011a148c73a0dbacff46b9c2c2c7e31a3f0be8bb00f25b9b75957261a0a"
+      "bytes": 7437,
+      "sha256": "57f09f9a6e131e92fc5057d224f8ca9c188afe24104a29a1846cc1d399f48636"
     },
     {
       "path": "core/dialogue_adaptation.py",
@@ -3517,8 +3517,8 @@
     },
     {
       "path": "docs/GITHUB_NATIVE_BUILDS.md",
-      "bytes": 7790,
-      "sha256": "9f8eeea3d1a6a28093a1de85c6b2a766655fcc008f54c05ac7186fdddba57ea1"
+      "bytes": 8415,
+      "sha256": "97cb2c998542b23b89c99b94e3c69bc4e8c7cf0725cf3881d95d1ea629dcf7f1"
     },
     {
       "path": "docs/GITHUB_UPLOAD_GUIDE.md",
@@ -4712,8 +4712,8 @@
     },
     {
       "path": "packaging/tests/test_desktop_server.py",
-      "bytes": 4350,
-      "sha256": "e096123401aa49745740681b3caac3095dcd8ca458d231462a944b8859398280"
+      "bytes": 5463,
+      "sha256": "48d438d2777592e0459be356ab97fbe44bc8f34ca6a0621f7de324b6df782834"
     },
     {
       "path": "packaging/tests/test_development_preview.mjs",
@@ -4762,8 +4762,8 @@
     },
     {
       "path": "packaging/verify_posix_installer.py",
-      "bytes": 4665,
-      "sha256": "03713699d5c45e34b63c6d8adfdd5bd54d449d1ab40fc1fbe676cf052481a0d7"
+      "bytes": 4870,
+      "sha256": "d5d141ca5e83665a5f5d612e34fa1b9f16920233171b0206daca453658c3d3bf"
     },
     {
       "path": "packaging/verify_windows_installer.py",

@@ -56,7 +56,8 @@ def main():
                 command=[executable,mode,output]
                 if not mac and mode=='--verify-desktop':
                     command=['xvfb-run','-a',*command]
-                run(command,env)
+                launch_env={**env,'QT_DEBUG_PLUGINS':'1'} if not mac and mode=='--verify-desktop' else env
+                run(command,launch_env)
                 if json.loads(output.read_text(encoding='utf-8')).get(key) is not True:
                     raise RuntimeError('Installed startup failed: '+mode)
             if mac:

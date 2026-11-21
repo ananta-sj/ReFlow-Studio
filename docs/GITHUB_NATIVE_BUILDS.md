@@ -122,3 +122,12 @@ startup also reports remaining threads; a lingering process emits diagnostic
 stacks and fails after a short shutdown deadline. Interface acceptance alone
 never overrides a failed process-exit check. These fixes require a fresh native
 Actions run; earlier logs established UI startup, not successful shutdown.
+
+The subsequent Mac shutdown traces identified bridge callback threads waiting
+inside Cocoa JavaScript evaluation after window closure. The pinned pywebview
+6.2.1 Cocoa adapter now cancels those waits when its native window is closed and
+bounds waits for an unresponsive live window. This is shared by normal launch
+and hidden acceptance; it does not force a successful process exit. Native
+confirmation still requires the next build. Linux additionally checks Qt plugin
+dependencies with `ldd` before packaging, includes XInput/XCB runtime libraries,
+and emits plugin-loader diagnostics on the hidden desktop test.
