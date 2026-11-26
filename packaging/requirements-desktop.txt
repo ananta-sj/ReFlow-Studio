@@ -11,6 +11,6 @@ pystray==0.19.5
 pywebview==6.2.1; sys_platform != 'linux'
 pywebview[qt]==6.2.1; sys_platform == 'linux'
 requests==2.34.2
-soundfile==0.13.1
+soundfile==0.14.0
 tqdm==4.67.3
 huggingface-hub==2.4.0
